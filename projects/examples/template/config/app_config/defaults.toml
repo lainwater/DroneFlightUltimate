@@ -1,0 +1,35 @@
+[project]
+name = "DroneFlightUltimate"
+version = "a0.1.0"
+
+[fileops]
+platform = "win_64x82"
+
+[bus]
+max_queue_size = 100
+
+[logging]
+level = "INFO"
+log_dir = "logs/"
+console_log = true
+record_log = true
+gui_log = false
+
+[video]
+fps = 30
+resolution = [960, 720]
+
+[controller]
+keyboard_layout = "qwertz"
+poll_rate_hz = 50
+
+[paths]
+project_dir = "projects/"
+example_dir = "projects/examples/"
+tests_dir = "projects/tests/"
+drone_dir = "core/drone/"
+controller_dir = "core/controller/"
+bus_dir = "core/bus/"
+fileops_dir = "core/fileops/"
+logger_dir = "core/logger/"
+video_dir = "core/video/"
