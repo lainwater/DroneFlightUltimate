@@ -4,9 +4,9 @@ DroneBase — Interface for drone operations.
 
 from abc import ABC, abstractmethod
 from enum import Enum
-import asyncio
+from pathlib import Path
 
-from fileops import get_fileops
+from core.fileops import get_fileops
 
 
 class DroneType(Enum):
@@ -42,7 +42,7 @@ class DroneBase(ABC):
     def __init__(self,
                  drone_type: DroneType,
                  drone_id: str,
-                 bus: object = None,
+                 bus: object,
                  **kwargs):
         self.drone_type = drone_type
         self.drone_id = drone_id
@@ -51,19 +51,17 @@ class DroneBase(ABC):
         self.init_kwargs = kwargs
         self.bus = bus
         self.fops = get_fileops()
-        self.fops.ensure_dir(f"logs/debug_logs/{self.drone_id}_log.jsonl")
-        
         self.command_map = self._initialize_command_map()
         self.stats = self._initialize_stats()
         self._attach()
 
     def _initialize_command_map(self) -> dict:
         """Initialize the command map for the drone."""
-        return self.fops.read_json(f"{self.drone_type.value}/commands.json")
+        return self.fops.read_json(self.config_dir / "commands.json")
 
     def _initialize_stats(self) -> dict:
         """Initialize the stats for the drone."""
-        return self.fops.read_json(f"{self.drone_type.value}/stats.json")
+        return self.fops.read_json(self.config_dir / "stats.json")
         
     def _attach(self) -> None:
         """Start recording every cmd.{self.drone_id} event published on `bus`."""
@@ -76,35 +74,74 @@ class DroneBase(ABC):
     async def publish_parser(self, topic: PublishType, data: dict) -> None:
             """Publish the drone's stats and command map to the bus."""
             if self.bus:
-                self.bus.publish(f"{topic.value}.{self.drone_id}", data)
+                await self.bus.publish(f"{topic.value}.{self.drone_id}", data)
     
     async def parse_bus_event(self, topic: str, data: dict) -> None:
-        """Parse the bus event and execute the corresponding command."""
+        """Parse the bus event and execute the corresponding command.
+ 
+        Deliberately never lets an exception escape back through the
+        bus: a malformed or unsupported command (e.g. from a REPL
+        typo, or a keyboard mapping referencing an action this drone
+        doesn't support) shows up as an error.{drone_id} event instead
+        of crashing whichever controller published it."""
         action = data.get("action")
-        if action:
-            await self.execute(action, **data)
-        else:
-            raise ValueError(f"No action specified in data: {data}")
+        if not action:
+            await self.publish_parser(PublishType.ERROR, {
+                "error": "missing_action",
+                "message": f"No action specified in data: {data}",
+            })
+            return
+ 
+        kwargs = {k: v for k, v in data.items() if k != "action"}
+        try:
+            await self.execute(action, **kwargs)
+        except Exception as exc:
+            await self.publish_parser(PublishType.ERROR, {
+                "error": type(exc).__name__,
+                "message": str(exc),
+                "action": action,
+            })
     
     async def execute(self, action: str, **kwargs) -> None:
-        '''Execute the command corresponding to the action."""'''
+        """Execute the command corresponding to the action.
+ 
+        Raises on failure (unknown action, unsupported/missing method,
+        wrong arguments). Callers going through parse_bus_event get
+        these turned into error events instead of a crash; callers
+        invoking execute() directly (tests, a future REPL) get a real
+        exception they can handle themselves."""
         if action not in self.command_map:
-            raise ValueError(f"{action} not in {self.drone_id}'s capabilities")
+            raise ValueError(f"'{action}' not in {self.drone_id}'s capabilities")
+ 
         entry = self.command_map[action]
-        method = getattr(self.sdk, entry["method"])
-        await method(**kwargs)
+        method_name = entry["method"]
+        method = getattr(self, method_name, None)
+        if method is None:
+            raise AttributeError(f"'{action}' maps to '{method_name}', but {self.drone_id} has no such method")
+        try:
+            await method(**kwargs)
+        except TypeError as exc:
+            raise TypeError(f"Bad arguments for action '{action}': {exc}") from exc
+
+    @property
+    @abstractmethod
+    def config_dir(self) -> Path:
+        """Directory containing this drone's commands.json/stats.json.
+        Concrete implementations return Path(__file__).parent so this
+        works no matter where the app was launched from."""
+        raise NotImplementedError
 
     async def get_state(self):
         """Get the current state of the drone."""
-        self.publish_parser(PublishType.STATE, {"flight_state": self.flight_state.value, "con_state": self.con_state.value})
+        await self.publish_parser(PublishType.STATE, {"flight_state": self.flight_state.value, "con_state": self.con_state.value})
     
     async def get_stats(self):
         """Get the current stats of the drone."""
-        self.publish_parser(PublishType.INFO, self.stats)
+        await self.publish_parser(PublishType.INFO, self.stats)
 
     async def get_command_map(self):
         """Get the command map of the drone."""
-        self.publish_parser(PublishType.INFO, self.command_map)
+        await self.publish_parser(PublishType.INFO, self.command_map)
 
     @abstractmethod
     async def start_state_reciever(self):

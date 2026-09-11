@@ -37,7 +37,7 @@ class SimDroneSDK:
     
     async def data_generator(self):
         i = 0
-        while self.connected or i > self.data_gen_limit:
+        while self.connected and i < self.data_gen_limit:
             i += 1
             await asyncio.sleep(0.1)  # Simulate data generation interval
             yield {
