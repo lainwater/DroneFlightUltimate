@@ -21,7 +21,6 @@ blahblah
 .
 ├── .gitignore
 ├── .venv/
-├── droneflightultimate.toml
 ├── pyproject.toml
 ├── LICENSE
 ├── README.md
