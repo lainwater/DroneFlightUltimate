@@ -21,16 +21,17 @@ blahblah
 .
 ├── .gitignore
 ├── .venv/
-├── DroneFlightUltimate.toml
-├── LICENESE
+├── droneflightultimate.toml
+├── pyproject.toml
+├── LICENSE
 ├── README.md
 ├── run.py
 | 
 ├── app/
+|   ├── __init__.py
 │   ├── main.py
 │   └── app_conf/
-│       ├── __init__.py
-│       └── current.toml
+│       └── active_project.toml
 | 
 ├── core/
 │   ├── bus/
@@ -42,9 +43,11 @@ blahblah
 │   │   ├── base.py
 │   │   └── implementations/
 │   │       ├── keyboard_controller/
+|   |       |   ├── __init__.py
 │   │       │   ├── keyboard_controller.py
 │   │       │   └── qwertz.json
 │   │       └── repl_controller/
+|   |           ├── __init__.py
 │   │           ├── repl_controller.json
 │   │           └── repl_controller.py
 |   | 
@@ -54,24 +57,29 @@ blahblah
 │   │   └── implementations/
 │   │       ├── DJI/
 │   │       │   └── tello/
+│   │       │       ├── __init__.py
 │   │       │       ├── commands.json
 │   │       │       ├── stats.json
 │   │       │       └── tello.py
 │   │       └── Sim/
 │   │           └── simdrone/
+│   │               ├── __init__.py
 │   │               ├── commands.json
 │   │               ├── sim.py
 │   │               └── stats.json
+|   |
 │   ├── fileops/
 │   │   ├── __init__.py
 │   │   ├── base.py
 │   │   └── implementations/
+|   |       ├── __init__.py
 │   │       └── win_64x82.py
 |   |
 │   ├── logger/
 │   │   ├── __init__.py
 │   │   ├── base.py
 │   │   └── implementations/
+|   |       ├── __init__.py
 │   │       ├── gui_logger.py
 │   │       ├── live.py
 │   │       └── record.py
@@ -79,14 +87,15 @@ blahblah
 │   ├── player/
 │   │   ├── __init__.py
 │   │   ├── base.py
-│   │   └── jsonl_playe.py
+│   │   └── jsonl_player.py
 |   |
 │   └── video/
 │       ├── __init__.py
 │       ├── base.py
 │       ├── rec.py
 │       ├── snapshot.py
-│       └── impementations/
+│       └── implementations/
+|           ├── __init__.py
 │           ├── cv2_display.py
 │           └── tkinter_display.py
 |
@@ -97,9 +106,9 @@ blahblah
 │       │   │   └── main.py
 │       │   ├── config/
 │       │   │   ├── app_config/
-│       │   │   │   ├── __init__.py
 │       │   │   │   └── defaults.toml
 │       │   │   └── drone_config/
+│       │   │       └── mydrone.json
 │       │   └── logs/
 │       │       ├── bus_logs/
 │       │       │   ├── .gitkeep
@@ -117,26 +126,29 @@ blahblah
 │       │   │   └── main.py
 │       │   ├── config/
 │       │   │   ├── app_config/
-│       │   │   │   ├── __init__.py
-│       │   │   │   └── conf.toml
+│       │   │   │   └── defaults.toml
 │       │   │   └── drone_config/
-│       │   │       └── my_tello_conf.json
+│       │   │       └── mydrone.json
 │       │   └── logs/
 │       │       ├── bus_logs/
+│       │       │   ├── .gitkeep
 │       │       │   └── .jsonl
 │       │       ├── debug_logs/
+│       │       │   ├── .gitkeep
 │       │       │   └── .log
 │       │       ├── pictures/
+│       │       │   └── .gitkeep
 │       │       └── videos/
+│       │           └── .gitkeep
 |       |
 │       └── template/
 │           ├── commander/
 │           │   └── main.py
 │           ├── config/
 │           │   ├── app_config/
-│           │   │   ├── __init__.py
 │           │   │   └── defaults.toml
 │           │   └── drone_config/
+|           |       └── mydrone.json
 │           └── logs/
 │               ├── bus_logs/
 │               │   ├── .gitkeep
