@@ -29,8 +29,7 @@ class BusRecorder:
         bus.subscribe("*", self._on_event)
 
     def detach(self, bus) -> None:
-        """Stop recording events from `bus`. Safe to call even if never
-        attached."""
+        """Stop recording events from `bus`. Safe to call even if never attached."""
         bus.unsubscribe("*", self._on_event)
 
     def _on_event(self, topic: str, data: Any) -> None:

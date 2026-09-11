@@ -24,6 +24,7 @@ class WinFileOps(FileOpsBase):
         return self.ensure_dir(log_dir)
 
     def read_json(self, path: Path) -> dict[str, Any]:
+        path = Path(path)
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
 

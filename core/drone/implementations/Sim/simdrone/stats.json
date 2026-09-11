@@ -1,0 +1,11 @@
+{
+    "Name": "SimDrone",
+    "Version": "1.0",
+    "Description": "A simulated drone implementation for testing and development purposes.",
+    "Stats": {
+        "MaxSpeed": {"value": "10", "unit": "m/s"},
+        "MaxAltitude": {"value": "100", "unit": "m"},
+        "BatteryLife": {"value": "30", "unit": "min"},
+        "PayloadCapacity": {"value": "1", "unit": "kg"}
+    }
+}

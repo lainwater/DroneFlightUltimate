@@ -4,7 +4,6 @@ JSONLLogger - Logs entries as single-line JSON records.
  
 import json
 from datetime import datetime, timezone
-from pathlib import Path
  
 from core.fileops import get_fileops
 from core.logger.base import LoggerBase, LogLevel
@@ -13,8 +12,8 @@ from core.logger.base import LoggerBase, LogLevel
 class JSONLLogger(LoggerBase):
     def __init__(self, min_level: LogLevel = LogLevel.INFO, log_path: str | None = None):
         super().__init__(min_level)
-        self.file_path = Path(log_path) if log_path else None
-        self._fileops = get_fileops()
+        self.file_path =log_path if log_path else None
+        self.fops = get_fileops()
  
     def format_message(self, level: LogLevel, message: str, **context) -> str:
         """Format log entry as a single-line JSON string."""
@@ -31,4 +30,4 @@ class JSONLLogger(LoggerBase):
         if self.file_path:
             # append_line already creates missing parent folders (e.g.
             # logs/debug_logs/), so this works even on a brand new project.
-            self._fileops.append_line(self.file_path, message)
+            self.fops.append_line(self.file_path, message)
