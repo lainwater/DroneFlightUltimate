@@ -16,5 +16,6 @@
     "get_battery": {"method": "get_battery"},
     "get_gps": {"method": "get_gps"},
     "emergency":  {"method": "emergency"},
-    "start_state_reciever": {"method": "start_state_reciever"}
+    "start_state_reciever": {"method": "start_state_reciever"},
+    "stop_state_reciever": {"method": "stop_state_reciever"}
 }

@@ -1,0 +1,5 @@
+{
+  "drone_type": "sim_simdrone",
+  "drone_id": "drone1",
+  "ip": "127.0.0.1"
+}

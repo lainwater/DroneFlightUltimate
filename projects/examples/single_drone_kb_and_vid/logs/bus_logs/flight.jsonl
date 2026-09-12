@@ -1,0 +1,20 @@
+{"ts": 1789233827.684319, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789233827.685318, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789233841.4193761, "topic": "cmd.drone1", "data": {"action": "takeoff"}}
+{"ts": 1789233842.430063, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789233846.104375, "topic": "cmd.drone1", "data": {"action": "forward", "distance": 30}}
+{"ts": 1789233847.1130617, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789233848.0523024, "topic": "cmd.drone1", "data": {"action": "backward", "distance": 30}}
+{"ts": 1789233849.057453, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789233849.6083174, "topic": "cmd.drone1", "data": {"action": "right", "distance": 30}}
+{"ts": 1789233850.6140895, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789233851.0118906, "topic": "cmd.drone1", "data": {"action": "left", "distance": 30}}
+{"ts": 1789233852.016555, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789233853.0327516, "topic": "cmd.drone1", "data": {"action": "backward", "distance": 30}}
+{"ts": 1789233854.0438726, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789233854.1606116, "topic": "cmd.drone1", "data": {"action": "forward", "distance": 30}}
+{"ts": 1789233855.1720047, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789233855.8123276, "topic": "cmd.drone1", "data": {"action": "right", "distance": 30}}
+{"ts": 1789233856.8225648, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789233857.1473677, "topic": "cmd.drone1", "data": {"action": "forward", "distance": 30}}
+{"ts": 1789233858.1486773, "topic": "ack.drone1", "data": {"ack": "True"}}

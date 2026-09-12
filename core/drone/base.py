@@ -146,34 +146,34 @@ class DroneBase(ABC):
     @abstractmethod
     async def start_state_reciever(self):
         "Starts continues State reciever"
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     async def stop_state_reciever(self):
         "Stops continues State reciever"
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     async def connect(self):
         """Connect to the drone."""
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     async def disconnect(self):
         """Disconnect from the drone."""
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     async def takeoff(self):
         """Command the drone to take off."""
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     async def land(self):
         """Command the drone to land."""
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     async def emergency(self):
         """Command the drone to perform an emergency stop."""
-        pass
+        raise NotImplementedError

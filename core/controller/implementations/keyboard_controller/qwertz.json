@@ -1,0 +1,19 @@
+{
+    "c": {"to_publish": "connect", "type": "on_press"},
+    "v": {"to_publish": "disconnect", "type": "on_press"},
+    "b": {"to_publish": "land", "type": "on_press"},
+    "n": {"to_publish": "takeoff", "type": "on_press"},
+    "h": {"to_publish": "start_state_reciever", "type": "on_press"},
+    "j": {"to_publish": "stop_state_reciever", "type": "on_press"},
+    "z": {"to_publish": "get_battery", "type": "on_press"},
+    "u": {"to_publish": "get_state", "type": "on_press"},
+    "i": {"to_publish": "get_stats", "type": "on_press"},
+    "o": {"to_publish": "get_ip", "type": "on_press"},
+    "space": {"to_publish": "emergency", "type": "on_press"},
+    "w": {"to_publish": "forward", "type": "while_press", "amount": 30},
+    "s": {"to_publish": "backward", "type": "while_press", "amount": 30},
+    "a": {"to_publish": "left", "type": "while_press", "amount": 30},
+    "d": {"to_publish": "right", "type": "while_press", "amount": 30},
+    "up": {"to_publish": "up", "type": "while_press", "amount": 30},
+    "down": {"to_publish": "down", "type": "while_press", "amount": 30}
+}

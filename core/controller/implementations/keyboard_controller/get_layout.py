@@ -3,20 +3,21 @@ import os
 import subprocess
 from pathlib import Path
 
-from core.controller.base import ControllerBase
-
-def current_keyboard_layout_as_json_path() -> str:
-    layout = get_keyboard_layout
-    match layout["layout_type"]:
-        case "QWERTZ":
-            return f"{Path(__file__).parent}qwertz.json"
-        case _:
-            raise NotImplementedError(f"Keyboard layout {layout["layout_type"]} has not been implemented yet.")
+def current_keyboard_layout_as_json_path(_layout: str) -> str:
+    if _layout:
+        return Path(__file__).parent / f"{_layout}.json"
+    else:
+        layout = get_keyboard_layout()
+        match layout['layout_type']:
+            case "QWERTZ":
+                return Path(__file__).parent / "qwertz.json"
+            case _:
+                raise NotImplementedError(f"Keyboard layout {layout['layout_type']} has not been implemented yet.")
         
 
 def get_keyboard_layout() -> dict:
     lang_code = "Unknown"
-    qwertz_locales = ["de-at", "de-de", "de-ch", "de", "at", "ch", "0x0c07", "0x0407"]
+    # qwertz_locales = ["de-at", "de-de", "de-ch", "de", "at", "ch", "0x0c07", "0x0407"]
 
     # -------------------------------------------------------------
     # 1. LINUX DETECTION
@@ -87,7 +88,8 @@ def get_keyboard_layout() -> dict:
     # -------------------------------------------------------------
     # 3. EVALUATE QWERTZ VS QWERTY
     # -------------------------------------------------------------
-    layout_type = "QWERTZ" if any(loc in lang_code.lower() for loc in qwertz_locales) else "QWERTY"
+    base = lang_code.lower().split("-")[0].split("(")[0]
+    layout_type = "QWERTZ" if base in {"de", "at", "ch"} else "QWERTY"
 
     return {
         "layout_type": layout_type,
