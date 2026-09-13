@@ -11,8 +11,8 @@ from core.fileops import get_fileops
 
 class DroneType(Enum):
     """Enum for different drone types."""
-    SIM_SIMDRONE = "core/drone/implementations/Sim/simdrone/"
-    DJI_TELLO = "core/drone/implementations/DJI/tello/"
+    SIM_SIMDRONE = "Sim_simdrone"
+    DJI_TELLO = "DJI_tello"
 
 class DroneFlightState(Enum):
     """Enum for different drone states."""

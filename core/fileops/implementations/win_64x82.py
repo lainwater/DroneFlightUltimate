@@ -37,8 +37,7 @@ class WinFileOps(FileOpsBase):
     
     def read_toml(self, path: Path)-> dict[str, Any]:
         path = Path(path)
-        self.ensure_dir(path.parent)
-        with open(path, "rb") as f:
+        with open(path, "r", encoding="utf-8") as f:
                 return toml.load(f)
             
     def write_toml(self, path: Path, data: dict[str, Any]) -> None:

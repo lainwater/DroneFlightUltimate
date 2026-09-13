@@ -1,91 +1,47 @@
+"""
+run.py - single entry point for DroneFlightUltimate.
+
+Usage:
+    python run.py
+        Runs whichever project app/app_conf/active_project.toml points at.
+
+    python run.py <project_name>
+        Runs that project explicitly, overriding active_project.toml.
+        If it doesn't exist yet under projects/examples/, it gets
+        scaffolded (see projects.get_project()).
+"""
+
+import asyncio
 import sys
-import os
-import subprocess
+import tomllib
+from pathlib import Path
 
-def get_keyboard_layout() -> dict:
-    lang_code = "Unknown"
-    qwertz_locales = ["de-at", "de-de", "de-ch", "de", "at", "ch", "0x0c07", "0x0407"]
+from projects import get_project
 
-    # -------------------------------------------------------------
-    # 1. LINUX DETECTION
-    # -------------------------------------------------------------
-    if sys.platform.startswith("linux"):
-        # Try X11 / setxkbmap first
-        try:
-            output = subprocess.check_output(["setxkbmap", "-query"], stderr=subprocess.DEVNULL).decode()
-            layout = ""
-            variant = ""
-            for line in output.splitlines():
-                if line.startswith("layout:"):
-                    layout = line.split(":")[1].strip()
-                elif line.startswith("variant:"):
-                    variant = line.split(":")[1].strip()
-            
-            lang_code = f"{layout}({variant})" if variant else layout
-        except Exception:
-            pass
+ROOT = Path(__file__).resolve().parent
+ACTIVE_PROJECT_PATH = ROOT / "app" / "app_conf" / "active_project.toml"
 
-        # Fallback for Wayland (e.g. GNOME/KDE on Fedora/Ubuntu) or missing setxkbmap
-        if not lang_code or lang_code == "Unknown":
-            try:
-                # Query localectl system config
-                output = subprocess.check_output(["localectl", "status"], stderr=subprocess.DEVNULL).decode()
-                for line in output.splitlines():
-                    if "X11 Layout" in line:
-                        lang_code = line.split(":")[1].strip()
-                        break
-            except Exception:
-                # Last resort fallback to LANG environment variable
-                lang_code = os.environ.get("LANG", "Unknown").split(".")[0].replace("_", "-")
 
-    # -------------------------------------------------------------
-    # 2. WINDOWS DETECTION
-    # -------------------------------------------------------------
-    elif sys.platform == "win32":
-        import ctypes
-        user32 = ctypes.windll.user32
+def resolve_project_name() -> str:
+    """A CLI argument always wins. Otherwise fall back to whatever
+    active_project.toml points at."""
+    if len(sys.argv) > 1:
+        return sys.argv[1]
 
-        hwnd = user32.GetForegroundWindow()
-        thread_id = user32.GetWindowThreadProcessId(hwnd, 0)
-        hkl = user32.GetKeyboardLayout(thread_id)
-        lang_id = hkl & 0xFFFF
+    with open(ACTIVE_PROJECT_PATH, "rb") as f:
+        config = tomllib.load(f)
+    return config["active"]["project"]
 
-        windows_locales = {
-            0x0C07: "de-AT",  # German (Austria)
-            0x0407: "de-DE",  # German (Germany)
-            0x0807: "de-CH",  # German (Switzerland)
-            0x0409: "en-US",  # English (US)
-            0x0809: "en-GB",  # English (UK)
-        }
 
-        # Check all loaded layout handles if active thread defaults to en-US
-        if lang_id not in [0x0C07, 0x0407, 0x0807]:
-            num_layouts = user32.GetKeyboardLayoutList(0, None)
-            if num_layouts > 0:
-                layouts = (ctypes.c_void_p * num_layouts)()
-                user32.GetKeyboardLayoutList(num_layouts, layouts)
-                for handle in layouts:
-                    lid = handle & 0xFFFF
-                    if lid in [0x0C07, 0x0407, 0x0807]:
-                        lang_id = lid
-                        break
-
-        lang_code = windows_locales.get(lang_id, f"0x{lang_id:04x}")
-
-    # -------------------------------------------------------------
-    # 3. EVALUATE QWERTZ VS QWERTY
-    # -------------------------------------------------------------
-    layout_type = "QWERTZ" if any(loc in lang_code.lower() for loc in qwertz_locales) else "QWERTY"
-
-    return {
-        "layout_type": layout_type,
-        "lang_code": lang_code,
-        "platform": sys.platform
-    }
+def main() -> None:
+    name = resolve_project_name()
+    print(f"Starting project '{name}'...")
+    project = get_project(name)
+    asyncio.run(project.run())
 
 
 if __name__ == "__main__":
-    result = get_keyboard_layout()
-    print(f"Platform             : {result['platform']}")
-    print(f"Detected Layout Type : {result['layout_type']}")
-    print(f"Language / Code      : {result['lang_code']}")
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nStopped.")
