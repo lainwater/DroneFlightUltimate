@@ -25,3 +25,7 @@ class ControllerBase(ABC):
     @abstractmethod
     async def start_controller(self) -> None:
         raise NotImplementedError
+
+    @abstractmethod
+    async def stop_controller(self) -> None:
+        raise NotImplementedError
