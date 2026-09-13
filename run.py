@@ -27,10 +27,12 @@ def resolve_project_name() -> str:
     active_project.toml points at."""
     if len(sys.argv) > 1:
         return sys.argv[1]
-
-    with open(ACTIVE_PROJECT_PATH, "rb") as f:
-        config = tomllib.load(f)
-    return config["active"]["project"]
+    try:
+        with open(ACTIVE_PROJECT_PATH, "rb") as f:
+            config = tomllib.load(f)
+        return config["active"]["project"]
+    except KeyError:
+        return "new_project"
 
 
 def main() -> None:

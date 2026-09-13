@@ -1,0 +1,374 @@
+{"ts": 1789332697.5832672, "topic": "cmd.drone1", "data": {"action": "forward", "distance": 30}}
+{"ts": 1789332698.3657868, "topic": "cmd.drone1", "data": {"action": "backward", "distance": 30}}
+{"ts": 1789332698.6474285, "topic": "cmd.drone1", "data": {"action": "right", "distance": 30}}
+{"ts": 1789332698.964008, "topic": "cmd.drone1", "data": {"action": "left", "distance": 30}}
+{"ts": 1789332699.3987124, "topic": "cmd.drone1", "data": {"action": "down", "distance": 30}}
+{"ts": 1789332703.835427, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789332703.837427, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332705.5173156, "topic": "cmd.drone1", "data": {"action": "disconnect"}}
+{"ts": 1789332705.518311, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332706.249151, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789332706.25015, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332707.0418468, "topic": "cmd.drone1", "data": {"action": "land"}}
+{"ts": 1789332708.7684207, "topic": "cmd.drone1", "data": {"action": "takeoff"}}
+{"ts": 1789332709.7842023, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332712.7842965, "topic": "cmd.drone1", "data": {"action": "start_state_reciever"}}
+{"ts": 1789332712.8955255, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15427.062}}
+{"ts": 1789332713.0037906, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15427.171}}
+{"ts": 1789332713.1121562, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15427.281}}
+{"ts": 1789332713.2214687, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15427.39}}
+{"ts": 1789332713.331511, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15427.5}}
+{"ts": 1789332713.4398875, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15427.609}}
+{"ts": 1789332713.5483394, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15427.718}}
+{"ts": 1789332713.6575413, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15427.828}}
+{"ts": 1789332713.7668443, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15427.937}}
+{"ts": 1789332713.8747897, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.031}}
+{"ts": 1789332713.9847243, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.14}}
+{"ts": 1789332714.0940702, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.25}}
+{"ts": 1789332714.2039363, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.375}}
+{"ts": 1789332714.3129306, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.468}}
+{"ts": 1789332714.4219701, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.578}}
+{"ts": 1789332714.530285, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.687}}
+{"ts": 1789332714.5735533, "topic": "cmd.drone1", "data": {"action": "start_state_reciever"}}
+{"ts": 1789332714.640345, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.796}}
+{"ts": 1789332714.6711664, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.828}}
+{"ts": 1789332714.765287, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.921}}
+{"ts": 1789332714.765287, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15428.921}}
+{"ts": 1789332714.8748484, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.031}}
+{"ts": 1789332714.8757536, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.031}}
+{"ts": 1789332714.9849544, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.156}}
+{"ts": 1789332714.9979463, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.156}}
+{"ts": 1789332715.1080384, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.265}}
+{"ts": 1789332715.1090453, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.265}}
+{"ts": 1789332715.2182474, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.375}}
+{"ts": 1789332715.2192547, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.375}}
+{"ts": 1789332715.3279614, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.484}}
+{"ts": 1789332715.32897, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.484}}
+{"ts": 1789332715.4381468, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.609}}
+{"ts": 1789332715.4381468, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.609}}
+{"ts": 1789332715.5482247, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.718}}
+{"ts": 1789332715.5482247, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.718}}
+{"ts": 1789332715.6555111, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.812}}
+{"ts": 1789332715.657525, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.812}}
+{"ts": 1789332715.7652955, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.921}}
+{"ts": 1789332715.7662983, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15429.921}}
+{"ts": 1789332715.8742578, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.031}}
+{"ts": 1789332715.8752668, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.031}}
+{"ts": 1789332715.9850972, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.156}}
+{"ts": 1789332715.9850972, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.156}}
+{"ts": 1789332716.0943491, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.265}}
+{"ts": 1789332716.095364, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.265}}
+{"ts": 1789332716.2021782, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.359}}
+{"ts": 1789332716.2031937, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.359}}
+{"ts": 1789332716.3121321, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.468}}
+{"ts": 1789332716.3131402, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.468}}
+{"ts": 1789332716.3781035, "topic": "cmd.drone1", "data": {"action": "start_state_reciever"}}
+{"ts": 1789332716.4199617, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.578}}
+{"ts": 1789332716.4209692, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.578}}
+{"ts": 1789332716.4980865, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.656}}
+{"ts": 1789332716.528971, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.687}}
+{"ts": 1789332716.528971, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.687}}
+{"ts": 1789332716.607251, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.765}}
+{"ts": 1789332716.6383555, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.796}}
+{"ts": 1789332716.6383555, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.796}}
+{"ts": 1789332716.7167869, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.875}}
+{"ts": 1789332716.748338, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.906}}
+{"ts": 1789332716.748338, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.906}}
+{"ts": 1789332716.8276095, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15430.984}}
+{"ts": 1789332716.8286107, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.0}}
+{"ts": 1789332716.8286107, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.0}}
+{"ts": 1789332716.876456, "topic": "cmd.drone1", "data": {"action": "stop_state_reciever"}}
+{"ts": 1789332716.9347434, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.093}}
+{"ts": 1789332716.9357402, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.093}}
+{"ts": 1789332717.0448303, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.203}}
+{"ts": 1789332717.0453334, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.203}}
+{"ts": 1789332717.1575456, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.328}}
+{"ts": 1789332717.1585476, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.328}}
+{"ts": 1789332717.2636247, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.421}}
+{"ts": 1789332717.2636247, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.421}}
+{"ts": 1789332717.3720653, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.531}}
+{"ts": 1789332717.3730605, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.531}}
+{"ts": 1789332717.4814827, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.64}}
+{"ts": 1789332717.4824975, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.64}}
+{"ts": 1789332717.591714, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.75}}
+{"ts": 1789332717.5927289, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.75}}
+{"ts": 1789332717.7009413, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.859}}
+{"ts": 1789332717.701937, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.859}}
+{"ts": 1789332717.7187157, "topic": "cmd.drone1", "data": {"action": "stop_state_reciever"}}
+{"ts": 1789332717.794083, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.953}}
+{"ts": 1789332717.794083, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15431.953}}
+{"ts": 1789332717.9027915, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.062}}
+{"ts": 1789332717.9027915, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.062}}
+{"ts": 1789332718.0104868, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.171}}
+{"ts": 1789332718.0104868, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.171}}
+{"ts": 1789332718.1190045, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.281}}
+{"ts": 1789332718.1190045, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.281}}
+{"ts": 1789332718.226288, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.39}}
+{"ts": 1789332718.226288, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.39}}
+{"ts": 1789332718.3382385, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.5}}
+{"ts": 1789332718.33924, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.5}}
+{"ts": 1789332718.4442177, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.609}}
+{"ts": 1789332718.4442177, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.609}}
+{"ts": 1789332718.5528276, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.718}}
+{"ts": 1789332718.5528276, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.718}}
+{"ts": 1789332718.6619496, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.828}}
+{"ts": 1789332718.6629581, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.828}}
+{"ts": 1789332718.770723, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.937}}
+{"ts": 1789332718.7717316, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15432.937}}
+{"ts": 1789332718.8799427, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.046}}
+{"ts": 1789332718.8809388, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.046}}
+{"ts": 1789332718.9894547, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.156}}
+{"ts": 1789332718.990458, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.156}}
+{"ts": 1789332719.0990126, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.265}}
+{"ts": 1789332719.100008, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.265}}
+{"ts": 1789332719.2056916, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.375}}
+{"ts": 1789332719.2066998, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.375}}
+{"ts": 1789332719.3153172, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.484}}
+{"ts": 1789332719.3163247, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.484}}
+{"ts": 1789332719.4232757, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.593}}
+{"ts": 1789332719.4242716, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.593}}
+{"ts": 1789332719.531274, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.687}}
+{"ts": 1789332719.5322697, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.687}}
+{"ts": 1789332719.6409576, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.796}}
+{"ts": 1789332719.641959, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.796}}
+{"ts": 1789332719.7101996, "topic": "cmd.drone1", "data": {"action": "get_state"}}
+{"ts": 1789332719.712199, "topic": "state.drone1", "data": {"flight_state": "inair", "con_state": "connected"}}
+{"ts": 1789332719.7636986, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.921}}
+{"ts": 1789332719.7646942, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15433.921}}
+{"ts": 1789332719.873119, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.031}}
+{"ts": 1789332719.873119, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.031}}
+{"ts": 1789332719.98236, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.14}}
+{"ts": 1789332719.9833548, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.14}}
+{"ts": 1789332720.0913713, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.25}}
+{"ts": 1789332720.0923674, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.25}}
+{"ts": 1789332720.199632, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.359}}
+{"ts": 1789332720.2006278, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.359}}
+{"ts": 1789332720.3089273, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.468}}
+{"ts": 1789332720.3099277, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.468}}
+{"ts": 1789332720.416348, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.578}}
+{"ts": 1789332720.417351, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.578}}
+{"ts": 1789332720.5257096, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.687}}
+{"ts": 1789332720.5257096, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.687}}
+{"ts": 1789332720.6343966, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.796}}
+{"ts": 1789332720.635398, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.796}}
+{"ts": 1789332720.7429106, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.906}}
+{"ts": 1789332720.7429106, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15434.906}}
+{"ts": 1789332720.747296, "topic": "cmd.drone1", "data": {"action": "get_stats"}}
+{"ts": 1789332720.7483246, "topic": "info.drone1", "data": {"Name": "SimDrone", "Version": "1.0", "Description": "A simulated drone implementation for testing and development purposes.", "Stats": {"MaxSpeed": {"value": "10", "unit": "m/s"}, "MaxAltitude": {"value": "100", "unit": "m"}, "BatteryLife": {"value": "30", "unit": "min"}, "PayloadCapacity": {"value": "1", "unit": "kg"}}}}
+{"ts": 1789332720.8551278, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.015}}
+{"ts": 1789332720.8561296, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.015}}
+{"ts": 1789332720.9601378, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.125}}
+{"ts": 1789332720.9611328, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.125}}
+{"ts": 1789332721.0685885, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.234}}
+{"ts": 1789332721.0695972, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.234}}
+{"ts": 1789332721.177741, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.343}}
+{"ts": 1789332721.1787488, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.343}}
+{"ts": 1789332721.2854376, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.453}}
+{"ts": 1789332721.286433, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.453}}
+{"ts": 1789332721.3926601, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.562}}
+{"ts": 1789332721.3936565, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.562}}
+{"ts": 1789332721.502859, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.671}}
+{"ts": 1789332721.5038607, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.671}}
+{"ts": 1789332721.6112955, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.781}}
+{"ts": 1789332721.6262884, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.781}}
+{"ts": 1789332721.7353594, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.906}}
+{"ts": 1789332721.7362714, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15435.906}}
+{"ts": 1789332721.8481436, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.015}}
+{"ts": 1789332721.8481436, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.015}}
+{"ts": 1789332721.953815, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.125}}
+{"ts": 1789332721.954811, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.125}}
+{"ts": 1789332721.990886, "topic": "cmd.drone1", "data": {"action": "get_ip"}}
+{"ts": 1789332721.9918895, "topic": "data.drone1", "data": {"ip": "127.0.0.1"}}
+{"ts": 1789332722.0632887, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.234}}
+{"ts": 1789332722.0642905, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.234}}
+{"ts": 1789332722.1722102, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.328}}
+{"ts": 1789332722.1722102, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.328}}
+{"ts": 1789332722.2811217, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.437}}
+{"ts": 1789332722.2811217, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.437}}
+{"ts": 1789332722.3896847, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.546}}
+{"ts": 1789332722.3896847, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.546}}
+{"ts": 1789332722.4984176, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.656}}
+{"ts": 1789332722.4984176, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.656}}
+{"ts": 1789332722.60704, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.765}}
+{"ts": 1789332722.60704, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.765}}
+{"ts": 1789332722.7178965, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.875}}
+{"ts": 1789332722.7188928, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.875}}
+{"ts": 1789332722.8271573, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.984}}
+{"ts": 1789332722.8281653, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15436.984}}
+{"ts": 1789332722.934799, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.093}}
+{"ts": 1789332722.9368064, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.093}}
+{"ts": 1789332723.0439706, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.203}}
+{"ts": 1789332723.0449805, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.203}}
+{"ts": 1789332723.1532538, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.312}}
+{"ts": 1789332723.1542625, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.312}}
+{"ts": 1789332723.265364, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.421}}
+{"ts": 1789332723.265364, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.421}}
+{"ts": 1789332723.3705628, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.531}}
+{"ts": 1789332723.3705628, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.531}}
+{"ts": 1789332723.4804797, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.64}}
+{"ts": 1789332723.481501, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.64}}
+{"ts": 1789332723.5894248, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.75}}
+{"ts": 1789332723.5904214, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.75}}
+{"ts": 1789332723.697045, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.859}}
+{"ts": 1789332723.6980526, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.859}}
+{"ts": 1789332723.8067296, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.968}}
+{"ts": 1789332723.8067296, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15437.968}}
+{"ts": 1789332723.9157906, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.078}}
+{"ts": 1789332723.916787, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.078}}
+{"ts": 1789332724.024828, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.187}}
+{"ts": 1789332724.0265408, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.187}}
+{"ts": 1789332724.134557, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.296}}
+{"ts": 1789332724.1365662, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.296}}
+{"ts": 1789332724.2439775, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.406}}
+{"ts": 1789332724.244973, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.406}}
+{"ts": 1789332724.3525052, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.515}}
+{"ts": 1789332724.3525052, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.515}}
+{"ts": 1789332724.4604, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.625}}
+{"ts": 1789332724.4613957, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.625}}
+{"ts": 1789332724.5693245, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.734}}
+{"ts": 1789332724.5703256, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.734}}
+{"ts": 1789332724.6775675, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.843}}
+{"ts": 1789332724.6775675, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.843}}
+{"ts": 1789332724.786542, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.953}}
+{"ts": 1789332724.787551, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15438.953}}
+{"ts": 1789332724.8952186, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.062}}
+{"ts": 1789332724.8962145, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.062}}
+{"ts": 1789332725.0052252, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.171}}
+{"ts": 1789332725.0052252, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.171}}
+{"ts": 1789332725.1130657, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.281}}
+{"ts": 1789332725.1140606, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.281}}
+{"ts": 1789332725.2228796, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.39}}
+{"ts": 1789332725.2238805, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.39}}
+{"ts": 1789332725.3322194, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.5}}
+{"ts": 1789332725.333213, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.5}}
+{"ts": 1789332725.4407117, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.609}}
+{"ts": 1789332725.4417067, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.609}}
+{"ts": 1789332725.4547067, "topic": "cmd.drone1", "data": {"action": "get_battery"}}
+{"ts": 1789332725.4567068, "topic": "data.drone1", "data": {"battery": 100}}
+{"ts": 1789332725.551091, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.718}}
+{"ts": 1789332725.5520844, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.718}}
+{"ts": 1789332725.6592815, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.828}}
+{"ts": 1789332725.6592815, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.828}}
+{"ts": 1789332725.7682998, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.937}}
+{"ts": 1789332725.7702959, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15439.937}}
+{"ts": 1789332725.8760147, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.046}}
+{"ts": 1789332725.877024, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.046}}
+{"ts": 1789332725.9855595, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.156}}
+{"ts": 1789332725.9855595, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.156}}
+{"ts": 1789332726.0950515, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.265}}
+{"ts": 1789332726.095953, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.265}}
+{"ts": 1789332726.20412, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.375}}
+{"ts": 1789332726.2051349, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.375}}
+{"ts": 1789332726.31212, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.468}}
+{"ts": 1789332726.3131158, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.468}}
+{"ts": 1789332726.4209287, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.578}}
+{"ts": 1789332726.4219313, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.578}}
+{"ts": 1789332726.528963, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.687}}
+{"ts": 1789332726.5299578, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.687}}
+{"ts": 1789332726.6370158, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.796}}
+{"ts": 1789332726.6380231, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.796}}
+{"ts": 1789332726.7455604, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.906}}
+{"ts": 1789332726.7465675, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15440.906}}
+{"ts": 1789332726.798788, "topic": "cmd.drone1", "data": {"action": "right", "distance": 30}}
+{"ts": 1789332726.8398292, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.0}}
+{"ts": 1789332726.8398292, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.0}}
+{"ts": 1789332726.9495618, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.109}}
+{"ts": 1789332726.9495618, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.109}}
+{"ts": 1789332727.0591612, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.218}}
+{"ts": 1789332727.06017, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.218}}
+{"ts": 1789332727.178231, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.343}}
+{"ts": 1789332727.178231, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.343}}
+{"ts": 1789332727.1919982, "topic": "cmd.drone1", "data": {"action": "stop_state_reciever"}}
+{"ts": 1789332727.27938, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.437}}
+{"ts": 1789332727.27938, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.437}}
+{"ts": 1789332727.3920352, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.562}}
+{"ts": 1789332727.3920352, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.562}}
+{"ts": 1789332727.4502661, "topic": "cmd.drone1", "data": {"action": "right", "distance": 30}}
+{"ts": 1789332727.5117881, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.671}}
+{"ts": 1789332727.5127826, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.671}}
+{"ts": 1789332727.6211638, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.781}}
+{"ts": 1789332727.6211638, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.781}}
+{"ts": 1789332727.720019, "topic": "cmd.drone1", "data": {"action": "takeoff"}}
+{"ts": 1789332727.7210135, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.89}}
+{"ts": 1789332727.7220137, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15441.89}}
+{"ts": 1789332727.8057818, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332727.836357, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.0}}
+{"ts": 1789332727.837352, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.0}}
+{"ts": 1789332727.9447062, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.109}}
+{"ts": 1789332727.9457011, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.109}}
+{"ts": 1789332728.0531797, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.218}}
+{"ts": 1789332728.0541766, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.218}}
+{"ts": 1789332728.16196, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.328}}
+{"ts": 1789332728.162969, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.328}}
+{"ts": 1789332728.2722638, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.437}}
+{"ts": 1789332728.2732604, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.437}}
+{"ts": 1789332728.2813003, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789332728.2883396, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332728.3820648, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.546}}
+{"ts": 1789332728.3830795, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.546}}
+{"ts": 1789332728.4408543, "topic": "cmd.drone1", "data": {"action": "disconnect"}}
+{"ts": 1789332728.4428544, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332728.4909778, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.656}}
+{"ts": 1789332728.4909778, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15442.656}}
+{"ts": 1789332728.6838126, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789332728.6858065, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332729.8495483, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789332729.8505483, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332731.4544291, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789332731.456429, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332732.0934138, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789332732.0934138, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332732.5272546, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789332732.5292501, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332732.9656582, "topic": "cmd.drone1", "data": {"action": "start_state_reciever"}}
+{"ts": 1789332733.0700147, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15447.234}}
+{"ts": 1789332733.1785574, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15447.343}}
+{"ts": 1789332733.2871268, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15447.453}}
+{"ts": 1789332733.3962865, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15447.562}}
+{"ts": 1789332733.5052862, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15447.671}}
+{"ts": 1789332733.6144755, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15447.781}}
+{"ts": 1789332733.7218444, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15447.89}}
+{"ts": 1789332733.8305857, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.0}}
+{"ts": 1789332733.939538, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.109}}
+{"ts": 1789332734.0477142, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.218}}
+{"ts": 1789332734.1562254, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.312}}
+{"ts": 1789332734.2275174, "topic": "cmd.drone1", "data": {"action": "connect"}}
+{"ts": 1789332734.2275174, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332734.280212, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.437}}
+{"ts": 1789332734.3887727, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.546}}
+{"ts": 1789332734.4983075, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.656}}
+{"ts": 1789332734.6071599, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.765}}
+{"ts": 1789332734.7150075, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.875}}
+{"ts": 1789332734.8240054, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15448.984}}
+{"ts": 1789332734.9338663, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15449.093}}
+{"ts": 1789332735.045099, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15449.203}}
+{"ts": 1789332735.153542, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15449.312}}
+{"ts": 1789332735.2626395, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15449.421}}
+{"ts": 1789332735.3708878, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15449.531}}
+{"ts": 1789332735.479624, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15449.64}}
+{"ts": 1789332735.588182, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15449.75}}
+{"ts": 1789332735.6978045, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15449.859}}
+{"ts": 1789332735.8003006, "topic": "cmd.drone1", "data": {"action": "disconnect"}}
+{"ts": 1789332735.8013284, "topic": "state.drone1", "data": {"battery": 100, "gps": [0.0, 0.0], "timestamp": 15449.968}}
+{"ts": 1789332735.8013284, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332738.6915293, "topic": "cmd.drone1", "data": {"action": "disconnect"}}
+{"ts": 1789332738.6935287, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332741.142374, "topic": "cmd.drone1", "data": {"action": "start_state_reciever"}}
+{"ts": 1789332743.684373, "topic": "cmd.drone1", "data": {"action": "stop_state_reciever"}}
+{"ts": 1789332745.2823632, "topic": "cmd.drone1", "data": {"action": "get_state"}}
+{"ts": 1789332745.284363, "topic": "state.drone1", "data": {"flight_state": "inair", "con_state": "disconnected"}}
+{"ts": 1789332745.8430612, "topic": "cmd.drone1", "data": {"action": "get_stats"}}
+{"ts": 1789332745.8440628, "topic": "info.drone1", "data": {"Name": "SimDrone", "Version": "1.0", "Description": "A simulated drone implementation for testing and development purposes.", "Stats": {"MaxSpeed": {"value": "10", "unit": "m/s"}, "MaxAltitude": {"value": "100", "unit": "m"}, "BatteryLife": {"value": "30", "unit": "min"}, "PayloadCapacity": {"value": "1", "unit": "kg"}}}}
+{"ts": 1789332746.7283762, "topic": "cmd.drone1", "data": {"action": "get_ip"}}
+{"ts": 1789332746.7303748, "topic": "data.drone1", "data": {"ip": "127.0.0.1"}}
+{"ts": 1789332749.2113676, "topic": "cmd.drone1", "data": {"action": "land"}}
+{"ts": 1789332749.4652712, "topic": "cmd.drone1", "data": {"action": "takeoff"}}
+{"ts": 1789332750.2189164, "topic": "ack.drone1", "data": {"ack": "True"}}
+{"ts": 1789332751.831306, "topic": "cmd.drone1", "data": {"action": "get_stats"}}
+{"ts": 1789332751.832371, "topic": "info.drone1", "data": {"Name": "SimDrone", "Version": "1.0", "Description": "A simulated drone implementation for testing and development purposes.", "Stats": {"MaxSpeed": {"value": "10", "unit": "m/s"}, "MaxAltitude": {"value": "100", "unit": "m"}, "BatteryLife": {"value": "30", "unit": "min"}, "PayloadCapacity": {"value": "1", "unit": "kg"}}}}
+{"ts": 1789332752.6373768, "topic": "cmd.drone1", "data": {"action": "get_ip"}}
+{"ts": 1789332752.6383762, "topic": "data.drone1", "data": {"ip": "127.0.0.1"}}
+{"ts": 1789332754.4794073, "topic": "cmd.drone1", "data": {"action": "start_state_reciever"}}
+{"ts": 1789332754.8550107, "topic": "cmd.drone1", "data": {"action": "stop_state_reciever"}}
+{"ts": 1789332756.773368, "topic": "cmd.drone1", "data": {"action": "stop_state_reciever"}}
+{"ts": 1789332758.7753675, "topic": "cmd.drone1", "data": {"action": "start_state_reciever"}}
