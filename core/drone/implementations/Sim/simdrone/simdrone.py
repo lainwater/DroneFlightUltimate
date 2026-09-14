@@ -21,7 +21,13 @@ class SimDrone(DroneBase):
     @property
     def config_dir(self) -> Path:
         return Path(__file__).parent
-    
+
+    async def con_error(self, caller: str):
+        await self.publish_parser(PublishType.ERROR, {
+            "error": "NotConnected",
+            "message": f"{caller} called before connect()",
+        })
+
     async def connect(self):
         self.con_state = DroneConState.CONNECTING
         ack = await self.sdk.connect()
@@ -30,17 +36,15 @@ class SimDrone(DroneBase):
 
     async def disconnect(self):
         self.con_state = DroneConState.DISCONNECTING
+        await self.stop_state_reciever()
         ack = await self.sdk.disconnect()
         self.con_state = DroneConState.DISCONNECTED
         await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
 
     async def takeoff(self):
         if self.con_state != DroneConState.CONNECTED:
-                    await self.publish_parser(PublishType.ERROR, {
-                        "error": "NotConnected",
-                        "message": "start_state_reciever called before connect() - nothing would ever be streamed.",
-                    })
-                    return
+            self.conn_error(self.takeoff.__name__)
+            return
         if self.flight_state == DroneFlightState.LANDED:
             ack = await self.sdk.takeoff()
             self.flight_state = DroneFlightState.INAIR
@@ -48,11 +52,8 @@ class SimDrone(DroneBase):
 
     async def land(self):
         if self.con_state != DroneConState.CONNECTED:
-                    await self.publish_parser(PublishType.ERROR, {
-                        "error": "NotConnected",
-                        "message": "start_state_reciever called before connect() - nothing would ever be streamed.",
-                    })
-                    return
+            self.conn_error(self.land.__name__)
+            return
         if self.flight_state != DroneFlightState.LANDED:
             ack = await self.sdk.land()
             self.flight_state = DroneFlightState.LANDED
@@ -61,11 +62,8 @@ class SimDrone(DroneBase):
     async def _move(self, direction: str, distance: float):
         '''Shared Guard + SDK Call + state-update + ack posting for move commands'''
         if self.con_state != DroneConState.CONNECTED:
-                    await self.publish_parser(PublishType.ERROR, {
-                        "error": "NotConnected",
-                        "message": "start_state_reciever called before connect() - nothing would ever be streamed.",
-                    })
-                    return
+            self.conn_error(self._move.__name__)
+            return
         if self.flight_state != DroneFlightState.INAIR:
             return
         self.flight_state = DroneFlightState.MOVING
@@ -95,6 +93,7 @@ class SimDrone(DroneBase):
         ack = await self.sdk.motor_off()
         self.flight_state = DroneFlightState.EMERGENCY
         await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
+        self.flight_state = DroneFlightState.LANDED
 
     async def get_battery(self) -> int:
         battery_level = await self.sdk.get_battery_level()
@@ -111,10 +110,7 @@ class SimDrone(DroneBase):
         """Starts a background task that publishes every item the SDK's
         data_generator yields, until stop_state_reciever() cancels it."""
         if self.con_state != DroneConState.CONNECTED:
-            await self.publish_parser(PublishType.ERROR, {
-                "error": "NotConnected",
-                "message": "start_state_reciever called before connect() - nothing would ever be streamed.",
-            })
+            self.conn_error(self.start_state_reciever.__name__)
             return
         self.data_gen_task = asyncio.create_task(self._consume_state_stream())
 
