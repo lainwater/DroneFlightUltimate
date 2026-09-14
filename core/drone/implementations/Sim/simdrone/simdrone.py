@@ -102,7 +102,7 @@ class SimDrone(DroneBase):
     async def get_gps(self) -> tuple[float, float]:
         gps_coordinates = await self.sdk.get_gps_coordinates()
         await self.publish_parser(PublishType.DATA, {"gps": gps_coordinates})
-        
+
     async def get_ip(self) -> tuple[float, float]:
             await self.publish_parser(PublishType.DATA, {"ip": self.ip})
     

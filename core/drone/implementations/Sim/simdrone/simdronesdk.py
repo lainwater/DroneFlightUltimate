@@ -6,7 +6,6 @@ class SimDroneSDK:
         self.data_gen_limit = data_gen_limit
 
     async def connect(self) -> bool:
-        
         self.connected = True
         return True
 

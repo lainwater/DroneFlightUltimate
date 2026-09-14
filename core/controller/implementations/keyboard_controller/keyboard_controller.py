@@ -30,7 +30,7 @@ class KeyboardController(ControllerBase):
     async def stop_controller(self):
         self.kb_listener.stop()
 
-    def on_press(self, key):  # sync, nicht async!
+    def on_press(self, key):
         entry = self._resolve(key)
         if entry:
             data = {"action": entry["to_publish"]}

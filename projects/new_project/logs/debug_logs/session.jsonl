@@ -1,2 +1,4 @@
 {"timestamp": "2026-09-14T09:44:22.772144+00:00", "level": "INFO", "message": "Session starting", "context": {"drone_id": "drone1"}}
 {"timestamp": "2026-09-14T09:47:26.116150+00:00", "level": "INFO", "message": "Session ending", "context": {"drone_id": "drone1"}}
+{"timestamp": "2026-09-14T20:36:24.857684+00:00", "level": "INFO", "message": "Session starting", "context": {"drone_id": "drone1"}}
+{"timestamp": "2026-09-14T20:39:58.727557+00:00", "level": "INFO", "message": "Session ending", "context": {"drone_id": "drone1"}}
