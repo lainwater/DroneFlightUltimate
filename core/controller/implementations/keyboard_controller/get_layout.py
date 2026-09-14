@@ -6,13 +6,22 @@ from pathlib import Path
 def current_keyboard_layout_as_json_path(_layout: str) -> str:
     if _layout:
         return Path(__file__).parent / f"{_layout}.json"
-    else:
-        layout = get_keyboard_layout()
-        match layout['layout_type']:
-            case "QWERTZ":
-                return Path(__file__).parent / "qwertz.json"
-            case _:
-                raise NotImplementedError(f"Keyboard layout {layout['layout_type']} has not been implemented yet.")
+ 
+    layout = get_keyboard_layout()
+    layout_type = layout["layout_type"].lower()
+    candidate = Path(__file__).parent / f"{layout_type}.json"
+    if candidate.exists():
+        return candidate
+ 
+    fallback = Path(__file__).parent / "qwerty.json"
+    print(
+        f"[keyboard] No mapping file for detected layout '{layout_type}' "
+        f"(lang_code={layout['lang_code']!r}) - falling back to qwerty.json. "
+        f"Add a '{layout_type}.json' next to this file to override, or set "
+        f"'layout' explicitly in this project's app_config/defaults.toml."
+    )
+    return fallback
+
         
 
 def get_keyboard_layout() -> dict:

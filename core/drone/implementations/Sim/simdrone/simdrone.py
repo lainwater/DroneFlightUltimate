@@ -35,12 +35,24 @@ class SimDrone(DroneBase):
         await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
 
     async def takeoff(self):
+        if self.con_state != DroneConState.CONNECTED:
+                    await self.publish_parser(PublishType.ERROR, {
+                        "error": "NotConnected",
+                        "message": "start_state_reciever called before connect() - nothing would ever be streamed.",
+                    })
+                    return
         if self.flight_state == DroneFlightState.LANDED:
             ack = await self.sdk.takeoff()
             self.flight_state = DroneFlightState.INAIR
             await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
 
     async def land(self):
+        if self.con_state != DroneConState.CONNECTED:
+                    await self.publish_parser(PublishType.ERROR, {
+                        "error": "NotConnected",
+                        "message": "start_state_reciever called before connect() - nothing would ever be streamed.",
+                    })
+                    return
         if self.flight_state != DroneFlightState.LANDED:
             ack = await self.sdk.land()
             self.flight_state = DroneFlightState.LANDED
@@ -48,6 +60,12 @@ class SimDrone(DroneBase):
             
     async def _move(self, direction: str, distance: float):
         '''Shared Guard + SDK Call + state-update + ack posting for move commands'''
+        if self.con_state != DroneConState.CONNECTED:
+                    await self.publish_parser(PublishType.ERROR, {
+                        "error": "NotConnected",
+                        "message": "start_state_reciever called before connect() - nothing would ever be streamed.",
+                    })
+                    return
         if self.flight_state != DroneFlightState.INAIR:
             return
         self.flight_state = DroneFlightState.MOVING
@@ -92,6 +110,12 @@ class SimDrone(DroneBase):
     async def start_state_reciever(self):
         """Starts a background task that publishes every item the SDK's
         data_generator yields, until stop_state_reciever() cancels it."""
+        if self.con_state != DroneConState.CONNECTED:
+            await self.publish_parser(PublishType.ERROR, {
+                "error": "NotConnected",
+                "message": "start_state_reciever called before connect() - nothing would ever be streamed.",
+            })
+            return
         self.data_gen_task = asyncio.create_task(self._consume_state_stream())
 
     async def stop_state_reciever(self):
