@@ -142,6 +142,23 @@ class DroneBase(ABC):
     async def get_command_map(self):
         """Get the command map of the drone."""
         await self.publish_parser(PublishType.INFO, self.command_map)
+    
+    async def _require_connected(self, action_name: str) -> bool:
+        """Shared precondition check for any command that needs a live
+        connection. Returns True if connected; otherwise publishes a
+        generic error naming the ACTUAL action that was blocked (not a
+        copy-pasted message from some other method) and returns False,
+        so callers can write:
+            if not await self._require_connected("takeoff"):
+                return
+        """
+        if self.con_state != DroneConState.CONNECTED:
+            await self.publish_parser(PublishType.ERROR, {
+                "error": "NotConnected",
+                "message": f"'{action_name}' called before connect().",
+            })
+            return False
+        return True
 
     @abstractmethod
     async def start_state_reciever(self):
