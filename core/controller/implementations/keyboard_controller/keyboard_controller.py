@@ -34,8 +34,9 @@ class KeyboardController(ControllerBase):
         entry = self._resolve(key)
         if entry:
             data = {"action": entry["to_publish"]}
-            if "amount" in entry:
-                data["distance"] = entry["amount"]
+            for k, v in entry.items():
+                if (k != "to_publish") and (k != "type"):
+                    data[k] = v
             asyncio.run_coroutine_threadsafe(self.publish_parser(data), self.loop)
 
     def on_release(self, key):

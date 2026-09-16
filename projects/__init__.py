@@ -27,14 +27,15 @@ level = "INFO"
 
 [keyboard]
 # Leave empty for automatic layout detection, or set e.g. "qwertz" to override.
-layout = ""
+layout = "qwertz"
 """
 
 _DRONE_CONFIG_TEMPLATE = """\
 {
   "drone_type": "sim_simdrone",
   "drone_id": "drone1",
-  "ip": "127.0.0.1"
+  "ip": "67.67.0.1",
+  "port": "6767"
 }
 """
 
@@ -65,6 +66,7 @@ class {name}(ProjectBase):
             self.drone_config["drone_id"],
             bus=self.bus,
             ip=self.drone_config["ip"],
+            port=self.drone_config["port"]
         )
 
         layout = self.app_config.get("keyboard", {{}}).get("layout") or None
@@ -77,6 +79,9 @@ class {name}(ProjectBase):
 
     async def main(self) -> None:
         self.debug_logger.log(LogLevel.INFO, "Session starting", drone_id=self.drone.drone_id)
+        await self.drone.connect()
+        await self.drone.set("flightmode", flight_mode="rc")
+        await self.drone.disconnect()
         await self.controller.start_controller()
         print(f"Keyboard controller active for '{{self.drone.drone_id}}'. Press Ctrl+C to stop.")
         await asyncio.Event().wait()

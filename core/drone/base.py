@@ -123,14 +123,6 @@ class DroneBase(ABC):
         except TypeError as exc:
             raise TypeError(f"Bad arguments for action '{action}': {exc}") from exc
 
-    @property
-    @abstractmethod
-    def config_dir(self) -> Path:
-        """Directory containing this drone's commands.json/stats.json.
-        Concrete implementations return Path(__file__).parent so this
-        works no matter where the app was launched from."""
-        raise NotImplementedError
-
     async def get_state(self):
         """Get the current state of the drone."""
         await self.publish_parser(PublishType.STATE, {"flight_state": self.flight_state.value, "con_state": self.con_state.value})
@@ -160,6 +152,14 @@ class DroneBase(ABC):
             return False
         return True
 
+    @property
+    @abstractmethod
+    def config_dir(self) -> Path:
+        """Directory containing this drone's commands.json/stats.json.
+        Concrete implementations return Path(__file__).parent so this
+        works no matter where the app was launched from."""
+        raise NotImplementedError
+    
     @abstractmethod
     async def start_state_reciever(self):
         "Starts continues State reciever"
