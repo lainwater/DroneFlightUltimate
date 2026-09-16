@@ -1,21 +1,38 @@
 {
-    "connect": {"method": "connect"},
-    "disconnect": {"method": "disconnect"},
-    "land": {"method": "land"},
-    "takeoff": {"method": "takeoff"},
-    "start_state_reciever":  {"method": "start_state_reciever"},
-    "stop_state_reciever": {"method": "stop_state_reciever"},
-    "get_battery":  {"method": "get"},
-    "get_ip_and_port": {"method": "get"},
-    "emergency": {"method": "emergency"},
-    "up": {"method": "rc"},
-    "down":     {"method": "rc"},
-    "yaw_left":  {"method": "rc"},
-    "yaw_right":  {"method": "rc"},
-    "pitch_forward": {"method": "rc"},
-    "pitch_backward": {"method": "rc"},
-    "roll_left": {"method": "rc"},
-    "roll_right":  {"method": "rc"},
-    "arm": {"method": "set"},
-    "disarm": {"method": "set"}
+    "connect":               { "method": "connect" },
+    "disconnect":            { "method": "disconnect" },
+    "start_state_reciever":  { "method": "start_state_reciever" },
+    "stop_state_reciever":   { "method": "stop_state_reciever" },
+
+    "get_battery":            { "method": "get", "args": { "what": "battery" } },
+    "get_ip_and_port":        { "method": "get", "args": { "what": "ip_and_port" } },
+
+    "arm":                    { "method": "set", "args": { "what": "arm" } },
+    "stop_arm":               { "method": "set", "args": { "what": "arm" } },
+    "disarm":                 { "method": "set", "args": { "what": "disarm" } },
+    "stop_disarm":            { "method": "set", "args": { "what": "disarm" } },
+
+    "land":                   { "method": "land" },
+    "takeoff":                { "method": "takeoff" },
+    "emergency":              { "method": "emergency" },
+
+    "up":                     { "method": "rc", "args": { "x": 0, "y": 0, "z": 1,  "yaw": 0 } },
+    "stop_up":                { "method": "rc", "args": { "x": 0, "y": 0, "z": 0,  "yaw": 0 } },
+    "down":                   { "method": "rc", "args": { "x": 0, "y": 0, "z": -1, "yaw": 0 } },
+    "stop_down":              { "method": "rc", "args": { "x": 0, "y": 0, "z": 0,  "yaw": 0 } },
+
+    "yaw_left":               { "method": "rc", "args": { "x": 0, "y": 0, "z": 0, "yaw": -1 } },
+    "stop_yaw_left":          { "method": "rc", "args": { "x": 0, "y": 0, "z": 0, "yaw": 0 } },
+    "yaw_right":              { "method": "rc", "args": { "x": 0, "y": 0, "z": 0, "yaw": 1 } },
+    "stop_yaw_right":         { "method": "rc", "args": { "x": 0, "y": 0, "z": 0, "yaw": 0 } },
+
+    "pitch_forward":          { "method": "rc", "args": { "x": 0, "y": 1,  "z": 0, "yaw": 0 } },
+    "stop_pitch_forward":     { "method": "rc", "args": { "x": 0, "y": 0,  "z": 0, "yaw": 0 } },
+    "pitch_backward":         { "method": "rc", "args": { "x": 0, "y": -1, "z": 0, "yaw": 0 } },
+    "stop_pitch_backward":    { "method": "rc", "args": { "x": 0, "y": 0,  "z": 0, "yaw": 0 } },
+
+    "roll_left":              { "method": "rc", "args": { "x": -1, "y": 0, "z": 0, "yaw": 0 } },
+    "stop_roll_left":         { "method": "rc", "args": { "x": 0,  "y": 0, "z": 0, "yaw": 0 } },
+    "roll_right":             { "method": "rc", "args": { "x": 1,  "y": 0, "z": 0, "yaw": 0 } },
+    "stop_roll_right":        { "method": "rc", "args": { "x": 0,  "y": 0, "z": 0, "yaw": 0 } }
 }

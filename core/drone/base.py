@@ -92,7 +92,7 @@ class DroneBase(ABC):
             })
             return
  
-        kwargs = {k: v for k, v in data.items() if k != "action"}
+        kwargs = {k: v for k, v in data["args"].items() if k != "action"}
         try:
             await self.execute(action, **kwargs)
         except Exception as exc:
@@ -119,7 +119,11 @@ class DroneBase(ABC):
         if method is None:
             raise AttributeError(f"'{action}' maps to '{method_name}', but {self.drone_id} has no such method")
         try:
-            await method(**kwargs)
+            if hasattr(entry, "args"):
+                kwargs = {k: v for k, v in entry["args"].items()}
+                await method(kwargs)
+            else:
+                await method(**kwargs)
         except TypeError as exc:
             raise TypeError(f"Bad arguments for action '{action}': {exc}") from exc
 

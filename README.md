@@ -1,7 +1,3 @@
--> somehow get mapping to wrok with drone mapping with args
-
-
-
 # Drone Flight Ultimate
 
 Short Description

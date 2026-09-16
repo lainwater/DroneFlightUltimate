@@ -431,16 +431,20 @@ class SimDroneSDK:
                 pass
             else:
                 return False
+            x = self._normalize_rc(x)
+            y = self._normalize_rc(y)
+            z = self._normalize_rc(z)
+            yaw = self._normalize_rc(yaw)
+            # x / l-r dir
+            self._att.roll = x * _TILT_DEGREES
             self._pos.x += x * self._rc_speed
+            # y / fw-bw dir
+            self._att.pitch = y * _TILT_DEGREES
             self._pos.y += y * self._rc_speed
+            # z / h dir
             self._pos.z += z * self._rc_speed
+            # yaw
             self._att.yaw += yaw * self._rc_speed
-            if x != 0:
-                self._att.roll = _TILT_DEGREES
-            if y != 0:
-                self._att.pitch = _TILT_DEGREES
-            self._att.roll = 0
-            self._att.pitch = 0
             return True
         except:
             return False
@@ -467,3 +471,12 @@ class SimDroneSDK:
                 }
         self._is_state_gen_running = False
         return
+
+    def _normalize_rc(value):
+        if value > 0:
+            return 1
+
+        if value < 0:
+            return -1
+
+        return 0

@@ -1,0 +1,67 @@
+{
+    "deadzone": 0.1,
+
+    "axes": {
+        "0": {
+            "type": "rc",
+            "axis": "x",
+            "invert": false
+        },
+
+        "1": {
+            "type": "rc",
+            "axis": "y",
+            "invert": true
+        },
+
+        "2": {
+            "type": "rc",
+            "axis": "yaw",
+            "invert": false
+        },
+
+        "3": {
+            "type": "rc",
+            "axis": "z",
+            "invert": true
+        },
+
+        "4": {
+            "type": "switch",
+            "name": "SE",
+            "positions": {
+                "negative": null,
+                "positive": "emergency"
+            }
+        },
+
+        "5": {
+            "type": "switch",
+            "name": "SA",
+            "positions": {
+                "negative": "arm",
+                "positive": "disarm"
+            }
+        },
+
+        "6": {
+            "type": "switch",
+            "name": "SC",
+            "positions": {
+                "up": "takeoff",
+                "middle": null,
+                "down": "land"
+            }
+        },
+
+        "7": {
+            "type": "switch",
+            "name": "SB",
+            "positions": {
+                "up": "connect",
+                "middle": null,
+                "down": "disconnect"
+            }
+        }
+    }
+}

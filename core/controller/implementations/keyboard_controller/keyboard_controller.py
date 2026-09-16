@@ -32,15 +32,15 @@ class KeyboardController(ControllerBase):
 
     def on_press(self, key):
         entry = self._resolve(key)
-        if entry:
-            data = {"action": entry["to_publish"]}
-            for k, v in entry.items():
-                if (k != "to_publish") and (k != "type"):
-                    data[k] = v
+        if entry and (entry["on_press"] is not None):
+            data = {"action": entry["on_press"]}
             asyncio.run_coroutine_threadsafe(self.publish_parser(data), self.loop)
 
     def on_release(self, key):
-        pass
+        entry = self._resolve(key)
+        if entry and (entry["on_release"] is not None):
+            data = {"action": entry["on_release"]}
+            asyncio.run_coroutine_threadsafe(self.publish_parser(data), self.loop)
 
     def _resolve(self, key) -> dict | None:
         lookup_key = key.char if hasattr(key, "char") and key.char else getattr(key, "name", None)
