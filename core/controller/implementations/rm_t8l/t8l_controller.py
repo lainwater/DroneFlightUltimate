@@ -6,9 +6,9 @@ import asyncio
 import pygame
 
 from core.controller.base import ControllerBase
-from core.controller.implementations.rm_t8l.get_layout import (
-    current_t8l_layout_as_json_path,
-)
+# from core.controller.implementations.rm_t8l.get_layout import (
+#     current_t8l_layout_as_json_path,
+# )
 
 
 class T8LController(ControllerBase):
@@ -30,8 +30,75 @@ class T8LController(ControllerBase):
         self.switch_states = {}
 
     def load_config(self, layout: str) -> None:
-        layout_path = current_t8l_layout_as_json_path(layout)
-        self.config = self.fops.read_json(layout_path)
+        # layout_path = current_t8l_layout_as_json_path(layout)
+        # self.config = self.fops.read_json(layout_path)
+        self.config = {
+    "deadzone": 0.1,
+
+    "axes": {
+        "0": {
+            "type": "rc",
+            "axis": "x",
+            "invert": False
+        },
+
+        "1": {
+            "type": "rc",
+            "axis": "y",
+            "invert": True
+        },
+
+        "2": {
+            "type": "rc",
+            "axis": "yaw",
+            "invert": False
+        },
+
+        "3": {
+            "type": "rc",
+            "axis": "z",
+            "invert": True
+        },
+
+        "4": {
+            "type": "switch",
+            "name": "SE",
+            "positions": {
+                "negative": None,
+                "positive": "emergency"
+            }
+        },
+
+        "5": {
+            "type": "switch",
+            "name": "SA",
+            "positions": {
+                "negative": "arm",
+                "positive": "disarm"
+            }
+        },
+
+        "6": {
+            "type": "switch",
+            "name": "SC",
+            "positions": {
+                "up": "takeoff",
+                "middle": None,
+                "down": "land"
+            }
+        },
+
+        "7": {
+            "type": "switch",
+            "name": "SB",
+            "positions": {
+                "up": "connect",
+                "middle": None,
+                "down": "disconnect"
+            }
+        }
+    }
+}
 
     async def publish_parser(self, data: dict) -> None:
         if self.bus:
