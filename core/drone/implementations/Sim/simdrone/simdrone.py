@@ -4,8 +4,9 @@ Simulated Drone Implementation
 import asyncio
 from pathlib import Path
 
-from core.drone.base import DroneBase, DroneFlightState, DroneConState, DroneType, PublishType
-from core.drone.implementations.Sim.simdrone.simdronesdk import SimDroneSDK
+from core.drone.base import DroneBase, DroneFlightState, DroneConState, DroneType, DroneArmState, PublishType
+from core.drone.implementations.Sim.simdrone.simdronesdk import SimDroneSDK, _FlightMode
+
 
 class SimDrone(DroneBase):
     def __init__(self,
@@ -18,6 +19,7 @@ class SimDrone(DroneBase):
         self.ip = self.init_kwargs["ip"]
         self.port = self.init_kwargs["port"]
         self.data_gen_task = None
+        self.flightmode = _FlightMode.NONE_SET
         
     @property
     def config_dir(self) -> Path:
@@ -27,115 +29,106 @@ class SimDrone(DroneBase):
     async def connect(self):
         self.con_state = DroneConState.CONNECTING
         ack = await self.sdk.connect(self.ip, self.port)
-        self.con_state = DroneConState.CONNECTED
-        await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
+        if ack:
+            self.con_state = DroneConState.CONNECTED
+        else:
+            self.con_state = DroneConState.DISCONNECTED
+        await self.publish_parser(PublishType.ACK, {"cmd": "connect", "ack": f"{ack}"})
 
     async def disconnect(self):
-        if not await self._require_connected("disconnect"): return
+        if not await self._require_state(DroneConState.CONNECTED, "disconnect"): return
         await self.stop_state_reciever()
+        await self.set("disarm")
         self.con_state = DroneConState.DISCONNECTING
         ack = await self.sdk.disconnect()
-        self.con_state = DroneConState.DISCONNECTED
-        await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
+        if ack:
+            self.con_state = DroneConState.DISCONNECTED
+        else:
+            self.con_state = DroneConState.CONNECTED 
+        await self.publish_parser(PublishType.ACK, {"cmd": "disconnect", "ack": f"{ack}"})
         
 # Movement
     async def takeoff(self):
-        if not await self._require_connected("takeoff"): return
-        if self.flight_state == DroneFlightState.LANDED:
-            ack = await self.sdk.takeoff()
+        if not await self._require_state(DroneConState.CONNECTED, "takeoff"): return
+        if not await self._require_state(DroneFlightState.LANDED, "takeoff"): return
+        if not await self._require_state(DroneArmState.ARMED, "takeoff"): return
+        ack = await self.sdk.takeoff()
+        if not ack: await self.publish_parser(PublishType.ERROR, {"cmd": f"takeoff", "info": f"takeoff returned {ack}. Try arming drone first", "error": "takeoffFailed"})
+        else:
+            await self.publish_parser(PublishType.ACK, {"cmd": "takeoff", "ack": f"{ack}"})
             self.flight_state = DroneFlightState.INAIR
-            await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
 
     async def land(self):
-        if not await self._require_connected("land"): return
-        if self.flight_state != DroneFlightState.LANDED:
-            ack = await self.sdk.land()
+        if not await self._require_state(DroneConState.CONNECTED, "land"): return
+        if not await self._require_state(DroneFlightState.INAIR, "land"): return
+        ack = await self.sdk.land()
+        if not ack: await self.publish_parser(PublishType.ERROR, {"cmd": f"land", "info": f"land returned {ack}. Try getting drone in air first", "error": "landFailed"})
+        else:
+            await self.publish_parser(PublishType.ACK, {"cmd": "land", "ack": f"{ack}"})
             self.flight_state = DroneFlightState.LANDED
-            await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
     
     async def emergency(self):
-        if not await self._require_connected("emergency"): return
+        if not await self._require_state(DroneConState.CONNECTED, "emergency"): return
         ack = await self.sdk.emergency()
-        self.flight_state = DroneFlightState.EMERGENCY
-        await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
-        self.flight_state = DroneFlightState.LANDED
+        if not ack: await self.publish_parser(PublishType.ERROR, {"cmd": f"emergency", "info": f"emergency returned {ack}.", "error": "emergencyFailed"})
+        else:
+            await self.publish_parser(PublishType.ACK, {"cmd": "emergency", "ack": f"{ack}"})
+            self.flight_state = DroneFlightState.LANDED
+        
 
     # rc movement
     async def rc(self, x: int, y: int, z: int, yaw: int):
-        if not await self._require_connected(f"rc"): return
-        if self.flight_state != DroneFlightState.INAIR:
-            return
-        self.flight_state = DroneFlightState.MOVING
+        if not await self._require_state(DroneConState.CONNECTED, f"rc {x} {y} {z} {yaw}"): return
+        if not await self._require_state(DroneFlightState.INAIR, f"rc {x} {y} {z} {yaw}"): return
         ack = await self.sdk.rc(x, y, z, yaw)
-        self.flight_state = DroneFlightState.INAIR
-        await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
+        if not ack: await self.publish_parser(PublishType.ERROR, {"cmd": f"rc {x} {y} {z} {yaw}", "info": f"rc returned {ack}. Try setting drone in 'RC' mode first.", "error": "rcFailed"})
+        else: await self.publish_parser(PublishType.ACK, {"cmd": f"rc {x} {y} {z} {yaw}", "ack": f"{ack}"})
 
-    # Goto Pos Movement
+    # goto pos movement
     async def goto(self, x: float, y:float, z: float):
-        if not await self._require_connected("goto"): return
-        if self.flight_state != DroneFlightState.INAIR:
-            return
-        self.flight_state = DroneFlightState.MOVING
+        if not await self._require_state(DroneConState.CONNECTED, f"goto {x} {y} {z}"): return
+        if not await self._require_state(DroneFlightState.INAIR, f"goto {x} {y} {z}"): return
         ack = await self.sdk.goto_pos(x, y, z)
-        self.flight_state = DroneFlightState.INAIR
-        await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
+        if not ack: await self.publish_parser(PublishType.ERROR, {"cmd": f"goto {x} {y} {z}", "info": f"goto returned {ack}. Try setting drone in 'GOTO' mode first.", "error": "gotoFailed"})
+        else: await self.publish_parser(PublishType.ACK, {"cmd": f"goto {x} {y} {z}", "ack": f"{ack}"})
 
     # Step Movement            
-    async def _move(self, direction: str, distance: float):
-        if not await self._require_connected(f"_move {direction}"): return
-        if self.flight_state != DroneFlightState.INAIR:
-            return
-        self.flight_state = DroneFlightState.MOVING
+    async def steps_move(self, direction: str, distance: float):
+        if not await self._require_state(DroneConState.CONNECTED, f"_move {direction} {distance}"): return
+        if not await self._require_state(DroneFlightState.INAIR, f"_move {direction} {distance}"): return
         ack = await self.sdk.move_step(direction, distance)
-        self.flight_state = DroneFlightState.INAIR
-        await self.publish_parser(PublishType.ACK, {"ack": f"{ack}"})
-                        
-    async def move_forward(self, distance: float):
-            await self._move("forward", distance)
-    
-    async def move_backward(self, distance: float):
-            await self._move("backward", distance)
-    
-    async def move_up(self, distance: float):
-            await self._move("up", distance)
-            
-    async def move_down(self, distance: float):
-            await self._move("down", distance)
-    
-    async def move_left(self, distance: float):
-            await self._move("left", distance)
-                
-    async def move_right(self, distance: float):
-            await self._move("right", distance)
-
+        if not ack: await self.publish_parser(PublishType.ERROR, {"cmd": f"_move {direction} {distance}", "info": f"_move returned {ack}. Try setting drone in 'STEPS' mode first.", "error": "_moveFailed"})
+        else: await self.publish_parser(PublishType.ACK, {"cmd": f"_move {direction} {distance}", "ack": f"{ack}"})
 
 # Set
-    async def set(self, what: str, **kwargs):
-        if not await self._require_connected(f"set_{what}"): return
-        ack = False
+    async def set(self, what: str, **kwargs) -> None:
+        if not await self._require_state(DroneConState.CONNECTED, f"set {what} {kwargs}"): return
+        ack = None
         if what == "flight_mode":
-            return_val = await self.sdk.set_flight_mode(**kwargs)
-        if what == "rc_speed":
-            return_val = await self.sdk.set_rc_speed(**kwargs)
-        if what == "takeoff_height":
-            return_val = await self.sdk.set_takeoff_height(**kwargs)
-        if what == "ip_and_port":
-            return_val = await self.sdk.set_ip_and_port(**kwargs)
-            self.ip = kwargs["ip"]
-            self.port = kwargs["port"]
-            self.disconnect()
-        if what == "arm":
-            return_val = await self.sdk.arm()
-        if what == "disarm":
-            return_val = await self.sdk.disarm()
-        if not ack:
-            await self.publish_parser(PublishType.ACK, f"{what} set to {kwargs if kwargs else 'Not applicable. No kwargs.'}")
-        else:
-            await self.publish_parser(PublishType.ERROR, f"Could not set {what}")
+            ack = await self.sdk.set_flight_mode(**kwargs)
+            if ack: self.flightmode = _FlightMode[f"{kwargs['flight_mode']}".upper()]
+        elif what == "rc_speed":
+            ack = await self.sdk.set_rc_speed(**kwargs)
+        elif what == "takeoff_height":
+            ack = await self.sdk.set_takeoff_height(**kwargs)
+        elif what == "ip_and_port":
+            ack = await self.sdk.set_ip_and_port(**kwargs)
+            if ack:
+                self.ip = kwargs["ip"]
+                self.port = kwargs["port"]
+                await self.disconnect()
+        elif what == "arm":
+            ack = await self.sdk.arm()
+            if ack: self.arm_state = DroneArmState.ARMED
+        elif what == "disarm":
+            ack = await self.sdk.disarm()
+            if ack: self.arm_state = DroneArmState.DISARMED
+        if not ack: await self.publish_parser(PublishType.ERROR, {"cmd": f"set {what} {kwargs}", "info": f"set returned {ack}.", "error": "setFailed"})
+        else: await self.publish_parser(PublishType.ACK, {"cmd": f"set {what} {kwargs}", "ack": f"{ack}"})
 
 # GET
     async def get(self, what: str):
-        if not await self._require_connected(f"get_{what}"): return
+        if not await self._require_state(DroneConState.CONNECTED, f"get {what}"): return
         return_val = None
         if what == "armed_status":
             return_val = await self.sdk.get_armed_status()
@@ -160,13 +153,13 @@ class SimDrone(DroneBase):
         if return_val != None:
             await self.publish_parser(PublishType.DATA, {f"{what}": return_val})
         else:
-            await self.publish_parser(PublishType.ERROR, {f"Could not get {what}"})
+            await self.publish_parser(PublishType.ERROR, {"error": "NotFound", "message": f"Could not get {what}"})
 
 # Other
     async def start_state_reciever(self):
         """Starts a background task that publishes every item the SDK's
         data_generator yields, until stop_state_reciever() cancels it."""
-        if not await self._require_connected("start_state_reciever"): return
+        if not await self._require_state(DroneConState.CONNECTED, f"start_state_reciever"): return
         self.data_gen_task = asyncio.create_task(self._consume_state_stream())
 
     async def stop_state_reciever(self):

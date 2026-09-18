@@ -80,8 +80,7 @@ class {name}(ProjectBase):
     async def main(self) -> None:
         self.debug_logger.log(LogLevel.INFO, "Session starting", drone_id=self.drone.drone_id)
         await self.drone.connect()
-        await self.drone.set("flightmode", flight_mode="rc")
-        await self.drone.disconnect()
+        await self.drone.set("flight_mode", flight_mode="rc")
         await self.controller.start_controller()
         print(f"Keyboard controller active for '{{self.drone.drone_id}}'. Press Ctrl+C to stop.")
         await asyncio.Event().wait()

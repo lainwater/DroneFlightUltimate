@@ -3,9 +3,9 @@ KeyboardController - Operate drone via keyboard.
 '''
 
 import asyncio
+from pynput import keyboard
 from core.controller.base import ControllerBase
 from core.controller.implementations.keyboard_controller.get_layout import current_keyboard_layout_as_json_path
-from pynput import keyboard
 
 class KeyboardController(ControllerBase):
     def __init__(self, drone_id, bus, layout):
@@ -14,6 +14,7 @@ class KeyboardController(ControllerBase):
               on_press=self.on_press,
               on_release=self.on_release
           )
+          self._held_axes = { "x": 0.0, "y": 0.0, "z": 0.0, "yaw": 0.0 }
     
     def load_config(self, layout: str) -> None:
         layoutpath = current_keyboard_layout_as_json_path(layout)
@@ -32,15 +33,50 @@ class KeyboardController(ControllerBase):
 
     def on_press(self, key):
         entry = self._resolve(key)
-        if entry and (entry["on_press"] is not None):
+        if not entry:
+            return
+        if entry.get("on_press") is not None:
             data = {"action": entry["on_press"]}
-            asyncio.run_coroutine_threadsafe(self.publish_parser(data), self.loop)
+        elif (entry.get("rc_axis") is not None) and (entry.get("rc_sign") is not None):
+            self._held_axes[entry["rc_axis"]] = entry["rc_sign"]
+            data = {"action": "rc", "args": self._compute_rc_vector()}
+        else:
+            return
+        future = asyncio.run_coroutine_threadsafe(self.publish_parser(data), self.loop)
+        future.add_done_callback(self._log_future_exception)
 
     def on_release(self, key):
         entry = self._resolve(key)
-        if entry and (entry["on_release"] is not None):
+        if not entry:
+            return
+        if entry.get("on_release") is not None:
             data = {"action": entry["on_release"]}
-            asyncio.run_coroutine_threadsafe(self.publish_parser(data), self.loop)
+        elif (entry.get("rc_axis") is not None) and (entry.get("rc_sign") is not None):
+            if self._held_axes[entry.get("rc_axis")] == entry.get("rc_sign"):
+                self._held_axes[entry.get("rc_axis")] = 0.0
+            data = { "action": "rc", "args": self._compute_rc_vector()}
+        else:
+            return
+        future = asyncio.run_coroutine_threadsafe(self.publish_parser(data), self.loop)
+        future.add_done_callback(self._log_future_exception)
+
+    def _compute_rc_vector(self) -> dict:
+        return {
+            "x": self._held_axes.get("x", 0.0),
+            "y": self._held_axes.get("y", 0.0),
+            "z": self._held_axes.get("z", 0.0),
+            "yaw": self._held_axes.get("yaw", 0.0),
+        }
+    
+    @staticmethod
+    def _log_future_exception(future) -> None:
+        """run_coroutine_threadsafe() futures swallow exceptions unless
+        someone checks .result()/.exception() on them - without this,
+        a bug anywhere downstream just looks like 'nothing happened'."""
+        exc = future.exception()
+        if exc is not None:
+            import traceback
+            traceback.print_exception(type(exc), exc, exc.__traceback__)
 
     def _resolve(self, key) -> dict | None:
         lookup_key = key.char if hasattr(key, "char") and key.char else getattr(key, "name", None)

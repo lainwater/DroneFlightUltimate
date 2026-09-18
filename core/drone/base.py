@@ -18,9 +18,6 @@ class DroneFlightState(Enum):
     """Enum for different drone states."""
     LANDED = "landed"
     INAIR = "inair"
-    HOVER = "hover"
-    MOVING = "moving"
-    EMERGENCY = "emergency"
 
 class DroneConState(Enum):
     """Enum for different drone connection states."""
@@ -28,6 +25,10 @@ class DroneConState(Enum):
     CONNECTING = "connecting"
     DISCONNECTING = "disconnecting"
     DISCONNECTED = "disconnected"
+
+class DroneArmState(Enum):
+    ARMED = "armed"
+    DISARMED = "disarmed"
 
 class PublishType(Enum):
     """Enum for different types of publish events."""
@@ -48,6 +49,7 @@ class DroneBase(ABC):
         self.drone_id = drone_id
         self.flight_state = DroneFlightState.LANDED
         self.con_state = DroneConState.DISCONNECTED
+        self.arm_state = DroneArmState.DISARMED
         self.init_kwargs = kwargs
         self.bus = bus
         self.fops = get_fileops()
@@ -77,13 +79,6 @@ class DroneBase(ABC):
                 await self.bus.publish(f"{topic.value}.{self.drone_id}", data)
     
     async def parse_bus_event(self, topic: str, data: dict) -> None:
-        """Parse the bus event and execute the corresponding command.
- 
-        Deliberately never lets an exception escape back through the
-        bus: a malformed or unsupported command (e.g. from a REPL
-        typo, or a keyboard mapping referencing an action this drone
-        doesn't support) shows up as an error.{drone_id} event instead
-        of crashing whichever controller published it."""
         action = data.get("action")
         if not action:
             await self.publish_parser(PublishType.ERROR, {
@@ -91,8 +86,7 @@ class DroneBase(ABC):
                 "message": f"No action specified in data: {data}",
             })
             return
- 
-        kwargs = {k: v for k, v in data["args"].items() if k != "action"}
+        kwargs = data.get("args", {})
         try:
             await self.execute(action, **kwargs)
         except Exception as exc:
@@ -103,33 +97,24 @@ class DroneBase(ABC):
             })
     
     async def execute(self, action: str, **kwargs) -> None:
-        """Execute the command corresponding to the action.
- 
-        Raises on failure (unknown action, unsupported/missing method,
-        wrong arguments). Callers going through parse_bus_event get
-        these turned into error events instead of a crash; callers
-        invoking execute() directly (tests, a future REPL) get a real
-        exception they can handle themselves."""
         if action not in self.command_map:
-            raise ValueError(f"'{action}' not in {self.drone_id}'s capabilities")
- 
+            await self.publish_parser(PublishType.ERROR, {"error": "NotCapable", "message": f"'{action}' not in {self.drone_id}'s capabilities"})
+            return
         entry = self.command_map[action]
         method_name = entry["method"]
         method = getattr(self, method_name, None)
         if method is None:
             raise AttributeError(f"'{action}' maps to '{method_name}', but {self.drone_id} has no such method")
         try:
-            if hasattr(entry, "args"):
+            if ("args" in entry) and (kwargs == {}):
                 kwargs = {k: v for k, v in entry["args"].items()}
-                await method(kwargs)
-            else:
-                await method(**kwargs)
+            await method(**kwargs)
         except TypeError as exc:
             raise TypeError(f"Bad arguments for action '{action}': {exc}") from exc
 
     async def get_state(self):
         """Get the current state of the drone."""
-        await self.publish_parser(PublishType.STATE, {"flight_state": self.flight_state.value, "con_state": self.con_state.value})
+        await self.publish_parser(PublishType.STATE, {"flight_state": self.flight_state.value, "con_state": self.con_state.value, "arm_state": self.arm_state.value})
     
     async def get_stats(self):
         """Get the current stats of the drone."""
@@ -139,19 +124,19 @@ class DroneBase(ABC):
         """Get the command map of the drone."""
         await self.publish_parser(PublishType.INFO, self.command_map)
     
-    async def _require_connected(self, action_name: str) -> bool:
-        """Shared precondition check for any command that needs a live
-        connection. Returns True if connected; otherwise publishes a
-        generic error naming the ACTUAL action that was blocked (not a
-        copy-pasted message from some other method) and returns False,
-        so callers can write:
-            if not await self._require_connected("takeoff"):
-                return
-        """
-        if self.con_state != DroneConState.CONNECTED:
+    async def _require_state(self, state: DroneArmState | DroneConState | DroneFlightState, action_name: str) -> bool:
+        if type(state) == DroneArmState:
+            var = self.arm_state
+        elif type(state) == DroneConState:
+            var = self.con_state
+        elif type(state) == DroneFlightState:
+            var = self.flight_state
+        else:
+            raise TypeError(f"{state}'s type is not valid for this _require_state. Needs to be DroneArmState, DroneConState or DroneFlightState.")
+        if var != state:
             await self.publish_parser(PublishType.ERROR, {
-                "error": "NotConnected",
-                "message": f"'{action_name}' called before connect().",
+                "error": f"Not {state.value}",
+                "message": f"'{action_name}' called before {self.drone_id} was {state.value}.",
             })
             return False
         return True

@@ -1,0 +1,6 @@
+[logging]
+level = "INFO"
+
+[keyboard]
+# Leave empty for automatic layout detection, or set e.g. "qwertz" to override.
+layout = "qwertz"

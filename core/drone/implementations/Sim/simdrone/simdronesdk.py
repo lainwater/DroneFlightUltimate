@@ -404,37 +404,17 @@ class SimDroneSDK:
             return False
         
     async def rc(self, x: int, y: int, z: int, yaw: int) -> bool:
-        """# rc
-        rc _summary_
-        
-        ### Args:
-            - x (int) -- Only -1, 0 or 1 allowed, set speed with self._set_rc_speed(float)
-            - y (int) -- Only -1, 0 or 1 allowed, set speed with self._set_rc_speed(float)
-            - z (int) -- Only -1, 0 or 1 allowed, set speed with self._set_rc_speed(float)
-            - yaw (int) -- Only -1, 0 or 1 allowed, set speed with self._set_rc_speed(float)
-        
-        ### Returns:
-            - bool -- True if it succeded and all the state requirments are met, else False
-        """
         try:
-            if not self._is_connected:
-                return False
-            if not self._is_ready_to_recv:
-                return False
-            if not self._is_armed:
-                return False
-            if self._is_landed:
-                return False
-            if not self._is_in_air:
-                return False
-            if self._flight_mode == _FlightMode.RC:
-                pass
-            else:
-                return False
-            x = self._normalize_rc(x)
-            y = self._normalize_rc(y)
-            z = self._normalize_rc(z)
-            yaw = self._normalize_rc(yaw)
+            if not self._is_connected: return False
+            if not self._is_ready_to_recv: return False
+            if not self._is_armed: return False
+            if self._is_landed: return False
+            if not self._is_in_air: return False
+            if self._flight_mode != _FlightMode.RC: return False
+            # x = self._normalize_rc(x)
+            # y = self._normalize_rc(y)
+            # z = self._normalize_rc(z)
+            # yaw = self._normalize_rc(yaw)
             # x / l-r dir
             self._att.roll = x * _TILT_DEGREES
             self._pos.x += x * self._rc_speed
@@ -472,11 +452,11 @@ class SimDroneSDK:
         self._is_state_gen_running = False
         return
 
-    def _normalize_rc(value):
-        if value > 0:
-            return 1
+    # def _normalize_rc(value):
+    #     if value > 0:
+    #         return 1
 
-        if value < 0:
-            return -1
+    #     if value < 0:
+    #         return -1
 
-        return 0
+    #     return 0
