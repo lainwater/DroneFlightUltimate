@@ -272,12 +272,17 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
 
 ## Important
 ### Features
-- [ ] add video/stream output (to web, vr mode (2x), to tkinter, to cv2)
-- [ ] add video for simdrone and tello (start/stop stream)
-- [ ] add example projects:
-    - [ ] tello repl,
+- [ ] add video/stream output
+    -> [ ] to web server
+    -> [ ] vr mode (jsut the screen twice for a cardbox vr or similar)
+    -> [ ] idk what else output cv2?
+- [ ] implement video output for(start/stop stream)
+    -> [ ] simdrone
+    -> [ ] tello
+- [ ] add7edit example projects:
+    - [ ] ~~tello repl,~~
     - [ ] simdrone keyboard,
-    - [ ] simdrone repl,
+    - [ ] ~~simdrone repl,~~
     - [ ] simdrone t8l,
     - [ ] multi tello/simdrone with keyboard,
     - [ ] all with video support
