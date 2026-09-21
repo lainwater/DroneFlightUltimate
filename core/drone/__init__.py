@@ -12,10 +12,10 @@ def get_drone(
     """Create a new drone instance using the default implementation."""
     match dronetype:
         case DroneType.SIM_SIMDRONE:
-            from .implementations.Sim.simdrone.simdrone import SimDrone
+            from core.drone.implementations.Sim.simdrone.simdrone import SimDrone
             return SimDrone(drone_type=dronetype, drone_id=drone_id, **kwargs)
         case DroneType.DJI_TELLO:
-            from .implementations.DJI.tello import TelloDrone
+            from core.drone.implementations.DJI.tello import TelloDrone
             return TelloDrone(drone_type=dronetype,drone_id=drone_id, **kwargs)
         case _:
             raise ValueError(f"Unknown drone type: {dronetype}")

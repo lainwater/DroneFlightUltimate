@@ -32,7 +32,7 @@ def resolve_project_name() -> str:
             config = tomllib.load(f)
         return config["active"]["project"]
     except KeyError:
-        return "new_project"
+        return "simple_tello"
 
 
 def main() -> None:

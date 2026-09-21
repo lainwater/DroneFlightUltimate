@@ -15,13 +15,11 @@
 
 ### To implement:
 
-- t8l
 - tello
 - video/stream output (to web, vr mode (2x), to tkinter, to cv2)
 - video for simdrone (start/stop stream)
 - missions/premade flight patterns
-- write new tests for everything
-- bus recorder/logging to create new log files with datetime
+- bus recorder/logging to create new log files with datetime instead of appending
 
 ---
 
@@ -33,10 +31,13 @@
 
 ### Future:
 
+- write new tests for everything
 - examples
 - desktop app
 - web ui
 - phone app
+- linux fops
+- more controllers
 
 ---
 

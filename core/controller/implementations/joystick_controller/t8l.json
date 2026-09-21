@@ -1,5 +1,5 @@
 {
-    "deadzone": 0.1,
+    "deadzone": 0.15,
 
     "axes": {
         "0": {
@@ -30,8 +30,8 @@
             "type": "switch",
             "name": "SE",
             "positions": {
-                "negative": null,
-                "positive": "emergency"
+                "negative": "set_arm",
+                "positive": null
             }
         },
 
@@ -39,8 +39,8 @@
             "type": "switch",
             "name": "SA",
             "positions": {
-                "negative": "arm",
-                "positive": "disarm"
+                "negative": "get_position",
+                "positive": null
             }
         },
 

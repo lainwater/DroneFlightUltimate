@@ -1,0 +1,55 @@
+{
+    "connect":                { "method": "connect" },
+    "connect_via_wifi":       { "method": "connect_via_wifi" },
+    "disconnect":             { "method": "disconnect" },
+    "start_state_reciever":   { "method": "start_state_reciever" },
+    "stop_state_reciever":    { "method": "stop_state_reciever" },
+
+    "set_arm":                { "method": "set", "args": { "what": "arm" } },
+    "set_disarm":             { "method": "set", "args": { "what": "disarm" } },
+    "set_speed":              { "method": "set", "args": { "what": "speed", "speed": 50 } },
+    "set_own_wifi":           { "method": "set", "args": { "what": "own_wifi" } },
+    "set_ports":              { "method": "set", "args": { "what": "ports", "state_port": 8890, "video_port": 11111 } },
+    "set_mission_pad_on":     { "method": "set", "args": { "what": "mission_pad_detection", "enabled": true } },
+    "set_mission_pad_off":    { "method": "set", "args": { "what": "mission_pad_detection", "enabled": false } },
+    "set_mission_pad_direction": { "method": "set", "args": { "what": "mission_pad_direction", "direction": 0 } },
+    "set_camera_forward":     { "method": "set", "args": { "what": "camera_source", "downward": false } },
+    "set_camera_downward":    { "method": "set", "args": { "what": "camera_source", "downward": true } },
+    "set_video_fps":          { "method": "set", "args": { "what": "video_fps", "fps": "middle" } },
+    "set_video_bitrate":      { "method": "set", "args": { "what": "video_bitrate", "bitrate": 0 } },
+
+    "get_battery":            { "method": "get", "args": { "what": "battery" } },
+    "get_position":           { "method": "get", "args": { "what": "position" } },
+    "get_speed":              { "method": "get", "args": { "what": "speed" } },
+    "get_flight_time":        { "method": "get", "args": { "what": "flight_time" } },
+    "get_wifi_snr":           { "method": "get", "args": { "what": "wifi_snr" } },
+    "get_sdk_version":        { "method": "get", "args": { "what": "sdk_version" } },
+    "get_serial_number":      { "method": "get", "args": { "what": "serial_number" } },
+    "get_height":             { "method": "get", "args": { "what": "height" } },
+    "get_temperature":        { "method": "get", "args": { "what": "temperature" } },
+    "get_attitude":           { "method": "get", "args": { "what": "attitude" } },
+    "get_barometer":          { "method": "get", "args": { "what": "barometer" } },
+    "get_acceleration":       { "method": "get", "args": { "what": "acceleration" } },
+    "get_tof":                { "method": "get", "args": { "what": "tof" } },
+
+    "get_state":              { "method": "get_state" },
+    "get_stats":              { "method": "get_stats" },
+    "get_command_map":        { "method": "get_command_map" },
+
+    "land":                   { "method": "land" },
+    "takeoff":                { "method": "takeoff" },
+    "emergency":              { "method": "emergency" },
+
+    "steps_move_up":          { "method": "steps_move", "args": { "direction": "up", "distance": 30 } },
+    "steps_move_down":        { "method": "steps_move", "args": { "direction": "down", "distance": 30 } },
+    "steps_move_forward":     { "method": "steps_move", "args": { "direction": "forward", "distance": 30 } },
+    "steps_move_backward":    { "method": "steps_move", "args": { "direction": "backward", "distance": 30 } },
+    "steps_move_left":        { "method": "steps_move", "args": { "direction": "left", "distance": 30 } },
+    "steps_move_right":       { "method": "steps_move", "args": { "direction": "right", "distance": 30 } },
+
+    "rc":                     { "method": "rc", "args": { "x": 0, "y": 0, "z": 0, "yaw": 0 } },
+    "goto":                   { "method": "goto", "args": { "x": 0, "y": 0, "z": 0, "speed": 50 } },
+
+    "start_video":            { "method": "start_video" },
+    "stop_video":             { "method": "stop_video" }
+}

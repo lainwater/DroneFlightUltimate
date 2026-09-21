@@ -1,25 +1,20 @@
 {
-  "c":      { "on_press": "connect", "on_release": null },
-  "v":      { "on_press": "disconnect", "on_release": null },
-  "b":      { "on_press": "start_state_reciever", "on_release": null },
-  "n":      { "on_press": "stop_state_reciever", "on_release": null },
+  "c":     { "on_press": "connect" },
+  "v":     { "on_press": "set_arm" },
+  "b":     { "on_press": "set_disarm" },
+  "y":     { "on_press": "get_position" },
+  "u":     { "on_press": "get_attitude" },
 
-  "j":      { "on_press": "arm", "on_release": null },
-  "k":      { "on_press": "disarm", "on_release": null },
-  "o":      { "on_press": "get_battery", "on_release": null },
-  "p":      { "on_press": "get_ip_and_port", "on_release": null },
+  "t":     { "on_press": "takeoff" },
+  "l":     { "on_press": "land" },
+  "space": { "on_press": "emergency" },
 
-  "l":      { "on_press": "land", "on_release": null },
-  "t":      { "on_press": "takeoff", "on_release": null },
-  "space":  { "on_press": "emergency", "on_release": null },
-
-  "w":      { "on_press": "up", "on_release": "stop_up" },
-  "s":      { "on_press": "down", "on_release": "stop_down" },
-  "a":      { "on_press": "yaw_left", "on_release": "stop_yaw_left" },
-  "d":      { "on_press": "yaw_right", "on_release": "stop_yaw_right" },
-  "up":     { "on_press": "pitch_forward", "on_release": "stop_pitch_forward" },
-  "down":   { "on_press": "pitch_backward", "on_release": "stop_pitch_backward" },
-  "left":   { "on_press": "roll_left", "on_release": "stop_roll_left" },
-  "right":  { "on_press": "roll_right", "on_release": "stop_roll_right" }
-
+  "w":     { "rc_axis": "z", "rc_sign": 1 },
+  "s":     { "rc_axis": "z", "rc_sign": -1 },
+  "a":     { "rc_axis": "yaw", "rc_sign": -1 },
+  "d":     { "rc_axis": "yaw", "rc_sign": 1 },
+  "up":    { "rc_axis": "y", "rc_sign": 1 },
+  "down":  { "rc_axis": "y", "rc_sign": -1 },
+  "left":  { "rc_axis": "x", "rc_sign": -1 },
+  "right": { "rc_axis": "x", "rc_sign": 1 }
 }

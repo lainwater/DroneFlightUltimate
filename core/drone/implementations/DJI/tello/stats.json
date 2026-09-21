@@ -1,0 +1,12 @@
+{
+    "Name": "DJI/Ryze Tello",
+    "Version": "SDK 2.0",
+    "Description": "Real DJI/Ryze Tello drone controlled via UDP per the official Tello SDK 2.0.",
+    "Stats": {
+        "MaxSpeed": {"value": "8", "unit": "m/s"},
+        "MaxAltitude": {"value": "30", "unit": "m"},
+        "BatteryLife": {"value": "13", "unit": "min"},
+        "PayloadCapacity": {"value": "0", "unit": "kg"},
+        "MaxRange": {"value": "100", "unit": "m"}
+    }
+}

@@ -28,7 +28,7 @@ class new_project(ProjectBase):
             port=self.drone_config["port"]
         )
 
-        layout = self.app_config.get("keyboard", {}).get("layout") or None
+        layout = self.app_config.get("controller", {}).get("layout") or None
         self.controller = get_controller(
             ControllerType.KEYBOARD_CONTROLLER,
             drone_id=self.drone_config["drone_id"],

@@ -1,8 +1,0 @@
-[logging]
-level = "INFO"
- 
-[keyboard]
-# Leer lassen = automatische Layout-Erkennung über get_keyboard_layout().
-# Explizit setzen (z.B. "qwertz") um die Erkennung zu überschreiben.
-layout = ""
- 

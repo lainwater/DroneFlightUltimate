@@ -52,7 +52,7 @@ class SimDroneSDK:
         self._is_landed: bool = True
         self._flight_mode: _FlightMode = _FlightMode.RC
         
-        self._rc_speed: float = 10.0
+        self._rc_speed: float = 1.0
         self._takeoff_height: float = 50.0
         
         self._pos: position = position(x = 0.0, y = 0.0, z = 0.0, vx = 0.0, vy = 0.0, vz = 0.0, timestamp=None)
