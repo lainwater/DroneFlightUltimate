@@ -1,5 +1,0 @@
-[logging]
-level = "INFO"
-
-[controller]
-layout = "t8l"

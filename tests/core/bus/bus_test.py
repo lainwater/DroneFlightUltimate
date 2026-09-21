@@ -2,10 +2,6 @@
 Tests for core.bus.
 
 Run with: pytest tests/core/bus/bus_test.py -v
-
-Note: no pytest-asyncio dependency is used here on purpose, to keep the
-dev dependency list minimal. Each test simply wraps its async logic in
-asyncio.run(...).
 """
 
 import asyncio

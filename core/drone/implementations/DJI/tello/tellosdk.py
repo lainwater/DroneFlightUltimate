@@ -73,9 +73,7 @@ _POSITION_DELTA = {
     "up": ("z", 1),
     "down": ("z", -1),
 }
-# Rough guess: Tello's rc units (-100..100) to cm/s. Not calibrated
-# against real hardware - fine for a live display, not for anything
-# precision-critical.
+
 _RC_CM_PER_SECOND_PER_UNIT = 2.0
 _RC_TICK_SECONDS = 0.1
 
@@ -93,8 +91,8 @@ class TelloSDK:
         self._state_queue: "asyncio.Queue[dict]" = asyncio.Queue()
         self._send_lock = asyncio.Lock()
 
-        # Dead-reckoned position estimate - x/y have NO real sensor on
-        # a bare Tello (no mission pads), so this is our only option.
+        # position estimate - x/y have NO real sensor on
+        # a bare Tello (no mission pads)
         # z gets overwritten with the real 'h' field whenever the
         # state stream is running (see TelloDrone._consume_state_stream) -
         # only falls back to dead-reckoning for z when it isn't.
@@ -112,8 +110,6 @@ class TelloSDK:
             self.position[axis] += sign * distance
 
     def apply_goto_delta(self, x: float, y: float, z: float) -> None:
-        # NOTE: assumes 'go x y z speed' is relative to current
-        # position - verify against the SDK doc if this matters to you.
         self.position["x"] += x
         self.position["y"] += y
         self.position["z"] += z
@@ -121,9 +117,7 @@ class TelloSDK:
     def track_rc_velocity(self, x: float, y: float, z: float, yaw: float) -> None:
         """Best-effort dead-reckoning while rc is held - starts a
         background integrator that keeps updating position for as
-        long as velocity stays non-zero, same principle as
-        SimDroneSDK's continuous-motion simulation, just an estimate
-        instead of ground truth here."""
+        long as velocity stays non-zero"""
         self._rc_velocity = {"x": x, "y": y, "z": z}
         if self._position_task is None or self._position_task.done():
             self._position_task = asyncio.create_task(self._integrate_position())

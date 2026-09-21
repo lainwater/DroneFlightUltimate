@@ -15,7 +15,7 @@ def get_drone(
             from core.drone.implementations.Sim.simdrone.simdrone import SimDrone
             return SimDrone(drone_type=dronetype, drone_id=drone_id, **kwargs)
         case DroneType.DJI_TELLO:
-            from core.drone.implementations.DJI.tello import TelloDrone
+            from core.drone.implementations.DJI.tello.tello import TelloDrone
             return TelloDrone(drone_type=dronetype,drone_id=drone_id, **kwargs)
         case _:
             raise ValueError(f"Unknown drone type: {dronetype}")

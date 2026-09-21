@@ -13,13 +13,13 @@ class LogLevel(IntEnum):
     ERROR = 4
     
 class LoggerBase(ABC):
-    """Each platform implementation must fulfill this interface."""
+    """Each implementation must fulfill this interface."""
     
     def __init__(self, min_level: LogLevel):
         self.min_level = min_level
     
     def log(self, level: LogLevel, message:str, **context) -> None:
-        '''Log a message if the level is above the minimum level.'''
+        """Log a message if the level is above the minimum level."""
         if level >= self.min_level:
             message = self.format_message(level, message, **context)
             self._write(message)
@@ -31,5 +31,5 @@ class LoggerBase(ABC):
     
     @abstractmethod
     def _write(self, message) -> None:
-        '''Write the log message to the appropriate destination.'''
+        """Write the log message to the appropriate destination."""
         raise NotImplementedError

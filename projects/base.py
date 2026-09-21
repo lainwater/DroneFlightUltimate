@@ -2,16 +2,15 @@
 ProjectBase - shared lifecycle and wiring for every DroneFlightUltimate
 example/project.
 
-Config loading, bus, loggers, and the bus recorder are all set up once
-here, so a concrete project only has to implement three things:
-    setup()   - wire up drone/controller/etc (called once)
-    main()    - the actual run loop
-    end_run() - cleanup (always called by run(), no matter how main()
-                ended - normal return, exception, or Ctrl+C)
+Config: config/defaults.toml + config/mydrone.json
+
+Logs: bus_logs/flight_<timestamp>.jsonl, a fresh file every run so old
+sessions are never overwritten.
 """
 
 import asyncio
 from abc import ABC, abstractmethod
+from datetime import datetime
 from pathlib import Path
 
 from core.bus import get_bus
@@ -29,25 +28,21 @@ class ProjectBase(ABC):
         self.drone_config = self.load_drone_config()
 
         self.bus = get_bus()
-        self.debug_logger = get_logger(
-            LoggerType.RECORD,
-            min_level=LogLevel[self.app_config.get("logging", {}).get("level", "INFO")],
-            log_path=self.root_path / "logs" / "debug_logs" / "session.jsonl",
-        )
         self.live_logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=LogLevel.INFO)
-        self.recorder = get_recorder(self.root_path / "logs" / "bus_logs" / "flight.jsonl")
+
+        session_stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self.recorder = get_recorder(
+            self.root_path / "logs" / "bus_logs" / f"flight_{session_stamp}.jsonl"
+        )
 
     def load_app_config(self) -> dict:
-        """Load this project's app-level config (logging level, keyboard
-        layout override, ...)."""
-        path = self.root_path / "config" / "app_config" / "defaults.toml"
-        return self.fops.read_toml(path)
+        """Load this project's app-level config (logging level, keyboard/
+        joystick layout override, ...)."""
+        return self.fops.read_toml(self.root_path / "config" / "defaults.toml")
 
     def load_drone_config(self) -> dict:
-        """Load this project's drone config (drone_type, drone_id, ip, ...).
-        This is JSON, not TOML - read_json, not read_toml."""
-        path = self.root_path / "config" / "drone_config" / "mydrone.json"
-        return self.fops.read_json(path)
+        """Load this project's drone config (drone_type, drone_id, ip, ...)."""
+        return self.fops.read_json(self.root_path / "config" / "mydrone.json")
 
     async def run(self) -> None:
         """Run this project's full lifecycle. Call this once from an
@@ -77,6 +72,6 @@ class ProjectBase(ABC):
 
     @abstractmethod
     async def end_run(self) -> None:
-        """Clean up: detach recorder/drone/controller, write a final
-        log entry. Always called by run(), even on error or interrupt."""
+        """Clean up: detach recorder/drone/controller. Always called
+        by run(), even on error or interrupt."""
         raise NotImplementedError

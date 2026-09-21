@@ -1,5 +1,5 @@
 '''
-KeyboardController - Operate drone via keyboard.
+KeyboardController - Controller implementation for keyboard control unsing pynput.keyboard.
 '''
 
 import asyncio
@@ -11,27 +11,28 @@ class KeyboardController(ControllerBase):
     def __init__(self, drone_id, bus, layout):
           super().__init__(drone_id, bus, layout)
           self.kb_listener = keyboard.Listener(
-              on_press=self.on_press,
-              on_release=self.on_release
+              on_press=self._on_press,
+              on_release=self._on_release
           )
           self._held_axes = { "x": 0.0, "y": 0.0, "z": 0.0, "yaw": 0.0 }
+
+    async def start_controller(self):
+            self.loop = asyncio.get_running_loop()
+            self.kb_listener.start()
+        
+    async def stop_controller(self):
+            self.kb_listener.stop()
     
-    def load_config(self, layout: str) -> None:
+    def _load_layout(self, layout: str) -> None:
         layoutpath = current_keyboard_layout_as_json_path(layout)
         self.config = self.fops.read_json(layoutpath)
     
-    async def publish_parser(self, data: dict) -> None:
+    async def _publish_parser(self, data: dict) -> None:
         if self.bus:
             await self.bus.publish(f"cmd.{self.drone_id}", data)
-    
-    async def start_controller(self):
-        self.loop = asyncio.get_running_loop()
-        self.kb_listener.start()
-    
-    async def stop_controller(self):
-        self.kb_listener.stop()
 
-    def on_press(self, key):
+    def _on_press(self, key):
+        """Method done on 'on_press' event. Publishes action to bus specified in layout set at creation."""
         entry = self._resolve(key)
         if not entry:
             return
@@ -42,10 +43,11 @@ class KeyboardController(ControllerBase):
             data = {"action": "rc", "args": self._compute_rc_vector()}
         else:
             return
-        future = asyncio.run_coroutine_threadsafe(self.publish_parser(data), self.loop)
+        future = asyncio.run_coroutine_threadsafe(self._publish_parser(data), self.loop)
         future.add_done_callback(self._log_future_exception)
 
-    def on_release(self, key):
+    def _on_release(self, key):
+        """Method done on 'on_release' event. Publishes action to bus specified in layout set at creation."""
         entry = self._resolve(key)
         if not entry:
             return
@@ -57,7 +59,7 @@ class KeyboardController(ControllerBase):
             data = { "action": "rc", "args": self._compute_rc_vector()}
         else:
             return
-        future = asyncio.run_coroutine_threadsafe(self.publish_parser(data), self.loop)
+        future = asyncio.run_coroutine_threadsafe(self._publish_parser(data), self.loop)
         future.add_done_callback(self._log_future_exception)
 
     def _compute_rc_vector(self) -> dict:
@@ -79,5 +81,6 @@ class KeyboardController(ControllerBase):
             traceback.print_exception(type(exc), exc, exc.__traceback__)
 
     def _resolve(self, key) -> dict | None:
+        """Gets layout sub-dictionary from pressed char/key-name."""
         lookup_key = key.char if hasattr(key, "char") and key.char else getattr(key, "name", None)
         return self.config.get(lookup_key)

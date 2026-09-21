@@ -2,6 +2,7 @@
 Tests for core.fileops.
 
 Run with: pytest tests/core/fileops/fileops_test.py -v
+Note: Missing TOML tests.
 """
 
 from pathlib import Path

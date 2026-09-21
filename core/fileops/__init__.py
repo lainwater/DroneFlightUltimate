@@ -4,9 +4,6 @@ public API of core.fileops.
 The rest of the app always does:
     from core.fileops import get_fileops
     fops = get_fileops()
- 
-...and never a direct import like
-    from core.fileops.implementations.win_64x82 import WinFileOps
 """
  
 import platform

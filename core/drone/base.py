@@ -74,11 +74,12 @@ class DroneBase(ABC):
         self.bus.unsubscribe(f"cmd.{self.drone_id}", self.parse_bus_event)
     
     async def publish_parser(self, topic: PublishType, data: dict) -> None:
-            """Publish the drone's stats and command map to the bus."""
-            if self.bus:
-                await self.bus.publish(f"{topic.value}.{self.drone_id}", data)
+        """Publish the drone's stats and command map to the bus."""
+        if self.bus:
+            await self.bus.publish(f"{topic.value}.{self.drone_id}", data)
     
     async def parse_bus_event(self, topic: str, data: dict) -> None:
+        """Parse an event from the bus and run execute on the action with args"""
         action = data.get("action")
         if not action:
             await self.publish_parser(PublishType.ERROR, {
@@ -97,6 +98,7 @@ class DroneBase(ABC):
             })
     
     async def execute(self, action: str, **kwargs) -> None:
+        """Execute on the action with args"""
         if action not in self.command_map:
             await self.publish_parser(PublishType.ERROR, {"error": "NotCapable", "message": f"'{action}' not in {self.drone_id}'s capabilities"})
             return
@@ -125,6 +127,9 @@ class DroneBase(ABC):
         await self.publish_parser(PublishType.INFO, self.command_map)
     
     async def _require_state(self, state: DroneArmState | DroneConState | DroneFlightState, action_name: str) -> bool:
+        """Utility to easy require an state before doing an action.
+        Returns false if input state is the current state
+        and true if input state is the current state"""
         if type(state) == DroneArmState:
             var = self.arm_state
         elif type(state) == DroneConState:

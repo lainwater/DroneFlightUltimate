@@ -1,13 +1,6 @@
 """
-SimpleBus - the default, in-process, asyncio-based implementation of
-BusBase.
-
-"In-process" is the key limitation to keep in mind: this bus only works
-within a single Python process/asyncio event loop. If DroneFlightUltimate
-ever needs to control drones from multiple machines, a different
-implementation (e.g. one backed by a message queue over the network)
-could be added here, alongside SimpleBus, as long as it also satisfies
-BusBase - nothing else in the app would need to change.
+SimpleBus - the default, asyncio-based implementation of
+BusBase running in a single process/cooroutine.
 """
 
 import asyncio
@@ -40,10 +33,7 @@ class SimpleBus(BusBase):
 
     @staticmethod
     async def _invoke(callback: Callback, topic: str, data: Any) -> None:
-        # Support both sync callbacks (e.g. a simple lambda appending to
-        # a list) and async callbacks (e.g. a coroutine that awaits I/O)
-        # with the same subscribe() call, so subscribers don't need to
-        # care which kind they are writing.
+        """Check if async or sync and awaits if it is async."""
         result = callback(topic, data)
         if inspect.isawaitable(result):
             await result

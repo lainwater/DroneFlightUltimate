@@ -11,19 +11,19 @@
         "1": {
             "type": "rc",
             "axis": "y",
-            "invert": true
+            "invert": false
         },
 
         "2": {
             "type": "rc",
-            "axis": "yaw",
+            "axis": "z",
             "invert": false
         },
 
         "3": {
             "type": "rc",
-            "axis": "z",
-            "invert": true
+            "axis": "yaw",
+            "invert": false
         },
 
         "4": {
@@ -48,9 +48,9 @@
             "type": "switch",
             "name": "SC",
             "positions": {
-                "up": "takeoff",
+                "up": "land",
                 "middle": null,
-                "down": "land"
+                "down": "takeoff"
             }
         },
 
@@ -58,9 +58,9 @@
             "type": "switch",
             "name": "SB",
             "positions": {
-                "up": "connect",
+                "up": "disconnect",
                 "middle": null,
-                "down": "disconnect"
+                "down": "connect"
             }
         }
     }

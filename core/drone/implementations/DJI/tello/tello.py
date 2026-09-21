@@ -2,9 +2,6 @@
 TelloDrone - Real DJI/Ryze Tello, controlled via UDP per the Tello
 SDK 2.0.
 
-A few things that differ from SimDrone on purpose, because the real
-hardware works differently:
-
 - arm()/disarm() send NO command to the drone - the real Tello has no
   arming concept at all, it goes straight from "connected" to
   "takeoff". This is kept as a pure software-level safety gate so the
@@ -247,8 +244,7 @@ class TelloDrone(DroneBase):
         value = _parse_state_string(raw) if what == "attitude" else _coerce_number(raw)
         await self.publish_parser(PublishType.DATA, {what: value})
 
-# Video (streamon/streamoff work now; decoding the H264 frames on
-# video_port is core/video's job later - see get_frame())
+
     async def start_video(self):
         if not await self._require_state(DroneConState.CONNECTED, "start_video"): return
         ack = await self.sdk.send_and_receive("streamon", timeout=10)

@@ -1,5 +1,7 @@
 """
 FileOpsBase — Interface for platform-independent file system operations.
+
+Wraps directiory stuff, json read&write, toml read&write and appending lines to a file.
 """
 
 from abc import ABC, abstractmethod

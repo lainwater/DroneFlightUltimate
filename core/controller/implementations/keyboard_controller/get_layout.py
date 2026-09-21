@@ -13,10 +13,10 @@ def current_keyboard_layout_as_json_path(_layout: str) -> str:
     if candidate.exists():
         return candidate
  
-    fallback = Path(__file__).parent / "qwerty.json"
+    fallback = Path(__file__).parent / "qwertz.json"
     print(
         f"[keyboard] No mapping file for detected layout '{layout_type}' "
-        f"(lang_code={layout['lang_code']!r}) - falling back to qwerty.json. "
+        f"(lang_code={layout['lang_code']!r}) - falling back to qwertz.json. "
         f"Add a '{layout_type}.json' next to this file to override, or set "
         f"'layout' explicitly in this project's app_config/defaults.toml."
     )
@@ -25,12 +25,10 @@ def current_keyboard_layout_as_json_path(_layout: str) -> str:
         
 
 def get_keyboard_layout() -> dict:
+    """Get keyboard layout. this is only a fallback incase none was provided. This is unreliable"""
     lang_code = "Unknown"
-    # qwertz_locales = ["de-at", "de-de", "de-ch", "de", "at", "ch", "0x0c07", "0x0407"]
 
-    # -------------------------------------------------------------
-    # 1. LINUX DETECTION
-    # -------------------------------------------------------------
+    # LINUX DETECTION
     if sys.platform.startswith("linux"):
         # Try X11 / setxkbmap first
         try:
@@ -60,9 +58,7 @@ def get_keyboard_layout() -> dict:
                 # Last resort fallback to LANG environment variable
                 lang_code = os.environ.get("LANG", "Unknown").split(".")[0].replace("_", "-")
 
-    # -------------------------------------------------------------
-    # 2. WINDOWS DETECTION
-    # -------------------------------------------------------------
+    # WINDOWS DETECTION
     elif sys.platform == "win32":
         import ctypes
         user32 = ctypes.windll.user32
@@ -94,9 +90,7 @@ def get_keyboard_layout() -> dict:
 
         lang_code = windows_locales.get(lang_id, f"0x{lang_id:04x}")
 
-    # -------------------------------------------------------------
-    # 3. EVALUATE QWERTZ VS QWERTY
-    # -------------------------------------------------------------
+    # EVALUATE QWERTZ VS QWERTY
     base = lang_code.lower().split("-")[0].split("(")[0]
     layout_type = "QWERTZ" if base in {"de", "at", "ch"} else "QWERTY"
 

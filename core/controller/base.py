@@ -12,20 +12,26 @@ class ControllerBase(ABC):
         self.drone_id = drone_id
         self.layout = layout
         self.bus = bus
-        self.load_config(layout)
+        self._load_layout(layout)
+
+        self.is_running = False
     
     @abstractmethod
-    def load_config(self, layout:str = None):
+    def _load_layout(self, layout:str = None):
+        """Load the layout."""
         raise NotImplementedError
     
     @abstractmethod
-    async def publish_parser(self, data: dict) -> None:
+    async def _publish_parser(self, data: dict) -> None:
+        """Parses controller input to bus publish"""
         raise NotImplementedError
     
     @abstractmethod
     async def start_controller(self) -> None:
+        """Start the controller."""
         raise NotImplementedError
 
     @abstractmethod
     async def stop_controller(self) -> None:
+        """Stop the controller"""
         raise NotImplementedError
