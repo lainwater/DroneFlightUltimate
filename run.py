@@ -2,44 +2,52 @@
 run.py - single entry point for DroneFlightUltimate.
 
 Usage:
-    python run.py
-        Runs whichever project app/app_conf/active_project.toml points at.
+    python run.py create <project_name>    (shorthand c)
+        Creates a new project dir scaffolded with provided name, defaults to "new_project" if none provided.
 
-    python run.py <project_name>
-        Runs that project explicitly, overriding active_project.toml.
-        If it doesn't exist yet under projects/examples/, it gets
-        scaffolded (see projects.get_project()).
+    python run.py run <project_name>    (shorthand: r)
+        Run a project (will create it if it doesn't exist.)
 """
 
 import asyncio
 import sys
-import tomllib
 from pathlib import Path
 
 from projects import get_project
 
 ROOT = Path(__file__).resolve().parent
-ACTIVE_PROJECT_PATH = ROOT / "app" / "app_conf" / "active_project.toml"
 
+ERROR_MSG = """You did something wrong calling run.py
+    Usage:
 
-def resolve_project_name() -> str:
-    """A CLI argument always wins. Otherwise fall back to whatever
-    active_project.toml points at."""
-    if len(sys.argv) > 1:
-        return sys.argv[1]
-    try:
-        with open(ACTIVE_PROJECT_PATH, "rb") as f:
-            config = tomllib.load(f)
-        return config["active"]["project"]
-    except KeyError:
-        return "new_project"
+        `python run.py create <project_name>`    (shorthand c)
+            Creates a new project dir scaffolded with provided name, defaults to "new_project" if none provided.
+
+        `python run.py run <project_name>`    (shorthand: r)
+            Run a project (will create it if it doesn't exist.)
+"""
 
 
 def main() -> None:
-    name = resolve_project_name()
-    print(f"Starting project '{name}'...")
-    project = get_project(name)
-    asyncio.run(project.run())
+    args = sys.argv
+    if len(args) < 2 or len(args) > 3:
+        raise SyntaxError(ERROR_MSG)
+
+    name = "new_project"
+    if len(args) == 3:
+        name = args[2]
+
+    if args[1] == "create" or args[1] == "c":
+        print(f"Starting project '{name}'...")
+        project = get_project(name)
+        return
+    if args[1] == "run" or args[1] == "r":
+        print(f"Starting project '{name}'...")
+        project = get_project(name)
+        asyncio.run(project.run())
+
+    if args[1] != "run" or args[1] != "create":
+        raise SyntaxError(ERROR_MSG)
 
 
 if __name__ == "__main__":

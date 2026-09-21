@@ -214,13 +214,13 @@
     -> run `pip install -e .` in your env
 
 ## Make a project
-->  create a new project by running python `run.py <project_name>`
-    -> Press `CTRL + C` to cancel the scafhold project.
-    -> Naviaget to  `projects/<project_name>/commander/main.py`
+->  create a new project by running python `run.py create <project_name>`
+    -> Navigate to `projects/<project_name>/commander/main.py`
     -> There you can edit `setup()` `main()` and `end_run()` to your needs
 
 ## Run a project
-<...>
+in the folder open the terminal and type
+    `python run.py run <project_name>`
 
 ## Hints
 <...>
