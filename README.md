@@ -127,8 +127,7 @@
 │   │               ├── commands.json
 │   │               ├── simdrone.py
 │   │               ├── simdronesdk.py
-│   │               ├── stats.json
-│   │               └── __init__.py
+│   │               └── stats.json
 │   │
 │   ├── fileops/
 │   │   ├── __init__.py
