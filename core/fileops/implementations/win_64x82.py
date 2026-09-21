@@ -7,6 +7,7 @@ import json
 import platform
 from pathlib import Path
 from typing import Any
+
 import toml
 
 from core.fileops.base import FileOpsBase
@@ -35,17 +36,17 @@ class WinFileOps(FileOpsBase):
         self.ensure_dir(path.parent)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-    
-    def read_toml(self, path: Path)-> dict[str, Any]:
+
+    def read_toml(self, path: Path) -> dict[str, Any]:
         path = Path(path)
         with open(path, "r", encoding="utf-8") as f:
-                return toml.load(f)
-            
+            return toml.load(f)
+
     def write_toml(self, path: Path, data: dict[str, Any]) -> None:
-            path = Path(path)
-            self.ensure_dir(path.parent)
-            with open(path, "w", encoding="utf-8") as f:
-                toml.dump(data, f)
+        path = Path(path)
+        self.ensure_dir(path.parent)
+        with open(path, "w", encoding="utf-8") as f:
+            toml.dump(data, f)
 
     def append_line(self, path: Path, line: str) -> None:
         path = Path(path)

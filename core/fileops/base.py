@@ -38,12 +38,12 @@ class FileOpsBase(ABC):
     def write_json(self, path: Path, data: dict[str, Any]) -> None:
         """Writes a dict as formatted JSON. Creates missing parent folders automatically."""
         raise NotImplementedError
-    
+
     @abstractmethod
-    def read_toml(self, path: Path)-> dict[str, Any]:
+    def read_toml(self, path: Path) -> dict[str, Any]:
         """Loads a TOML-File as dict."""
         raise NotImplementedError
-    
+
     @abstractmethod
     def write_toml(self, path: Path, data: dict[str, Any]) -> None:
         """Writes a dict as TOML. Creates missing parent folders automatically."""

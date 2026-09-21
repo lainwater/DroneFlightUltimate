@@ -1,4 +1,4 @@
-'''
+"""
 REPLController - Operate drone via REPL.
 
 On start it asks which drone type you are flying, loads that type's command
@@ -9,7 +9,7 @@ message on the bus.
     repl> takeoff
     repl> steps_move_forward distance=50
     repl> rc x=20 yaw=-10
-'''
+"""
 
 import asyncio
 import difflib
@@ -57,7 +57,7 @@ class REPLController(ControllerBase):
             elif type == "stream":
                 await self.bus.publish(f"stream.{self.drone_id}", data)
             elif type == "state":
-                await self.bus.publish(f"state.REPL", data)
+                await self.bus.publish("state.REPL", data)
 
     # ------------------------------------------------------------ REPL loop
     async def _repl(self) -> None:

@@ -3,6 +3,7 @@ LiveConsoleLogger - Sends Logger messages to the console in real-time.
 """
 
 from datetime import datetime
+
 from core.logger.base import LoggerBase, LogLevel
 
 

@@ -1,4 +1,4 @@
-'''
+"""
 JoystickController - Operate a drone via any pygame-recognized
 joystick/gamepad.
 
@@ -9,17 +9,19 @@ xbox.json, ...), selected via `layout`.
 
 If you want to map different controller inputs to different bus events,
 edit or create a new .json and put it in the layout arg on get_controller(...).
-'''
+"""
 
 import asyncio
-from pathlib import Path
 from os import environ
+from pathlib import Path
+
 environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 import pygame
 
 from core.controller.base import ControllerBase
 
 POLLING_RATE = 200
+
 
 class JoystickController(ControllerBase):
     def __init__(self, drone_id, bus, layout):
@@ -69,7 +71,7 @@ class JoystickController(ControllerBase):
         """Actual loop of controller with 1/POLLING_RATE (see top) time inbetween processing events."""
         while self.is_running:
             self._process_events()
-            await asyncio.sleep(1/POLLING_RATE)
+            await asyncio.sleep(1 / POLLING_RATE)
 
     def _process_events(self) -> None:
         """Process pygame events. What method to call by event type."""
@@ -165,4 +167,5 @@ class JoystickController(ControllerBase):
         exc = task.exception()
         if exc is not None:
             import traceback
+
             traceback.print_exception(type(exc), exc, exc.__traceback__)

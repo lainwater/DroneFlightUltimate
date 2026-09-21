@@ -23,9 +23,7 @@ class SimpleBus(BusBase):
             self._subscribers[topic].remove(callback)
 
     async def publish(self, topic: str, data: Any = None) -> None:
-        callbacks = list(self._subscribers.get(topic, [])) + list(
-            self._subscribers.get("*", [])
-        )
+        callbacks = list(self._subscribers.get(topic, [])) + list(self._subscribers.get("*", []))
         if not callbacks:
             return
 

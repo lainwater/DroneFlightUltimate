@@ -1,18 +1,19 @@
-import sys
 import os
 import subprocess
+import sys
 from pathlib import Path
+
 
 def current_keyboard_layout_as_json_path(_layout: str) -> str:
     if _layout:
         return Path(__file__).parent / f"{_layout}.json"
- 
+
     layout = get_keyboard_layout()
     layout_type = layout["layout_type"].lower()
     candidate = Path(__file__).parent / f"{layout_type}.json"
     if candidate.exists():
         return candidate
- 
+
     fallback = Path(__file__).parent / "qwertz.json"
     print(
         f"[keyboard] No mapping file for detected layout '{layout_type}' "
@@ -22,7 +23,6 @@ def current_keyboard_layout_as_json_path(_layout: str) -> str:
     )
     return fallback
 
-        
 
 def get_keyboard_layout() -> dict:
     """Get keyboard layout. this is only a fallback incase none was provided. This is unreliable"""
@@ -40,7 +40,7 @@ def get_keyboard_layout() -> dict:
                     layout = line.split(":")[1].strip()
                 elif line.startswith("variant:"):
                     variant = line.split(":")[1].strip()
-            
+
             lang_code = f"{layout}({variant})" if variant else layout
         except Exception:
             pass
@@ -61,6 +61,7 @@ def get_keyboard_layout() -> dict:
     # WINDOWS DETECTION
     elif sys.platform == "win32":
         import ctypes
+
         user32 = ctypes.windll.user32
 
         hwnd = user32.GetForegroundWindow()
@@ -94,9 +95,4 @@ def get_keyboard_layout() -> dict:
     base = lang_code.lower().split("-")[0].split("(")[0]
     layout_type = "QWERTZ" if base in {"de", "at", "ch"} else "QWERTY"
 
-    return {
-        "layout_type": layout_type,
-        "lang_code": lang_code,
-        "platform": sys.platform
-    }
-    
+    return {"layout_type": layout_type, "lang_code": lang_code, "platform": sys.platform}

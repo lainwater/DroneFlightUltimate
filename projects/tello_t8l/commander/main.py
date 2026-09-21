@@ -9,10 +9,10 @@ mapping).
 
 import asyncio
 
-from projects.base import ProjectBase
-from core.logger import LogLevel
 from core.controller import ControllerType, get_controller
 from core.drone import DroneType, get_drone
+from core.logger import LogLevel
+from projects.base import ProjectBase
 
 
 class tello_t8l(ProjectBase):
@@ -28,11 +28,7 @@ class tello_t8l(ProjectBase):
 
     async def main(self) -> None:
         await self.controller.start_controller()
-        print(
-            f"T8L controller active for '{self.drone.drone_id}'.\n"
-            "SB up = connect, SA down = arm, SC up = take off.\n"
-            "Press Ctrl+C to stop."
-        )
+        print(f"T8L controller active for '{self.drone.drone_id}'.\nSB up = connect, SA down = arm, SC up = take off.\nPress Ctrl+C to stop.")
         await asyncio.Event().wait()
 
     async def end_run(self) -> None:

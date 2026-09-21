@@ -2,27 +2,24 @@
 name = "droneflightultimate"
 version = "0.1.0"
 description = "Modular, async Framework to control various drones."
-authors = [
-  {name = "Valerie Lain"}
-]
+authors = [{ name = "Valerie Lain" }]
 requires-python = ">=3.11"
-dependencies = [
-    "djitellopy",
-    "opencv-python",
-    "pynput",
-    "pygame",
-    "toml",
-]
- 
+dependencies = ["djitellopy", "opencv-python", "pynput", "pygame", "toml"]
+
 [project.optional-dependencies]
-dev = [
-    "pytest",
-]
- 
+dev = ["pytest", "ruff"]
+
+[tool.ruff]
+line-length = 150
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
- 
+
 [tool.setuptools.packages.find]
 include = ["core*", "app*"]
 

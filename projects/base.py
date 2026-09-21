@@ -8,7 +8,6 @@ Logs: bus_logs/flight_<timestamp>.jsonl, a fresh file every run so old
 sessions are never overwritten.
 """
 
-import asyncio
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
@@ -16,7 +15,7 @@ from pathlib import Path
 from core.bus import get_bus
 from core.bus_player_recorder import get_recorder
 from core.fileops import get_fileops
-from core.logger import LogLevel, LoggerType, get_logger
+from core.logger import LoggerType, LogLevel, get_logger
 
 
 class ProjectBase(ABC):
@@ -31,9 +30,7 @@ class ProjectBase(ABC):
         self.live_logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=LogLevel.INFO)
 
         session_stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.recorder = get_recorder(
-            self.root_path / "logs" / "bus_logs" / f"flight_{session_stamp}.jsonl"
-        )
+        self.recorder = get_recorder(self.root_path / "logs" / "bus_logs" / f"flight_{session_stamp}.jsonl")
 
     def load_app_config(self) -> dict:
         """Load this project's app-level config (logging level, keyboard/

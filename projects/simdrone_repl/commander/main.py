@@ -5,10 +5,10 @@ end_run() and config/ to fit what this project actually needs to do.
 
 import asyncio
 
-from projects.base import ProjectBase
-from core.logger import LogLevel
 from core.controller import ControllerType, get_controller
 from core.drone import DroneType, get_drone
+from core.logger import LogLevel
+from projects.base import ProjectBase
 
 
 class simple_tello(ProjectBase):
@@ -25,7 +25,7 @@ class simple_tello(ProjectBase):
             self.drone_config["drone_1"]["drone_id"],
             bus=self.bus,
             ip=self.drone_config["drone_1"]["ip"],
-            port=self.drone_config["drone_1"]["port"]
+            port=self.drone_config["drone_1"]["port"],
         )
 
         layout = self.app_config.get("controller", {}).get("layout") or None

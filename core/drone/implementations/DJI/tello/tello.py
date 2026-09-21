@@ -1,4 +1,4 @@
-'''
+"""
 TelloDrone - Real DJI/Ryze Tello, controlled via UDP per the Tello
 SDK 2.0.
 
@@ -16,14 +16,14 @@ SDK 2.0.
 - get_position isn't available - a real Tello has no absolute position
   sensor without mission pads. It isn't in commands.json, so execute()
   reports it cleanly as unsupported instead of crashing.
-'''
+"""
 
 import asyncio
 from pathlib import Path
 from typing import Callable
 
-from core.drone.base import DroneBase, DroneFlightState, DroneConState, DroneType, DroneArmState, PublishType
-from core.drone.implementations.DJI.tello.tellosdk import TelloSDK, _parse_state_string, _coerce_number
+from core.drone.base import DroneArmState, DroneBase, DroneConState, DroneFlightState, DroneType, PublishType
+from core.drone.implementations.DJI.tello.tellosdk import TelloSDK, _coerce_number, _parse_state_string
 
 _STEP_MOVE_WORDS = {
     "forward": "forward",
@@ -51,11 +51,7 @@ _QUERY_COMMANDS = {
 
 
 class TelloDrone(DroneBase):
-    def __init__(self,
-                 drone_type: DroneType,
-                 drone_id: str,
-                 bus: object,
-                 **kwargs):
+    def __init__(self, drone_type: DroneType, drone_id: str, bus: object, **kwargs):
         super().__init__(drone_type, drone_id, bus, **kwargs)
         self.ip = self.init_kwargs.get("ip", "192.168.10.1")
         self.cmd_port = self.init_kwargs.get("cmd_port", 8889)
@@ -82,24 +78,30 @@ class TelloDrone(DroneBase):
             if on_success:
                 on_success()
         elif ack is None:
-            await self.publish_parser(PublishType.ACK, {
-                "cmd": cmd_label,
-                "ack": "unknown",
-                "info": "No response within timeout - command may have still succeeded.",
-            })
+            await self.publish_parser(
+                PublishType.ACK,
+                {
+                    "cmd": cmd_label,
+                    "ack": "unknown",
+                    "info": "No response within timeout - command may have still succeeded.",
+                },
+            )
             # Optimistic: the real Tello frequently drops the ack over
             # UDP while still executing the command, so we update
             # local state as if it worked rather than getting stuck.
             if on_success:
                 on_success()
         else:
-            await self.publish_parser(PublishType.ERROR, {
-                "cmd": cmd_label,
-                "error": f"{cmd_label}Failed",
-                "info": f"'{cmd_label}' returned 'error'.",
-            })
+            await self.publish_parser(
+                PublishType.ERROR,
+                {
+                    "cmd": cmd_label,
+                    "error": f"{cmd_label}Failed",
+                    "info": f"'{cmd_label}' returned 'error'.",
+                },
+            )
 
-# General
+    # General
     async def connect(self):
         self.con_state = DroneConState.CONNECTING
         self.sdk = TelloSDK(self.ip, self.cmd_port, self.cmd_pc_port, self.state_port)
@@ -122,14 +124,16 @@ class TelloDrone(DroneBase):
         and reboots onto your network with a NEW IP this app has no
         way to discover on its own (check your router's DHCP client
         list) - reconnect afterwards with connect() using that IP."""
-        if not await self._require_state(DroneConState.CONNECTED, "connect_via_wifi"): return
+        if not await self._require_state(DroneConState.CONNECTED, "connect_via_wifi"):
+            return
         ack = await self.sdk.send_and_receive(f"ap {ssid} {password}", timeout=10)
         await self._publish_tristate_ack(f"connect_via_wifi {ssid}", ack)
         if ack is not False:
             await self.disconnect()
 
     async def disconnect(self):
-        if not await self._require_state(DroneConState.CONNECTED, "disconnect"): return
+        if not await self._require_state(DroneConState.CONNECTED, "disconnect"):
+            return
         await self.stop_state_reciever()
         await self.set("disarm")
         self.con_state = DroneConState.DISCONNECTING
@@ -137,29 +141,37 @@ class TelloDrone(DroneBase):
         self.con_state = DroneConState.DISCONNECTED
         await self.publish_parser(PublishType.ACK, {"cmd": "disconnect", "ack": "True"})
 
-# Movement
+    # Movement
     async def takeoff(self):
-        if not await self._require_state(DroneConState.CONNECTED, "takeoff"): return
-        if not await self._require_state(DroneFlightState.LANDED, "takeoff"): return
-        if not await self._require_state(DroneArmState.ARMED, "takeoff"): return
+        if not await self._require_state(DroneConState.CONNECTED, "takeoff"):
+            return
+        if not await self._require_state(DroneFlightState.LANDED, "takeoff"):
+            return
+        if not await self._require_state(DroneArmState.ARMED, "takeoff"):
+            return
         ack = await self.sdk.send_and_receive("takeoff", timeout=20)
         await self._publish_tristate_ack("takeoff", ack, on_success=lambda: setattr(self, "flight_state", DroneFlightState.INAIR))
 
     async def land(self):
-        if not await self._require_state(DroneConState.CONNECTED, "land"): return
-        if not await self._require_state(DroneFlightState.INAIR, "land"): return
+        if not await self._require_state(DroneConState.CONNECTED, "land"):
+            return
+        if not await self._require_state(DroneFlightState.INAIR, "land"):
+            return
         ack = await self.sdk.send_and_receive("land", timeout=20)
         await self._publish_tristate_ack("land", ack, on_success=lambda: setattr(self, "flight_state", DroneFlightState.LANDED))
 
     async def emergency(self):
-        if not await self._require_state(DroneConState.CONNECTED, "emergency"): return
+        if not await self._require_state(DroneConState.CONNECTED, "emergency"):
+            return
         ack = await self.sdk.send_and_receive("emergency", timeout=5)
         await self._publish_tristate_ack("emergency", ack, on_success=lambda: setattr(self, "flight_state", DroneFlightState.LANDED))
 
     # rc movement - fire-and-forget, Tello never acks this one
     async def rc(self, x: float, y: float, z: float, yaw: float):
-        if not await self._require_state(DroneConState.CONNECTED, "rc"): return
-        if not await self._require_state(DroneFlightState.INAIR, "rc"): return
+        if not await self._require_state(DroneConState.CONNECTED, "rc"):
+            return
+        if not await self._require_state(DroneFlightState.INAIR, "rc"):
+            return
         a, b, c, d = (self._to_tello_rc(v) for v in (x, y, z, yaw))
         self.sdk.send(f"rc {a} {b} {c} {d}")
         self.sdk.track_rc_velocity(x, y, z, yaw)
@@ -173,15 +185,19 @@ class TelloDrone(DroneBase):
 
     # goto pos movement
     async def goto(self, x: float, y: float, z: float, speed: int = 50):
-        if not await self._require_state(DroneConState.CONNECTED, "goto"): return
-        if not await self._require_state(DroneFlightState.INAIR, "goto"): return
+        if not await self._require_state(DroneConState.CONNECTED, "goto"):
+            return
+        if not await self._require_state(DroneFlightState.INAIR, "goto"):
+            return
         ack = await self.sdk.send_and_receive(f"go {int(x)} {int(y)} {int(z)} {int(speed)}", timeout=20)
         await self._publish_tristate_ack(f"goto {x} {y} {z}", ack, on_success=lambda: self.sdk.apply_goto_delta(x, y, z))
 
     # Step Movement
     async def steps_move(self, direction: str, distance: float):
-        if not await self._require_state(DroneConState.CONNECTED, f"move {direction}"): return
-        if not await self._require_state(DroneFlightState.INAIR, f"move {direction}"): return
+        if not await self._require_state(DroneConState.CONNECTED, f"move {direction}"):
+            return
+        if not await self._require_state(DroneFlightState.INAIR, f"move {direction}"):
+            return
         word = _STEP_MOVE_WORDS.get(direction)
         if word is None:
             await self.publish_parser(PublishType.ERROR, {"error": "UnknownDirection", "message": f"'{direction}' is not a valid move direction."})
@@ -189,9 +205,10 @@ class TelloDrone(DroneBase):
         ack = await self.sdk.send_and_receive(f"{word} {int(distance)}", timeout=15)
         await self._publish_tristate_ack(f"move {direction} {distance}", ack, on_success=lambda: self.sdk.apply_step_delta(direction, distance))
 
-# Set
+    # Set
     async def set(self, what: str, **kwargs) -> None:
-        if not await self._require_state(DroneConState.CONNECTED, f"set {what}"): return
+        if not await self._require_state(DroneConState.CONNECTED, f"set {what}"):
+            return
 
         if what == "arm":
             # No real command - see the class docstring.
@@ -221,9 +238,10 @@ class TelloDrone(DroneBase):
         ack = await self.sdk.send_and_receive(builder(), timeout=10)
         await self._publish_tristate_ack(f"set {what} {kwargs}", ack)
 
-# GET
+    # GET
     async def get(self, what: str):
-        if not await self._require_state(DroneConState.CONNECTED, f"get {what}"): return
+        if not await self._require_state(DroneConState.CONNECTED, f"get {what}"):
+            return
         if what == "position":
             # Dead-reckoned estimate, not a real sensor reading - see
             # TelloSDK's position tracking. Labeled clearly so it's
@@ -244,14 +262,15 @@ class TelloDrone(DroneBase):
         value = _parse_state_string(raw) if what == "attitude" else _coerce_number(raw)
         await self.publish_parser(PublishType.DATA, {what: value})
 
-
     async def start_video(self):
-        if not await self._require_state(DroneConState.CONNECTED, "start_video"): return
+        if not await self._require_state(DroneConState.CONNECTED, "start_video"):
+            return
         ack = await self.sdk.send_and_receive("streamon", timeout=10)
         await self._publish_tristate_ack("start_video", ack, on_success=lambda: setattr(self, "video_streaming", True))
 
     async def stop_video(self):
-        if not await self._require_state(DroneConState.CONNECTED, "stop_video"): return
+        if not await self._require_state(DroneConState.CONNECTED, "stop_video"):
+            return
         ack = await self.sdk.send_and_receive("streamoff", timeout=10)
         await self._publish_tristate_ack("stop_video", ack, on_success=lambda: setattr(self, "video_streaming", False))
 
@@ -262,11 +281,12 @@ class TelloDrone(DroneBase):
             f"on port {self.video_port} comes later."
         )
 
-# Other
+    # Other
     async def start_state_reciever(self):
         """Starts a background task that publishes every item the SDK's
         state_stream yields, until stop_state_reciever() cancels it."""
-        if not await self._require_state(DroneConState.CONNECTED, "start_state_reciever"): return
+        if not await self._require_state(DroneConState.CONNECTED, "start_state_reciever"):
+            return
         await self.sdk.open_state_channel()
         self.data_gen_task = asyncio.create_task(self._consume_state_stream())
 

@@ -4,32 +4,30 @@ Tests for core.logger.
 Run with: pytest tests/core/logger/logger_test.py -v
 """
 
-import asyncio
 import io
 import json
 from contextlib import redirect_stdout
 
 from core.logger import LoggerType, LogLevel, get_logger
-from core.logger.implementations.live_console import LiveConsoleLogger
 from core.logger.implementations.jsonl_logger import JSONLLogger
+from core.logger.implementations.live_console import LiveConsoleLogger
 from core.logger.implementations.no_logger import NoLogger
-
 
 # ---------------------------------------------------------------------
 # get_logger factory
 # ---------------------------------------------------------------------
 
+
 def test_get_logger_returns_correct_type_for_each_enum_value():
     assert isinstance(get_logger(LoggerType.LIVE_CONSOLE), LiveConsoleLogger)
     assert isinstance(get_logger(LoggerType.NOLOGGER), NoLogger)
-    assert isinstance(
-        get_logger(LoggerType.RECORD, log_path="unused.jsonl"), JSONLLogger
-    )
+    assert isinstance(get_logger(LoggerType.RECORD, log_path="unused.jsonl"), JSONLLogger)
 
 
 # ---------------------------------------------------------------------
 # LiveConsoleLogger
 # ---------------------------------------------------------------------
+
 
 def test_live_console_logger_prints_message_and_context():
     logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=LogLevel.INFO)
@@ -67,6 +65,7 @@ def test_live_console_logger_allows_message_at_exactly_min_level():
 # ---------------------------------------------------------------------
 # JSONLLogger
 # ---------------------------------------------------------------------
+
 
 def test_jsonl_logger_writes_valid_json_lines(tmp_path):
     path = tmp_path / "debug_logs" / "session.jsonl"
@@ -115,6 +114,7 @@ def test_jsonl_logger_respects_min_level(tmp_path):
 # ---------------------------------------------------------------------
 # NoLogger
 # ---------------------------------------------------------------------
+
 
 def test_no_logger_writes_nothing_to_stdout():
     logger = get_logger(LoggerType.NOLOGGER, min_level=LogLevel.DEBUG)

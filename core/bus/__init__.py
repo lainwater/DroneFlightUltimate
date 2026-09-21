@@ -11,9 +11,12 @@ explicitly passed to its controller, drone etc. objects
 
 from .base import BusBase, Callback
 
+
 def get_bus() -> BusBase:
     """Create a new bus instance using the default implementation."""
     from .implementations.simple_bus import SimpleBus
+
     return SimpleBus()
+
 
 __all__ = ["BusBase", "Callback", "get_bus"]

@@ -35,7 +35,7 @@ class BusBase(ABC):
         """Remove a previously registered callback. Must be a no-op
         (not an error) if the callback was never subscribed to that
         topic."""
-        raise NotImplementedError 
+        raise NotImplementedError
 
     @abstractmethod
     async def publish(self, topic: str, data: Any = None) -> None:

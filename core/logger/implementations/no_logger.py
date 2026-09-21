@@ -4,6 +4,7 @@ NoLogger - Silently suppresses all logging operations.
 
 from core.logger.base import LoggerBase, LogLevel
 
+
 class NoLogger(LoggerBase):
     def __init__(self, min_level: LogLevel = LogLevel.INFO):
         super().__init__(min_level)
