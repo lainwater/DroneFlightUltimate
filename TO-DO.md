@@ -1,95 +1,69 @@
 # To-Do
 
-- [To test](#to-test)
 - [To implement](#to-implement)
-- [Bugs](#bugs)
 - [Future](#future)
-
+- [Bugs](#bugs)
 
 ---
----
-
-
-### To Test
-
-- All modules. need pytests written to test all functionallity.
-
-
 ---
 
 ### To implement:
 
-- repl controller
+- add video/stream output (to web, vr mode (2x), to tkinter, to cv2)
 
-- video/stream output (to web, vr mode (2x), to tkinter, to cv2)
+- add video for simdrone and tello (start/stop stream)
 
-- video for simdrone and tello (start/stop stream)
+- add premade flight patterns (fly shapes and search grids of shapes: square, circle, triangle (resolution, how small grid-areas are), hexagon; waypoints (dict of xyz + speed); movement test)
 
-- missions/premade flight patterns
+- add repl controller
 
-- bus recorder/logging to create new log files with datetime instead of appending
+- add linux fops
 
+- add tests for each core module
 
----
+- add example projects:
+    - tello repl,
+    - simdrone keyboard,
+    - simdrone repl,
+    - simdrone t8l,
+    - multi tello/simdrone with keyboard,
+    - all with video support
 
+- look over everything , remove deadcode, reduency, overcomplicated things, prettyfie, add standardized and simple docstrings (add linter?)
 
-### To document:
+- write docs for each core module and for the whole project in /docs/...
 
-- core/bus x
+- write a proper readme with install guide, use guide, scope, about etc
 
-- core/bus_player_recorder x
+- get a proper license
 
-- core/controller
+- setup github for colabreation (issue tags, CI, versions)
 
-- core/drone
+- add pdf or powerpoint/similar presentations (for non-tech people, for techy people, for using, for collabing)
 
-- core/fileops
+- present to my uni
 
-- core/logger
-
-- core/video
-
-- projects/
-
-- projects/examples
-
-- run.py
-
-- actual docs
-
-- readme.md
-
+- make github public
 
 ---
-
-
-### Bugs:
-
-- There might be some wird async timing issue with simdrone and keyboard controller using the standard newproject script. Wasnt able to recreate it.
-
-
 ---
-
 
 ### Future:
 
-- examples
+- web ui for handling projects
 
-- desktop app
+- more controllers (joystick ones mainly)
 
-- web ui
-
-- phone app
-
-- linux fops
-
-- more controllers or a joystick controller base?
-
-- more drones
-
+- more drones (parrot mambo, a scafhold/template drone maybe)
 
 ---
 ---
 
+### Bugs:
+
+- There might be some weird async timing issue with simdrone and keyboard controller using the standard newproject script. Wasnt able to recreate it.
+
+---
+---
 
 [Goto Top](#to-do)

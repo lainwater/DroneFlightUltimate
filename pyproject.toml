@@ -3,7 +3,7 @@ name = "droneflightultimate"
 version = "0.1.0"
 description = "Modular, async Framework to control various drones."
 authors = [
-  {name = "Val Lain"}
+  {name = "Valerie Lain"}
 ]
 requires-python = ">=3.11"
 dependencies = [
