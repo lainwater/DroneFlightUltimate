@@ -4,6 +4,9 @@ public API of core.fileops.
 The rest of the app always does:
     from core.fileops import get_fileops
     fops = get_fileops()
+
+Important:  This is a singelton.
+            Unlike other modules it is a global instance and you can just get one Fops.
 """
 
 import platform
@@ -11,6 +14,12 @@ import platform
 from .base import FileOpsBase
 
 _instance: FileOpsBase | None = None
+
+_PLATFORM_CLASSES = {
+    "Windows": ("core.fileops.implementations.windows", "WindowsFileOps"),
+    "Linux": ("core.fileops.implementations.linux", "LinuxFileOps"),
+    "Darwin": ("core.fileops.implementations.darwin", "DarwinFileOps"),
+}
 
 
 def get_fileops() -> FileOpsBase:
@@ -20,15 +29,19 @@ def get_fileops() -> FileOpsBase:
         return _instance
 
     system = platform.system()
-    if system == "Windows":
-        from .implementations.win_64x82 import WinFileOps
-
-        _instance = WinFileOps()
-    else:
+    if system not in _PLATFORM_CLASSES:
         raise NotImplementedError(
-            f"No FileOps-Backend for platform '{system}' implemented. "
-            f"Add core/fileops/implementations/{system}.py. And implement it into core/fileops/__init__.py."
+            f"No FileOps backend for platform '{system}' implemented. "
+            f"Add core/fileops/implementations/{system.lower()}.py (subclassing "
+            f"FileOpsBase, implementing only platform_name()) and register it "
+            f"in core/fileops/__init__.py's _PLATFORM_CLASSES."
         )
+
+    module_name, class_name = _PLATFORM_CLASSES[system]
+    import importlib
+
+    module = importlib.import_module(module_name)
+    _instance = getattr(module, class_name)()
     return _instance
 
 

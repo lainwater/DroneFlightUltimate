@@ -69,7 +69,7 @@ class {name}(ProjectBase):
 
         layout = self.app_config.get("controller", {{}}).get("layout") or None
         self.controller = get_controller(
-            ControllerType.KEYBOARD_CONTROLLER,
+            ControllerType.KEYBOARD,
             drone_id=self.drone_config["drone_1"]["drone_id"],
             bus=self.bus,
             layout=layout,

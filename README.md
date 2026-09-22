@@ -80,6 +80,7 @@
 │   │   ├── __init__.py
 │   │   ├── player_base.py
 │   │   ├── recorder_base.py
+│   │   ├── schema.py
 │   │   └── implementations/
 │   │       └── jsonl/
 │   │           ├── __init__.py
@@ -132,9 +133,13 @@
 │   ├── fileops/
 │   │   ├── __init__.py
 │   │   ├── base.py
+│   │   ├── errors.py
 │   │   └── implementations/
 │   │       ├── __init__.py
-│   │       └── win_64x82.py
+│   │       ├── common.py
+│   │       ├── darwin.py
+│   │       ├── linux.py
+│   │       └── windows.py
 │   │
 │   ├── logger/
 │   │   ├── __init__.py

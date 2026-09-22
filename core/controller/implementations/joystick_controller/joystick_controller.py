@@ -40,7 +40,7 @@ class JoystickController(ControllerBase):
 
         self.joystick = pygame.joystick.Joystick(0)
         self.joystick.init()
-        self._publish_parser("status", f"Joystick connected: {self.joystick.get_name()}")
+        await self._publish_parser("status", f"Joystick connected: {self.joystick.get_name()}")
 
         self.is_running = True
         self.controller_task = asyncio.create_task(self._controller_loop())
@@ -57,14 +57,16 @@ class JoystickController(ControllerBase):
         pygame.quit()
 
     def _load_layout(self, layout: str = "t8l") -> None:
+        if layout is None:
+            layout = "t8l"
         layout_path = Path(__file__).parent / f"{layout}.json"
         self.config = self.fops.read_json(layout_path)
 
-    async def _publish_parser(self, type: str, data: dict) -> None:
+    async def _publish_parser(self, _type: str, data: dict) -> None:
         if self.bus:
-            if type == "cmd":
+            if _type == "cmd":
                 await self.bus.publish(f"cmd.{self.drone_id}", data)
-            elif type == "status":
+            elif _type == "status":
                 await self.bus.publish(f"state.joystick-{self.layout}.{self.drone_id}", data)
 
     async def _controller_loop(self) -> None:
@@ -154,11 +156,11 @@ class JoystickController(ControllerBase):
             return "negative"
         return "positive"
 
-    def _publish(self, type: str = "cmd", data: dict = {}) -> None:
+    def _publish(self, _type: str = "cmd", data: dict = {}) -> None:
         """Schedule the publish on the running event loop and make
         sure any exception actually surfaces - an untracked task's
         failure would otherwise just look like 'the switch did nothing'"""
-        task = asyncio.create_task(self._publish_parser(type, data))
+        task = asyncio.create_task(self._publish_parser(_type, data))
         task.add_done_callback(self._log_task_exception)
 
     @staticmethod

@@ -17,15 +17,15 @@ from .base import ControllerBase
 
 
 class ControllerType(Enum):
-    KEYBOARD_CONTROLLER = "keyboard_controller"
+    KEYBOARD = "keyboard_controller"
     REPL = "repl_controller"
-    JOYSTICK = "JoystickController"
+    JOYSTICK = "joystick_controller"
 
 
 def get_controller(controllertype: ControllerType, drone_id: str, bus: object, layout: str | None = None, **kwargs) -> ControllerBase:
     """Create a new controller instance."""
     match controllertype:
-        case ControllerType.KEYBOARD_CONTROLLER:
+        case ControllerType.KEYBOARD:
             from .implementations.keyboard_controller.keyboard_controller import KeyboardController
 
             return KeyboardController(drone_id=drone_id, bus=bus, layout=layout, **kwargs)

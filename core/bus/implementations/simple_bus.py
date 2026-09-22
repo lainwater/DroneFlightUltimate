@@ -13,6 +13,7 @@ from core.bus.base import BusBase, Callback
 
 class SimpleBus(BusBase):
     def __init__(self) -> None:
+        self.loop_prevention = False
         self._subscribers: dict[str, list[Callback]] = defaultdict(list)
 
     def subscribe(self, topic: str, callback: Callback) -> None:
@@ -27,7 +28,17 @@ class SimpleBus(BusBase):
         if not callbacks:
             return
 
-        await asyncio.gather(*(self._invoke(cb, topic, data) for cb in callbacks))
+        results = await asyncio.gather(
+            *(self._invoke(cb, topic, data) for cb in callbacks),
+            return_exceptions=True,
+        )
+        errors = [r for r in results if isinstance(r, BaseException)]
+        if errors and topic != "error.bus" and not self.loop_prevention:
+            self.loop_prevention = True
+            try:
+                await self.publish("error.bus", {"topic": topic, "errors": errors})
+            finally:
+                self.loop_prevention = False
 
     @staticmethod
     async def _invoke(callback: Callback, topic: str, data: Any) -> None:
