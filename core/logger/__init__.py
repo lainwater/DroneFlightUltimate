@@ -18,7 +18,7 @@ class LoggerType(Enum):
     """Enum for different logger types."""
 
     LIVE_CONSOLE = "live_console"
-    RECORD = "record"
+    JSONL = "jsonl"
     NOLOGGER = "nologger"
 
 
@@ -29,7 +29,7 @@ def get_logger(loggertype: LoggerType, min_level: LogLevel = LogLevel.INFO, log_
             from .implementations.live_console import LiveConsoleLogger
 
             return LiveConsoleLogger(min_level=min_level)
-        case LoggerType.RECORD:
+        case LoggerType.JSONL:
             from .implementations.jsonl_logger import JSONLLogger
 
             return JSONLLogger(min_level=min_level, log_path=log_path)

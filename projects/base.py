@@ -21,13 +21,14 @@ from core.logger import LoggerType, LogLevel, get_logger
 class ProjectBase(ABC):
     def __init__(self, root_path: Path, **kwargs):
         self.root_path = Path(root_path)
+        self.kwargs = kwargs
+
         self.fops = get_fileops()
+        self.bus = get_bus()
+        self.live_logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=LogLevel.INFO)
 
         self.app_config = self.load_app_config()
         self.drone_config = self.load_drone_config()
-
-        self.bus = get_bus()
-        self.live_logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=LogLevel.INFO)
 
         session_stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         self.recorder = get_recorder(self.root_path / "logs" / "bus_logs" / f"flight_{session_stamp}.jsonl")

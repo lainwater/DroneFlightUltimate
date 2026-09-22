@@ -9,12 +9,12 @@ class NoLogger(LoggerBase):
     def __init__(self, min_level: LogLevel = LogLevel.INFO):
         super().__init__(min_level)
 
-    def log(self, level: LogLevel, message: str, **context) -> None:
+    def log(self, level: LogLevel, message, **context) -> None:
         """Short-circuit log execution to avoid formatting overhead."""
         pass
 
-    def format_message(self, level: LogLevel, message: str, **context) -> str:
+    def format_message(self, level: LogLevel, message, **context) -> str:
         return ""
 
-    def _write(self, message: str) -> None:
+    def _write(self, message) -> None:
         pass

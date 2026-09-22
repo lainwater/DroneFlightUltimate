@@ -140,6 +140,12 @@ class TelloSDK:
         if self._cmd_transport:
             self._cmd_transport.close()
             self._cmd_transport = None
+            self._position_task.cancel()
+            try:
+                await self._position_task
+            except asyncio.CancelledError:
+                pass
+            self._position_task = None
 
     async def open_state_channel(self) -> None:
         loop = asyncio.get_running_loop()

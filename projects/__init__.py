@@ -11,6 +11,7 @@ logs/) and returns that instead.
 
 import importlib.util
 from pathlib import Path
+from sys import modules
 
 from core.fileops import get_fileops
 
@@ -52,36 +53,41 @@ from core.drone import DroneType, get_drone
 
 class {name}(ProjectBase):
     async def setup(self) -> None:
+        _drone_conf = self.drone_config["drone_1"]
+
         self.recorder.attach(self.bus)
         self.bus.subscribe(
             "*",
             lambda topic, data: self.live_logger.log(LogLevel.INFO, f"{{topic}}: {{data}}"),
         )
 
-        drone_type = DroneType[self.drone_config["drone_1"]["drone_type"].upper()]
+        drone_type = DroneType[_drone_conf["drone_type"].upper()]
         self.drone = get_drone(
             drone_type,
-            self.drone_config["drone_1"]["drone_id"],
+            _drone_conf["drone_id"],
             bus=self.bus,
-            ip=self.drone_config["drone_1"]["ip"],
-            port=self.drone_config["drone_1"]["port"]
+            ip=_drone_conf["ip"],
+            port=_drone_conf["port"]
         )
 
         layout = self.app_config.get("controller", {{}}).get("layout") or None
         self.controller = get_controller(
             ControllerType.KEYBOARD,
-            drone_id=self.drone_config["drone_1"]["drone_id"],
+            drone_id=_drone_conf["drone_id"],
             bus=self.bus,
             layout=layout,
         )
 
     async def main(self) -> None:
-        await self.drone.connect()
-        await self.drone.set("flight_mode", flight_mode="rc")
-        await self.controller.start_controller()
-        print(f"Keyboard controller active for '{{self.drone.drone_id}}'. Press Ctrl+C to stop.")
-        await asyncio.Event().wait()
-
+        try:
+            await self.drone.connect()
+            await self.drone.set("flight_mode", flight_mode="rc")
+            await self.controller.start_controller()
+            print(f"Keyboard controller active for '{{self.drone.drone_id}}'. Press Ctrl+C to stop.")
+            await asyncio.Event().wait()
+        except KeyboardInterrupt:
+            await self.end_run()
+            
     async def end_run(self) -> None:
         await self.controller.stop_controller()
         self.recorder.detach(self.bus)
@@ -123,6 +129,7 @@ def _load_project_class(project_dir: Path, name: str):
     main_path = project_dir / "commander" / "main.py"
     spec = importlib.util.spec_from_file_location(f"_project_{name}", main_path)
     module = importlib.util.module_from_spec(spec)
+    modules[spec.name] = module
     spec.loader.exec_module(module)
     return getattr(module, name)
 

@@ -47,6 +47,19 @@ class PublishType(Enum):
     ERROR = "error"
 
 
+def requires(*states):
+    def deco(fn):
+        async def wrapper(self, *a, **kw):
+            for s in states:
+                if not await self._require_state(s, fn.__name__):
+                    return
+            return await fn(self, *a, **kw)
+
+        return wrapper
+
+    return deco
+
+
 class DroneBase(ABC):
     """Abstract base class for drone operations."""
 
@@ -110,7 +123,6 @@ class DroneBase(ABC):
             )
 
     async def execute(self, action: str, **kwargs) -> None:
-        """Execute on the action with args"""
         if action not in self.command_map:
             await self.publish_parser(PublishType.ERROR, {"error": "NotCapable", "message": f"'{action}' not in {self.drone_id}'s capabilities"})
             return
@@ -118,13 +130,16 @@ class DroneBase(ABC):
         method_name = entry["method"]
         method = getattr(self, method_name, None)
         if method is None:
-            raise AttributeError(f"'{action}' maps to '{method_name}', but {self.drone_id} has no such method")
+            await self.publish_parser(
+                PublishType.ERROR, {"error": "NoSuchMethod", "message": f"'{action}' maps to '{method_name}', but {self.drone_id} has no such method"}
+            )
+            return
+
+        kwargs = {**entry.get("args", {}), **kwargs}
         try:
-            if ("args" in entry) and (kwargs == {}):
-                kwargs = {k: v for k, v in entry["args"].items()}
             await method(**kwargs)
-        except TypeError as exc:
-            raise TypeError(f"Bad arguments for action '{action}': {exc}") from exc
+        except Exception as exc:
+            await self.publish_parser(PublishType.ERROR, {"error": type(exc).__name__, "message": str(exc), "action": action})
 
     async def get_state(self):
         """Get the current state of the drone."""
@@ -171,6 +186,7 @@ class DroneBase(ABC):
         works no matter where the app was launched from."""
         raise NotImplementedError
 
+    @requires(DroneConState.CONNECTED)
     @abstractmethod
     async def start_state_reciever(self):
         "Starts continues State reciever"
@@ -186,21 +202,25 @@ class DroneBase(ABC):
         """Connect to the drone."""
         raise NotImplementedError
 
+    @requires(DroneConState.CONNECTED)
     @abstractmethod
     async def disconnect(self):
         """Disconnect from the drone."""
         raise NotImplementedError
 
+    @requires(DroneConState.CONNECTED, DroneFlightState.LANDED, DroneArmState.ARMED)
     @abstractmethod
     async def takeoff(self):
         """Command the drone to take off."""
         raise NotImplementedError
 
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
     @abstractmethod
     async def land(self):
         """Command the drone to land."""
         raise NotImplementedError
 
+    @requires(DroneConState.CONNECTED)
     @abstractmethod
     async def emergency(self):
         """Command the drone to perform an emergency stop."""

@@ -5,7 +5,7 @@ Simulated Drone Implementation
 import asyncio
 from pathlib import Path
 
-from core.drone.base import DroneArmState, DroneBase, DroneConState, DroneFlightState, DroneType, PublishType
+from core.drone.base import DroneArmState, DroneBase, DroneConState, DroneFlightState, DroneType, PublishType, requires
 from core.drone.implementations.Sim.simdrone.simdronesdk import SimDroneSDK, _FlightMode
 
 
@@ -32,9 +32,8 @@ class SimDrone(DroneBase):
             self.con_state = DroneConState.DISCONNECTED
         await self.publish_parser(PublishType.ACK, {"cmd": "connect", "ack": f"{ack}"})
 
+    @requires(DroneConState.CONNECTED)
     async def disconnect(self):
-        if not await self._require_state(DroneConState.CONNECTED, "disconnect"):
-            return
         await self.stop_state_reciever()
         await self.set("disarm")
         self.con_state = DroneConState.DISCONNECTING
@@ -46,13 +45,8 @@ class SimDrone(DroneBase):
         await self.publish_parser(PublishType.ACK, {"cmd": "disconnect", "ack": f"{ack}"})
 
     # Movement
+    @requires(DroneConState.CONNECTED, DroneFlightState.LANDED, DroneArmState.ARMED)
     async def takeoff(self):
-        if not await self._require_state(DroneConState.CONNECTED, "takeoff"):
-            return
-        if not await self._require_state(DroneFlightState.LANDED, "takeoff"):
-            return
-        if not await self._require_state(DroneArmState.ARMED, "takeoff"):
-            return
         ack = await self.sdk.takeoff()
         if not ack:
             await self.publish_parser(
@@ -62,11 +56,8 @@ class SimDrone(DroneBase):
             await self.publish_parser(PublishType.ACK, {"cmd": "takeoff", "ack": f"{ack}"})
             self.flight_state = DroneFlightState.INAIR
 
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
     async def land(self):
-        if not await self._require_state(DroneConState.CONNECTED, "land"):
-            return
-        if not await self._require_state(DroneFlightState.INAIR, "land"):
-            return
         ack = await self.sdk.land()
         if not ack:
             await self.publish_parser(
@@ -76,9 +67,8 @@ class SimDrone(DroneBase):
             await self.publish_parser(PublishType.ACK, {"cmd": "land", "ack": f"{ack}"})
             self.flight_state = DroneFlightState.LANDED
 
+    @requires(DroneConState.CONNECTED)
     async def emergency(self):
-        if not await self._require_state(DroneConState.CONNECTED, "emergency"):
-            return
         ack = await self.sdk.emergency()
         if not ack:
             await self.publish_parser(PublishType.ERROR, {"cmd": "emergency", "info": f"emergency returned {ack}.", "error": "emergencyFailed"})
@@ -87,11 +77,8 @@ class SimDrone(DroneBase):
             self.flight_state = DroneFlightState.LANDED
 
     # rc movement
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
     async def rc(self, x: int, y: int, z: int, yaw: int):
-        if not await self._require_state(DroneConState.CONNECTED, f"rc {x} {y} {z} {yaw}"):
-            return
-        if not await self._require_state(DroneFlightState.INAIR, f"rc {x} {y} {z} {yaw}"):
-            return
         ack = await self.sdk.rc(x, y, z, yaw)
         if not ack:
             await self.publish_parser(
@@ -102,11 +89,8 @@ class SimDrone(DroneBase):
             await self.publish_parser(PublishType.ACK, {"cmd": f"rc {x} {y} {z} {yaw}", "ack": f"{ack}"})
 
     # goto pos movement
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
     async def goto(self, x: float, y: float, z: float):
-        if not await self._require_state(DroneConState.CONNECTED, f"goto {x} {y} {z}"):
-            return
-        if not await self._require_state(DroneFlightState.INAIR, f"goto {x} {y} {z}"):
-            return
         ack = await self.sdk.goto_pos(x, y, z)
         if not ack:
             await self.publish_parser(
@@ -117,11 +101,8 @@ class SimDrone(DroneBase):
             await self.publish_parser(PublishType.ACK, {"cmd": f"goto {x} {y} {z}", "ack": f"{ack}"})
 
     # Step Movement
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
     async def steps_move(self, direction: str, distance: float):
-        if not await self._require_state(DroneConState.CONNECTED, f"_move {direction} {distance}"):
-            return
-        if not await self._require_state(DroneFlightState.INAIR, f"_move {direction} {distance}"):
-            return
         ack = await self.sdk.move_step(direction, distance)
         if not ack:
             await self.publish_parser(
@@ -136,9 +117,8 @@ class SimDrone(DroneBase):
             await self.publish_parser(PublishType.ACK, {"cmd": f"_move {direction} {distance}", "ack": f"{ack}"})
 
     # Set
+    @requires(DroneConState.CONNECTED)
     async def set(self, what: str, **kwargs) -> None:
-        if not await self._require_state(DroneConState.CONNECTED, f"set {what} {kwargs}"):
-            return
         ack = None
         if what == "flight_mode":
             ack = await self.sdk.set_flight_mode(**kwargs)
@@ -168,9 +148,8 @@ class SimDrone(DroneBase):
             await self.publish_parser(PublishType.ACK, {"cmd": f"set {what} {kwargs}", "ack": f"{ack}"})
 
     # GET
+    @requires(DroneConState.CONNECTED)
     async def get(self, what: str):
-        if not await self._require_state(DroneConState.CONNECTED, f"get {what}"):
-            return
         return_val = None
         if what == "armed_status":
             return_val = await self.sdk.get_armed_status()
@@ -198,11 +177,10 @@ class SimDrone(DroneBase):
             await self.publish_parser(PublishType.ERROR, {"error": "NotFound", "message": f"Could not get {what}"})
 
     # Other
+    @requires(DroneConState.CONNECTED)
     async def start_state_reciever(self):
         """Starts a background task that publishes every item the SDK's
         data_generator yields, until stop_state_reciever() cancels it."""
-        if not await self._require_state(DroneConState.CONNECTED, "start_state_reciever"):
-            return
         self.data_gen_task = asyncio.create_task(self._consume_state_stream())
 
     async def stop_state_reciever(self):
