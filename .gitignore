@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 *.egg-info/
 droneflightultimate.egg-info/
+projects/**/*.jsonl
+projects/**/*.png
+projects/**/*.mp4

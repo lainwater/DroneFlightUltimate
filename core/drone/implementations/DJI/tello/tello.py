@@ -57,9 +57,6 @@ class TelloDrone(DroneBase):
         self.state_port = self.init_kwargs.get("state_port", 8890)
         self.video_port = self.init_kwargs.get("video_port", 11111)
 
-        # Built fresh in connect(), not here - a real UDP endpoint has
-        # to actually bind at connect-time, and a reconnect after
-        # disconnect() should get a new transport, not reuse a closed one.
         self.sdk: TelloSDK | None = None
         self.data_gen_task = None
         self.video_streaming = False
@@ -132,6 +129,8 @@ class TelloDrone(DroneBase):
     async def disconnect(self):
         await self.stop_state_reciever()
         await self.set("disarm")
+        self.flight_state = DroneFlightState.LANDED
+        self.arm_state = DroneArmState.DISARMED
         self.con_state = DroneConState.DISCONNECTING
         await self.sdk.close_command_channel()
         self.con_state = DroneConState.DISCONNECTED

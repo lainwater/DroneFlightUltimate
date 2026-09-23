@@ -283,11 +283,11 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
 - [ ] implement video output for(start/stop stream)
     -> [ ] simdrone
     -> [ ] tello
-- [ ] add7edit example projects:
+- [ ] add/edit example projects:
     - [ ] ~~tello repl,~~
-    - [ ] simdrone keyboard,
+    - [x] simdrone keyboard,
     - [ ] ~~simdrone repl,~~
-    - [ ] simdrone t8l,
+    - [x] simdrone t8l,
     - [ ] multi tello/simdrone with keyboard,
     - [ ] all with video support
 - [ ] add premade flight patterns (new core module)
@@ -301,7 +301,7 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
 - [ ] a scafhold/template drone.py
 - [ ] implement tests for each core module
 - [ ] look over everything
-    - [ ] remove deadcode, reduency, overcomplicated things
+    - [x] remove deadcode, reduency, overcomplicated things
     - [x] prettyfie (linter :))
     - [ ] add standardized and simple docstrings
 - [ ] write docs for each core module and for the whole project in /docs/...

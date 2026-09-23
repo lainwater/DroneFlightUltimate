@@ -92,7 +92,10 @@ def main() -> None:
             path = PROJECTS
         print(f"Running project '{args.name}' at {path}...")
         project = get_project(args.name, path)
-        asyncio.run(project.run())
+        try:
+            asyncio.run(project.run())
+        except KeyboardInterrupt:
+            pass
 
 
 def get_examples() -> list[str]:

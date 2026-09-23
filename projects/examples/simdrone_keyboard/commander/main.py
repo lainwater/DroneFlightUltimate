@@ -33,10 +33,8 @@ class simdrone_keyboard(ProjectBase):
         await self.controller.start_controller()
         print(
             f"""Keyboard controller active for '{self.drone1.drone_id}'.
-
-            'c': connect | 'v': arm | 't': take off
-
-            Press Ctrl+C to stop."""
+                'c': connect | 'v': arm | 't': take off
+                Press Ctrl+C to stop."""
         )
 
         await asyncio.Event().wait()

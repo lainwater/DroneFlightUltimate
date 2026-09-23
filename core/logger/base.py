@@ -29,9 +29,11 @@ class LoggerBase(ABC):
             message = self.format_message(level, message, **context)
             self._write(message)
 
+    @staticmethod
     def _now_iso():
         return datetime.now().isoformat()
 
+    @staticmethod
     def _now_strf():
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

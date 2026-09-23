@@ -17,7 +17,7 @@ class JSONLLogger(LoggerBase):
     def format_message(self, level: LogLevel, message, **context) -> str:
         """Format log entry as a single-line JSON string."""
         payload = {
-            "timestamp": self._now_iso,
+            "timestamp": self._now_iso(),
             "level": level.name,
             "message": message,
             "context": context if context else {},

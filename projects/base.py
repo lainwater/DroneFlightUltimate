@@ -12,6 +12,7 @@ Logs:           bus_logs/flight_<timestamp>.jsonl, a fresh file every run so old
                 sessions are never overwritten.
 """
 
+import asyncio.exceptions
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
@@ -54,6 +55,8 @@ class ProjectBase(ABC):
             await self.main()
         except KeyboardInterrupt:
             print("\nStopped by Keyboard Interrupt (CTRL+C).")
+        except asyncio.exceptions.CancelledError:
+            print("\nStopped by asyncio.exceptions.CancelledError (likely triggered by CTRL+C).")
         finally:
             await self.end_run()
 
