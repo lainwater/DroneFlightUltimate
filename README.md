@@ -295,7 +295,7 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
     - [ ] fly waypoints (dict of xyz + speed);
     - [ ] search grids of shapes: square, circle, triangle, hexagon (resolution, how small grid-areas are) (single, multi)
     - [ ] tests for it
-- [ ] add linux fops
+- [x] add linux fops
 
 ### Utils
 - [ ] a scafhold/template drone.py
