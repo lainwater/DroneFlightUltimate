@@ -2,10 +2,14 @@
 ProjectBase - shared lifecycle and wiring for every DroneFlightUltimate
 example/project.
 
-Config: config/defaults.toml + config/mydrone.json
+__init__.py:    ignore
 
-Logs: bus_logs/flight_<timestamp>.jsonl, a fresh file every run so old
-sessions are never overwritten.
+main.py:        where your project lives (setup, main, end_run)
+
+Config:         config/defaults.toml + config/mydrone.json
+
+Logs:           bus_logs/flight_<timestamp>.jsonl, a fresh file every run so old
+                sessions are never overwritten.
 """
 
 from abc import ABC, abstractmethod
@@ -15,7 +19,6 @@ from pathlib import Path
 from core.bus import get_bus
 from core.bus_player_recorder import get_recorder
 from core.fileops import get_fileops
-from core.logger import LoggerType, LogLevel, get_logger
 
 
 class ProjectBase(ABC):
@@ -25,7 +28,6 @@ class ProjectBase(ABC):
 
         self.fops = get_fileops()
         self.bus = get_bus()
-        self.live_logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=LogLevel.INFO)
 
         self.app_config = self.load_app_config()
         self.drone_config = self.load_drone_config()

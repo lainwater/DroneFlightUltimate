@@ -68,12 +68,17 @@ class JoystickController(ControllerBase):
                 await self.bus.publish(f"cmd.{self.drone_id}", data)
             elif _type == "status":
                 await self.bus.publish(f"state.joystick-{self.layout}.{self.drone_id}", data)
+            elif _type == "error":
+                await self.bus.publish(f"error.joystick-{self.layout}.{self.drone_id}", data)
 
     async def _controller_loop(self) -> None:
         """Actual loop of controller with 1/POLLING_RATE (see top) time inbetween processing events."""
         while self.is_running:
-            self._process_events()
-            await asyncio.sleep(1 / POLLING_RATE)
+            try:
+                self._process_events()
+                await asyncio.sleep(1 / POLLING_RATE)
+            except Exception as e:
+                await self._publish_parser("error", {"exception": e})
 
     def _process_events(self) -> None:
         """Process pygame events. What method to call by event type."""

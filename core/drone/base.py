@@ -186,7 +186,6 @@ class DroneBase(ABC):
         works no matter where the app was launched from."""
         raise NotImplementedError
 
-    @requires(DroneConState.CONNECTED)
     @abstractmethod
     async def start_state_reciever(self):
         "Starts continues State reciever"
@@ -202,25 +201,21 @@ class DroneBase(ABC):
         """Connect to the drone."""
         raise NotImplementedError
 
-    @requires(DroneConState.CONNECTED)
     @abstractmethod
     async def disconnect(self):
         """Disconnect from the drone."""
         raise NotImplementedError
 
-    @requires(DroneConState.CONNECTED, DroneFlightState.LANDED, DroneArmState.ARMED)
     @abstractmethod
     async def takeoff(self):
         """Command the drone to take off."""
         raise NotImplementedError
 
-    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
     @abstractmethod
     async def land(self):
         """Command the drone to land."""
         raise NotImplementedError
 
-    @requires(DroneConState.CONNECTED)
     @abstractmethod
     async def emergency(self):
         """Command the drone to perform an emergency stop."""

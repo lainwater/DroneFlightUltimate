@@ -137,7 +137,7 @@ class TelloSDK:
         )
 
     async def close_command_channel(self) -> None:
-        if self._cmd_transport:
+        if self._cmd_transport and self._position_task:
             self._cmd_transport.close()
             self._cmd_transport = None
             self._position_task.cancel()

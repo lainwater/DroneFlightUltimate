@@ -29,7 +29,10 @@ class KeyboardController(ControllerBase):
 
     async def _publish_parser(self, data: dict) -> None:
         if self.bus:
-            await self.bus.publish(f"cmd.{self.drone_id}", data)
+            if hasattr(data, "error"):
+                await self.bus.publish(f"error.Keyboard.{self.drone_id}", data)
+            else:
+                await self.bus.publish(f"cmd.{self.drone_id}", data)
 
     def _on_press(self, key):
         """Method done on 'on_press' event. Publishes action to bus specified in layout set at creation."""
@@ -83,5 +86,8 @@ class KeyboardController(ControllerBase):
 
     def _resolve(self, key) -> dict | None:
         """Gets layout sub-dictionary from pressed char/key-name."""
-        lookup_key = key.char if hasattr(key, "char") and key.char else getattr(key, "name", None)
-        return self.config.get(lookup_key)
+        try:
+            lookup_key = key.char if hasattr(key, "char") and key.char else getattr(key, "name", None)
+            return self.config.get(lookup_key)
+        except Exception as e:
+            self._publish_parser({"error": {"in": "_resolve", "exception": e}})

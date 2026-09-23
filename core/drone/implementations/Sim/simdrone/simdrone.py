@@ -142,6 +142,9 @@ class SimDrone(DroneBase):
             ack = await self.sdk.disarm()
             if ack:
                 self.arm_state = DroneArmState.DISARMED
+        else:
+            await self.publish_parser(PublishType.ERROR, {"error": "NotExist", "message": f"{what} does not exist in simdrone."})
+
         if not ack:
             await self.publish_parser(PublishType.ERROR, {"cmd": f"set {what} {kwargs}", "info": f"set returned {ack}.", "error": "setFailed"})
         else:
@@ -153,24 +156,27 @@ class SimDrone(DroneBase):
         return_val = None
         if what == "armed_status":
             return_val = await self.sdk.get_armed_status()
-        if what == "state_gen_status":
+        elif what == "state_gen_status":
             return_val = await self.sdk.get_state_gen_status()
-        if what == "flight_mode":
+        elif what == "flight_mode":
             return_val = await self.sdk.get_flight_mode()
-        if what == "ip_and_port":
+        elif what == "ip_and_port":
             return_val = await self.sdk.get_ip_and_port()
-        if what == "rc_speed":
+        elif what == "rc_speed":
             return_val = await self.sdk.get_rc_speed()
-        if what == "takeoff_height":
+        elif what == "takeoff_height":
             return_val = await self.sdk.get_takeoff_height()
-        if what == "position":
+        elif what == "position":
             return_val = await self.sdk.get_position()
-        if what == "attitude":
+        elif what == "attitude":
             return_val = await self.sdk.get_attitude()
-        if what == "battery":
+        elif what == "battery":
             return_val = await self.sdk.get_battery()
-        if what == "temperature":
+        elif what == "temperature":
             return_val = await self.sdk.get_temperature()
+        else:
+            await self.publish_parser(PublishType.ERROR, {"error": "NotExist", "message": f"{what} does not exist in simdrone."})
+
         if return_val is not None:
             await self.publish_parser(PublishType.DATA, {f"{what}": return_val})
         else:

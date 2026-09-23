@@ -2,4 +2,4 @@
 level = "INFO"
 
 [controller]
-layout = "simdrone"
+layout = "qwertz"

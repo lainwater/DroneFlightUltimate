@@ -1,2 +1,0 @@
-{"ts": 1790004182.4109828, "topic": "ack.drone1", "data": {"cmd": "connect", "ack": "True"}}
-{"ts": 1790004182.912726, "topic": "ack.drone1", "data": {"cmd": "set flight_mode {'flight_mode': 'rc'}", "ack": "True"}}
