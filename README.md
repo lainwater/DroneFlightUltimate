@@ -9,6 +9,8 @@
     - [Core ideas](#core-ideas)
     - [Module descriptions](#module-descriptions)
     - [Module interactions](#module-interactions)
+        - [Interaction Process](#interaction-process)
+        - [Bus Protocol Contracts](#bus-protocol-contracts)
     - [File Structure](#file-structure)
 
 - [How to use](#how-to-use)
@@ -16,9 +18,11 @@
     - [Make a project](#make-a-project)
     - [Run a project](#run-a-project)
     - [Hints](#hints)
+    - [Examples](#examples)
 
 - [Contribute](#contribute)
     - [Setup VSCode](#setup-vscode)
+    - [GitHub Repository Info](#github-repository-info)
     - [Lint and Test](#lint-and-test)
     - [What can be edited easily](#what-can-be-edited-easily)
 
@@ -41,6 +45,8 @@
 - [Core ideas](#core-ideas)
 - [Module descriptions](#module-descriptions)
 - [Module interactions](#module-interactions)
+    - [Interaction Process](#interaction-process)
+    - [Bus Protocol Contracts](#bus-protocol-contracts)
 - [File Structure](#file-structure)
     - [Tree](#tree)
 
@@ -54,10 +60,16 @@
 <...>
 
 ## Module interactions
+> In this section you read about how modules interact and what they expect from each other.
+
+### Interaction Process
+<...>
+
+### Bus Protocol Contracts
 <...>
 
 ## File Structure
-> Core, Projects - tests, top-level
+> Core, Projects - tests, top-level, explanation
 
 ### Tree
 ```text
@@ -209,6 +221,7 @@
 - [Make a project](#make-a-project)
 - [Run a project](#run-a-project)
 - [Hints](#hints)
+- [Examples](#examples)
 
 ## Setup
 1. Clone the rep (you need to be logged into GitHub on VSCode while DFU is a private rep!)
@@ -229,6 +242,9 @@ in the folder open the terminal and type
 ## Hints
 <...>
 
+## Examples
+<...>
+
 ---
 ---
 
@@ -237,6 +253,7 @@ in the folder open the terminal and type
 
 ### In this section
 - [Setup VSCode](#setup-vscode)
+- [GitHub Repository Info](#github-repository-info)
 - [Lint and Test](#lint-and-test)
 - [What can be edited easily](#what-can-be-edited-easily)
 
@@ -254,6 +271,9 @@ in the folder open the terminal and type
     -> `CTRL + Shift + P` and type `Python: Create Enviorment` and hit `Quick Create`.
     -> This will install all dependencies and setup your venv.
     -> If it did not get all dependencies run `pip install -e ".[dev]"` in your project path
+
+## GitHub Repository Info
+<...>
 
 ## Lint and Test
 `ruff check . --fix && ruff format . && pytest`
@@ -277,12 +297,11 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
 ## Important
 ### Features
 - [ ] add video/stream output
-    -> [ ] to web server
-    -> [ ] vr mode (jsut the screen twice for a cardbox vr or similar)
-    -> [ ] idk what else output cv2?
+  - [x] cv2
+  - [ ] webserver
 - [ ] implement video output for(start/stop stream)
-    -> [ ] simdrone
-    -> [ ] tello
+     - [ ] simdrone
+     - [ ] tello
 - [ ] add/edit example projects:
     - [ ] ~~tello repl,~~
     - [x] simdrone keyboard,

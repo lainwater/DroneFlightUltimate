@@ -4,7 +4,14 @@ version = "0.1.0"
 description = "Modular, async Framework to control various drones."
 authors = [{ name = "Valerie Lain" }]
 requires-python = ">=3.11"
-dependencies = ["djitellopy", "opencv-python", "pynput", "pygame", "toml"]
+dependencies = [
+    "djitellopy",
+    "opencv-python",
+    "pynput",
+    "pygame",
+    "toml",
+    "numpy",
+]
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]

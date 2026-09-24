@@ -1,0 +1,28 @@
+{
+    "fpv_on": {
+        "method": "turn_on_fpv_goggles"
+    },
+    "fpv_off": {
+        "method": "turn_off_fpv_goggles"
+    },
+    "rescale": {
+        "method": "set_rescale_factor",
+        "args": {
+            "scale": 1.0
+        }
+    },
+    "show_state_on": {
+        "method": "turn_on_display_state_data",
+        "args": {
+            "data_to_display": [
+                "ts",
+                "fps",
+                "bat",
+                "pos"
+            ]
+        }
+    },
+    "show_state_off": {
+        "method": "turn_off_display_state_data"
+    }
+}

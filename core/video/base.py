@@ -21,7 +21,7 @@ class VideoBase(ABC):
         self.display_state_data = False
         self.rescale_factor = 1
         self.ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.data_to_display: tuple = ("ts", "bat", "pos")
+        self.data_to_display: tuple = ("ts", "fpsbat", "pos")
         self.state_data = {}
 
         self.fops = get_fileops()
@@ -46,6 +46,11 @@ class VideoBase(ABC):
         self.bus.unsubscribe(f"state.{self.drone_id}", self._on_state_event)
 
     async def _on_frame_event(self, topic: str, data: Any):
+        """
+        What happens on frame event from bus
+        Contract of topic, data
+            frame.drone_id  - {"ts": 1758705600.1, "seq": 4821, "encoding": "bgr24", "frame": "<numpy BGR ndarray>"}
+        """
         if not self.is_running:
             return
         if (not data) or (data is None) or (data == {}):
@@ -54,7 +59,7 @@ class VideoBase(ABC):
         try:
             await self._update_frame(data)
         except Exception as e:
-            self._publish_parser("error", {"exception": e})
+            await self._publish_parser("error", {"error": type(e).__name__, "message": str(e)})
 
     async def _on_cmd_event(self, topic: str, data: Any):
         if not self.is_running:
@@ -68,8 +73,8 @@ class VideoBase(ABC):
         kwargs = data.get("args", {})
         try:
             await self._execute(action, **kwargs)
-        except Exception as exc:
-            await self._publish_parser("error", {"error": type(exc).__name__, "message": str(exc), "action": action})
+        except Exception as e:
+            await self._publish_parser("error", {"error": type(e).__name__, "message": str(e), "action": action})
 
     async def _on_state_event(self, topic: str, data: Any):
         if not self.is_running:
@@ -114,7 +119,7 @@ class VideoBase(ABC):
         """Turn off the FPV-Goggles mode"""
         self.fpv_goggles_mode = False
 
-    async def turn_on_display_state_data(self, data_to_display: tuple = ("ts", "bat", "pos")):
+    async def turn_on_display_state_data(self, data_to_display: tuple = ("ts", "fps", "bat", "pos")):
         """Turn on the display of state data"""
         self.data_to_display = data_to_display
         self.display_state_data = True
@@ -148,12 +153,12 @@ class VideoBase(ABC):
 
     @abstractmethod
     async def _rescale_frame(self, frame, scale):
-        """Rescale frame"""
+        """Rescale the frame"""
         raise NotImplementedError
 
     @abstractmethod
     async def _to_fpv_goggles_frame(self, frame):
-        """Change frame to FPV-Goggles look"""
+        """Duplicate the frame side-by-side for FPV goggles."""
         raise NotImplementedError
 
     @abstractmethod
@@ -163,4 +168,5 @@ class VideoBase(ABC):
 
     @abstractmethod
     async def _data_to_frame(self, data):
+        """Turn a frame.{drone_id} bus message into a implementation format frame."""
         raise NotImplementedError
