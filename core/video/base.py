@@ -14,7 +14,7 @@ class VideoBase(ABC):
     def __init__(self, drone_id: str, bus: object, **kwargs):
         self.drone_id = drone_id
         self.bus = bus
-        self.innit_kwargs = kwargs
+        self.init_kwargs = kwargs
 
         self.is_running = False
         self.fpv_goggles_mode = False
@@ -22,24 +22,28 @@ class VideoBase(ABC):
         self.rescale_factor = 1
         self.ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.data_to_display: tuple = ("ts", "bat", "pos")
-        self.state_data = None
+        self.state_data = {}
 
         self.fops = get_fileops()
-        self.cmd_map = self._initialize_command_map()
+        self.command_map = self._initialize_command_map()
 
     def _initialize_command_map(self) -> dict:
         """Initialize the command map for the stream."""
         return self.fops.read_json(self.config_dir / "commands.json")
 
     def _attach(self) -> None:
-        """Start recording every cmd.{self.drone_id} event published on `bus`. Called by start_stream()"""
+        """Start recording every 'cmd.stream.{self.drone_id}', 'frame.{self.drone_id}' and 'state.{self.drone_id}' event published on `bus`.
+        Called by start_stream()"""
         self.bus.subscribe(f"frame.{self.drone_id}", self._on_frame_event)
         self.bus.subscribe(f"cmd.stream.{self.drone_id}", self._on_cmd_event)
         self.bus.subscribe(f"state.{self.drone_id}", self._on_state_event)
 
     def _detach(self) -> None:
-        """Stop recording events from `bus`. Safe to call even if never attached. Called by stop_stream()"""
-        self.bus.unsubscribe(f"cmd.{self.drone_id}", self.parse_bus_event)
+        """Stop recording events from `bus`. Safe to call even if never attached.
+        Called by stop_stream()"""
+        self.bus.unsubscribe(f"frame.{self.drone_id}", self._on_frame_event)
+        self.bus.unsubscribe(f"cmd.stream.{self.drone_id}", self._on_cmd_event)
+        self.bus.unsubscribe(f"state.{self.drone_id}", self._on_state_event)
 
     async def _on_frame_event(self, topic: str, data: Any):
         if not self.is_running:
@@ -47,7 +51,10 @@ class VideoBase(ABC):
         if (not data) or (data is None) or (data == {}):
             return
         self.ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        await self._update_frame(data)
+        try:
+            await self._update_frame(data)
+        except Exception as e:
+            self._publish_parser("error", {"exception": e})
 
     async def _on_cmd_event(self, topic: str, data: Any):
         if not self.is_running:
@@ -73,13 +80,13 @@ class VideoBase(ABC):
 
     async def _execute(self, action: str, **kwargs) -> None:
         if action not in self.command_map:
-            await self.publish_parser("error", {"error": "NotCapable", "message": f"'{action}' not in stream.{self.drone_id}'s capabilities"})
+            await self._publish_parser("error", {"error": "NotCapable", "message": f"'{action}' not in stream.{self.drone_id}'s capabilities"})
             return
         entry = self.command_map[action]
         method_name = entry["method"]
         method = getattr(self, method_name, None)
         if method is None:
-            await self.publish_parser(
+            await self._publish_parser(
                 "error", {"error": "NoSuchMethod", "message": f"'{action}' maps to '{method_name}', but stream.{self.drone_id} has no such method"}
             )
             return
@@ -88,7 +95,7 @@ class VideoBase(ABC):
         try:
             await method(**kwargs)
         except Exception as exc:
-            await self.publish_parser("error", {"error": type(exc).__name__, "message": str(exc), "action": action})
+            await self._publish_parser("error", {"error": type(exc).__name__, "message": str(exc), "action": action})
 
     async def _publish_parser(self, topic: str, data: dict) -> None:
         """Publish to the bus."""

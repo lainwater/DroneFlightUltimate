@@ -74,11 +74,12 @@ class JoystickController(ControllerBase):
     async def _controller_loop(self) -> None:
         """Actual loop of controller with 1/POLLING_RATE (see top) time inbetween processing events."""
         while self.is_running:
-            try:
-                self._process_events()
-                await asyncio.sleep(1 / POLLING_RATE)
-            except Exception as e:
-                await self._publish_parser("error", {"exception": e})
+            if self.is_turned_on:
+                try:
+                    self._process_events()
+                    await asyncio.sleep(1 / POLLING_RATE)
+                except Exception as e:
+                    await self._publish_parser("error", {"exception": e})
 
     def _process_events(self) -> None:
         """Process pygame events. What method to call by event type."""

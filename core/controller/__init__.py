@@ -30,6 +30,7 @@ def get_controller(controllertype: ControllerType, drone_id: str, bus: object, l
 
             return KeyboardController(drone_id=drone_id, bus=bus, layout=layout, **kwargs)
         case ControllerType.REPL:
+            raise NotImplementedError
             from .implementations.repl_controller.repl_controller import REPLController
 
             return REPLController(drone_id=drone_id, bus=bus, layout=layout, **kwargs)

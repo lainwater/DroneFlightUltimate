@@ -17,6 +17,13 @@ class ControllerBase(ABC):
         self._load_layout(layout)
 
         self.is_running = False
+        self.is_turned_on = True
+
+    def _turn_off_controller_without_killing(self):
+        self.is_turned_on = False
+
+    def _turn_on_controller_after_starting(self):
+        self.is_turned_on = True
 
     @abstractmethod
     def _load_layout(self, layout: str = None):

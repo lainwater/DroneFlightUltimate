@@ -36,34 +36,36 @@ class KeyboardController(ControllerBase):
 
     def _on_press(self, key):
         """Method done on 'on_press' event. Publishes action to bus specified in layout set at creation."""
-        entry = self._resolve(key)
-        if not entry:
-            return
-        if entry.get("on_press") is not None:
-            data = {"action": entry["on_press"]}
-        elif (entry.get("rc_axis") is not None) and (entry.get("rc_sign") is not None):
-            self._held_axes[entry["rc_axis"]] = entry["rc_sign"]
-            data = {"action": "rc", "args": self._compute_rc_vector()}
-        else:
-            return
-        future = asyncio.run_coroutine_threadsafe(self._publish_parser(data), self.loop)
-        future.add_done_callback(self._log_future_exception)
+        if self.is_turned_on:
+            entry = self._resolve(key)
+            if not entry:
+                return
+            if entry.get("on_press") is not None:
+                data = {"action": entry["on_press"]}
+            elif (entry.get("rc_axis") is not None) and (entry.get("rc_sign") is not None):
+                self._held_axes[entry["rc_axis"]] = entry["rc_sign"]
+                data = {"action": "rc", "args": self._compute_rc_vector()}
+            else:
+                return
+            future = asyncio.run_coroutine_threadsafe(self._publish_parser(data), self.loop)
+            future.add_done_callback(self._log_future_exception)
 
     def _on_release(self, key):
         """Method done on 'on_release' event. Publishes action to bus specified in layout set at creation."""
-        entry = self._resolve(key)
-        if not entry:
-            return
-        if entry.get("on_release") is not None:
-            data = {"action": entry["on_release"]}
-        elif (entry.get("rc_axis") is not None) and (entry.get("rc_sign") is not None):
-            if self._held_axes[entry.get("rc_axis")] == entry.get("rc_sign"):
-                self._held_axes[entry.get("rc_axis")] = 0.0
-            data = {"action": "rc", "args": self._compute_rc_vector()}
-        else:
-            return
-        future = asyncio.run_coroutine_threadsafe(self._publish_parser(data), self.loop)
-        future.add_done_callback(self._log_future_exception)
+        if self.is_turned_on:
+            entry = self._resolve(key)
+            if not entry:
+                return
+            if entry.get("on_release") is not None:
+                data = {"action": entry["on_release"]}
+            elif (entry.get("rc_axis") is not None) and (entry.get("rc_sign") is not None):
+                if self._held_axes[entry.get("rc_axis")] == entry.get("rc_sign"):
+                    self._held_axes[entry.get("rc_axis")] = 0.0
+                data = {"action": "rc", "args": self._compute_rc_vector()}
+            else:
+                return
+            future = asyncio.run_coroutine_threadsafe(self._publish_parser(data), self.loop)
+            future.add_done_callback(self._log_future_exception)
 
     def _compute_rc_vector(self) -> dict:
         return {
