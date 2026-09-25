@@ -28,7 +28,7 @@ from core.bus_player_recorder.recorder_base import RecorderBase
 from core.bus_player_recorder.schema import BusLogEntry, is_json_safe
 from core.fileops import get_fileops
 
-DEFAULT_EXCLUDE_TOPICS = ("video.*",)
+DEFAULT_EXCLUDE_TOPICS = ("frame.*",)
 
 
 class BusRecorder(RecorderBase):

@@ -125,16 +125,18 @@ class TelloDrone(DroneBase):
         if ack is not False:
             await self.disconnect()
 
-    @requires(DroneConState.CONNECTED)
     async def disconnect(self):
-        await self.stop_state_reciever()
-        await self.set("disarm")
-        self.flight_state = DroneFlightState.LANDED
-        self.arm_state = DroneArmState.DISARMED
-        self.con_state = DroneConState.DISCONNECTING
-        await self.sdk.close_command_channel()
-        self.con_state = DroneConState.DISCONNECTED
-        await self.publish_parser(PublishType.ACK, {"cmd": "disconnect", "ack": "True"})
+        try:
+            await self.stop_state_reciever()
+            await self.set("disarm")
+            self.flight_state = DroneFlightState.LANDED
+            self.arm_state = DroneArmState.DISARMED
+            self.con_state = DroneConState.DISCONNECTING
+            await self.sdk.close_command_channel()
+            self.con_state = DroneConState.DISCONNECTED
+            await self.publish_parser(PublishType.ACK, {"cmd": "disconnect", "ack": "True"})
+        except Exception as e:
+            await self.publish_parser(PublishType.ERROR, {"error": str(e), "method": "disconnect"})
 
     # Movement
     @requires(DroneConState.CONNECTED, DroneFlightState.LANDED, DroneArmState.ARMED)
