@@ -17,6 +17,7 @@ SDK 2.0.
 """
 
 import asyncio
+import time
 from pathlib import Path
 from typing import Callable
 
@@ -60,6 +61,7 @@ class TelloDrone(DroneBase):
         self.sdk: TelloSDK | None = None
         self.data_gen_task = None
         self.video_streaming = False
+        self.video_task = None
 
     @property
     def config_dir(self) -> Path:
@@ -99,7 +101,7 @@ class TelloDrone(DroneBase):
     # General
     async def connect(self):
         self.con_state = DroneConState.CONNECTING
-        self.sdk = TelloSDK(self.ip, self.cmd_port, self.cmd_pc_port, self.state_port)
+        self.sdk = TelloSDK(self.ip, self.cmd_port, self.cmd_pc_port, self.state_port, self.video_port)
         await self.sdk.open_command_channel()
         ack = await self.sdk.send_and_receive("command", timeout=10)
         if ack is False:
@@ -242,29 +244,38 @@ class TelloDrone(DroneBase):
     @requires(DroneConState.CONNECTED)
     async def start_video(self):
         ack = await self.sdk.send_and_receive("streamon", timeout=10)
+        if ack is not False:
+            await asyncio.sleep(1.0)  # gib der Tello kurz Zeit, bevor der Capture-Probe reinschaut - siehe dein altes sleep(1)
+            await self.sdk.open_video_channel()
+            self.video_task = asyncio.create_task(self._consume_video_stream())
         await self._publish_tristate_ack("start_video", ack, on_success=lambda: setattr(self, "video_streaming", True))
 
     @requires(DroneConState.CONNECTED)
     async def stop_video(self):
         ack = await self.sdk.send_and_receive("streamoff", timeout=10)
+        self.sdk.stop_video_stream()
+        if self.video_task:
+            await self.video_task
+            self.video_task = None
+        await self.sdk.close_video_channel()
         await self._publish_tristate_ack("stop_video", ack, on_success=lambda: setattr(self, "video_streaming", False))
 
-    async def get_frame(self):
-        raise NotImplementedError(
-            "Video pipeline not implemented yet - see core/video. "
-            "streamon/streamoff already work; decoding the H264 stream "
-            f"on port {self.video_port} comes later."
-        )
+    async def _consume_video_stream(self):
+        """Analog to _consume_state_stream"""
+        seq = 0
+        async for frame in self.sdk.video_stream():
+            seq += 1
+            await self.publish_parser(PublishType.FRAME, {"ts": time.time(), "seq": seq, "encoding": "bgr24", "frame": frame})
 
     # Other
     @requires(DroneConState.CONNECTED)
-    async def start_state_reciever(self):
+    async def start_state_receiver(self):
         """Starts a background task that publishes every item the SDK's
         state_stream yields, until stop_state_reciever() cancels it."""
         await self.sdk.open_state_channel()
         self.data_gen_task = asyncio.create_task(self._consume_state_stream())
 
-    async def stop_state_reciever(self):
+    async def stop_state_receiver(self):
         """Cancel the background task and wait for it to actually stop,
         so we don't leave an unhandled CancelledError floating around."""
         if self.data_gen_task:

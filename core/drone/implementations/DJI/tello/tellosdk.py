@@ -22,6 +22,8 @@ Two things this does differently from a naive blocking-socket wrapper:
 import asyncio
 from typing import Any
 
+import cv2 as cv
+
 
 def _coerce_number(value: str):
     """Most Tello read-command responses are plain numbers; try int,
@@ -79,17 +81,20 @@ _RC_TICK_SECONDS = 0.1
 
 
 class TelloSDK:
-    def __init__(self, ip: str, cmd_port: int, cmd_pc_port: int, state_port: int):
+    def __init__(self, ip: str, cmd_port: int, cmd_pc_port: int, state_port: int, video_port: int):
         self.ip = ip
         self.cmd_port = cmd_port
         self.cmd_pc_port = cmd_pc_port
         self.state_port = state_port
+        self.video_port = video_port
 
         self._cmd_transport: asyncio.DatagramTransport | None = None
         self._state_transport: asyncio.DatagramTransport | None = None
         self._response_queue: "asyncio.Queue[str]" = asyncio.Queue()
         self._state_queue: "asyncio.Queue[dict]" = asyncio.Queue()
         self._send_lock = asyncio.Lock()
+        self._video_capture: "cv.VideoCapture | None" = None
+        self._video_stop = False
 
         # position estimate - x/y have NO real sensor on
         # a bare Tello (no mission pads)
@@ -203,3 +208,42 @@ class TelloSDK:
         while True:
             state = await self._state_queue.get()
             yield state
+
+    # ---------------------------------------------------------- video stream
+    async def open_video_channel(self) -> None:
+        """VideoCapture's constructor itself blocks while it probes the
+        stream - runs off the event loop, same reasoning as everywhere else here."""
+        self._video_stop = False
+        self._video_capture = await asyncio.to_thread(cv.VideoCapture, f"udp://0.0.0.0:{self.video_port}")
+
+    def stop_video_stream(self) -> None:
+        """Signals video_stream()'s loop to exit on its NEXT iteration.
+        Deliberately does NOT release the capture yet - see close_video_channel()."""
+        self._video_stop = True
+
+    async def close_video_channel(self) -> None:
+        """Only call this after the consumer task has actually finished
+        (see TelloDrone.stop_video). asyncio.Task.cancel() can't interrupt
+        a blocking call already running in a worker thread - if we release()
+        while a cap.read() from the previous iteration is still in flight
+        on another thread, that's a real OpenCV crash risk, not just a
+        theoretical one."""
+        if self._video_capture:
+            await asyncio.to_thread(self._video_capture.release)
+            self._video_capture = None
+
+    async def video_stream(self):
+        """Async generator yielding BGR numpy frames as they arrive.
+        Mirrors state_stream()'s interface. Retries on dropped frames
+        (normal over WiFi/UDP) but gives up after ~5s of nothing."""
+        consecutive_failures = 0
+        while not self._video_stop:
+            received, frame = await asyncio.to_thread(self._video_capture.read)
+            if not received:
+                consecutive_failures += 1
+                if consecutive_failures >= 50:
+                    return
+                await asyncio.sleep(0.1)
+                continue
+            consecutive_failures = 0
+            yield frame

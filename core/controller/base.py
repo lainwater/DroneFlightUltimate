@@ -25,6 +25,14 @@ class ControllerBase(ABC):
     def _turn_on_controller_after_starting(self):
         self.is_turned_on = True
 
+    def _cmd_topic(self, target: str | None) -> str:
+        """Layout entry's optional "target" -> bus topic. Default 'drone' = cmd.{id}."""
+        if target in (None, "drone"):
+            return f"cmd.{self.drone_id}"
+        if target == "stream":
+            return f"cmd.stream.{self.drone_id}"
+        raise ValueError(f"Unknown target {target!r} in layout {self.layout!r}")
+
     @abstractmethod
     def _load_layout(self, layout: str = None):
         """Load the layout."""

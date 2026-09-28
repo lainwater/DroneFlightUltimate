@@ -62,10 +62,10 @@ class JoystickController(ControllerBase):
         layout_path = Path(__file__).parent / f"{layout}.json"
         self.config = self.fops.read_json(layout_path)
 
-    async def _publish_parser(self, _type: str, data: dict) -> None:
+    async def _publish_parser(self, _type: str, data: dict, target: str | None = None) -> None:
         if self.bus:
             if _type == "cmd":
-                await self.bus.publish(f"cmd.{self.drone_id}", data)
+                await self.bus.publish(self._cmd_topic(target), data)
             elif _type == "status":
                 await self.bus.publish(f"state.joystick-{self.layout}.{self.drone_id}", data)
             elif _type == "error":
@@ -77,9 +77,9 @@ class JoystickController(ControllerBase):
             if self.is_turned_on:
                 try:
                     self._process_events()
-                    await asyncio.sleep(1 / POLLING_RATE)
                 except Exception as e:
-                    await self._publish_parser("error", {"exception": e})
+                    await self._publish_parser("error", {"error": type(e).__name__, "message": str(e)})
+            await asyncio.sleep(1 / POLLING_RATE)
 
     def _process_events(self) -> None:
         """Process pygame events. What method to call by event type."""
@@ -142,7 +142,7 @@ class JoystickController(ControllerBase):
         action = config.get("positions", {}).get(position)
         if action is None:
             return
-        self._publish("cmd", {"action": action})
+        self._publish("cmd", {"action": action}, config.get("target"))
 
     @staticmethod
     def _resolve_switch_position(config: dict, value: float) -> str | None:
@@ -162,11 +162,11 @@ class JoystickController(ControllerBase):
             return "negative"
         return "positive"
 
-    def _publish(self, _type: str = "cmd", data: dict = {}) -> None:
+    def _publish(self, _type: str = "cmd", data: dict = {}, target: str | None = None) -> None:
         """Schedule the publish on the running event loop and make
         sure any exception actually surfaces - an untracked task's
         failure would otherwise just look like 'the switch did nothing'"""
-        task = asyncio.create_task(self._publish_parser(_type, data))
+        task = asyncio.create_task(self._publish_parser(_type, data, target))
         task.add_done_callback(self._log_task_exception)
 
     @staticmethod

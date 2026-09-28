@@ -15,7 +15,7 @@ class simdrone_keyboard(ProjectBase):
         self.live_logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=LogLevel.INFO)
 
         self.recorder.attach(self.bus)
-        self.bus.subscribe("*", lambda topic, data: self.live_logger.log(LogLevel.INFO, f"{topic}: {data}"))
+        self.bus.subscribe("*", self.live_logger.log_bus_event)
 
         d1_conf = self.drone_config["drone_1"]
         drone_type = DroneType[d1_conf["drone_type"].upper()]

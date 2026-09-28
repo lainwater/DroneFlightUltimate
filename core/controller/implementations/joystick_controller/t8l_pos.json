@@ -1,31 +1,26 @@
 {
     "deadzone": 0.15,
-
     "axes": {
         "0": {
             "type": "rc",
             "axis": "x",
             "invert": false
         },
-
         "1": {
             "type": "rc",
             "axis": "y",
             "invert": false
         },
-
         "2": {
             "type": "rc",
             "axis": "z",
             "invert": false
         },
-
         "3": {
             "type": "rc",
             "axis": "yaw",
             "invert": false
         },
-
         "4": {
             "type": "switch",
             "name": "SE",
@@ -34,7 +29,6 @@
                 "positive": null
             }
         },
-
         "5": {
             "type": "switch",
             "name": "SA",
@@ -43,7 +37,6 @@
                 "positive": null
             }
         },
-
         "6": {
             "type": "switch",
             "name": "SC",
@@ -53,7 +46,6 @@
                 "down": "takeoff"
             }
         },
-
         "7": {
             "type": "switch",
             "name": "SB",

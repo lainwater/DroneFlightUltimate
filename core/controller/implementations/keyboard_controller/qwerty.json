@@ -1,20 +1,80 @@
 {
-  "c":     { "on_press": "connect" },
-  "v":     { "on_press": "set_arm" },
-  "b":     { "on_press": "set_disarm" },
-  "y":     { "on_press": "get_position" },
-  "u":     { "on_press": "get_attitude" },
-
-  "t":     { "on_press": "takeoff" },
-  "l":     { "on_press": "land" },
-  "space": { "on_press": "emergency" },
-
-  "w":     { "rc_axis": "z", "rc_sign": 1 },
-  "s":     { "rc_axis": "z", "rc_sign": -1 },
-  "a":     { "rc_axis": "yaw", "rc_sign": -1 },
-  "d":     { "rc_axis": "yaw", "rc_sign": 1 },
-  "up":    { "rc_axis": "y", "rc_sign": 1 },
-  "down":  { "rc_axis": "y", "rc_sign": -1 },
-  "left":  { "rc_axis": "x", "rc_sign": -1 },
-  "right": { "rc_axis": "x", "rc_sign": 1 }
+  "c": {
+    "on_press": "connect"
+  },
+  "v": {
+    "on_press": "set_arm"
+  },
+  "b": {
+    "on_press": "set_disarm"
+  },
+  "y": {
+    "on_press": "get_position"
+  },
+  "u": {
+    "on_press": "get_attitude"
+  },
+  "i": {
+    "on_press": "start_state_reciever"
+  },
+  "o": {
+    "on_press": "stop_state_reciever"
+  },
+  "f": {
+    "on_press": "fpv_on",
+    "target": "stream"
+  },
+  "g": {
+    "on_press": "fpv_off",
+    "target": "stream"
+  },
+  "n": {
+    "on_press": "show_state_on",
+    "target": "stream"
+  },
+  "m": {
+    "on_press": "show_state_off",
+    "target": "stream"
+  },
+  "t": {
+    "on_press": "takeoff"
+  },
+  "l": {
+    "on_press": "land"
+  },
+  "space": {
+    "on_press": "emergency"
+  },
+  "w": {
+    "rc_axis": "z",
+    "rc_sign": 1
+  },
+  "s": {
+    "rc_axis": "z",
+    "rc_sign": -1
+  },
+  "a": {
+    "rc_axis": "yaw",
+    "rc_sign": -1
+  },
+  "d": {
+    "rc_axis": "yaw",
+    "rc_sign": 1
+  },
+  "up": {
+    "rc_axis": "y",
+    "rc_sign": 1
+  },
+  "down": {
+    "rc_axis": "y",
+    "rc_sign": -1
+  },
+  "left": {
+    "rc_axis": "x",
+    "rc_sign": -1
+  },
+  "right": {
+    "rc_axis": "x",
+    "rc_sign": 1
+  }
 }

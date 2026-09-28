@@ -314,6 +314,7 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
     - [ ] fly waypoints (dict of xyz + speed);
     - [ ] search grids of shapes: square, circle, triangle, hexagon (resolution, how small grid-areas are) (single, multi)
     - [ ] tests for it
+    - [ ] parralel flight
 - [x] add linux fops
 
 ### Utils
@@ -343,6 +344,8 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
 
 
 ## Future
+- [ ] rework the whole error logic/pipeline
+- [ ] get better standardized bus
 - [ ] web ui for handling projects or an app (other repo, make a project)
 - [ ] more controllers (joystick ones mainly)
 - [ ] more drones (parrot mambo,..)

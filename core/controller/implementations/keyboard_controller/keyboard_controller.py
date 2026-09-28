@@ -27,12 +27,12 @@ class KeyboardController(ControllerBase):
         layoutpath = current_keyboard_layout_as_json_path(layout)
         self.config = self.fops.read_json(layoutpath)
 
-    async def _publish_parser(self, data: dict) -> None:
+    async def _publish_parser(self, data: dict, target: str | None = None) -> None:
         if self.bus:
-            if hasattr(data, "error"):
+            if "error" in data:
                 await self.bus.publish(f"error.Keyboard.{self.drone_id}", data)
             else:
-                await self.bus.publish(f"cmd.{self.drone_id}", data)
+                await self.bus.publish(self._cmd_topic(target), data)
 
     def _on_press(self, key):
         """Method done on 'on_press' event. Publishes action to bus specified in layout set at creation."""
@@ -47,7 +47,7 @@ class KeyboardController(ControllerBase):
                 data = {"action": "rc", "args": self._compute_rc_vector()}
             else:
                 return
-            future = asyncio.run_coroutine_threadsafe(self._publish_parser(data), self.loop)
+            future = asyncio.run_coroutine_threadsafe(self._publish_parser(data, entry.get("target")), self.loop)
             future.add_done_callback(self._log_future_exception)
 
     def _on_release(self, key):
@@ -64,7 +64,7 @@ class KeyboardController(ControllerBase):
                 data = {"action": "rc", "args": self._compute_rc_vector()}
             else:
                 return
-            future = asyncio.run_coroutine_threadsafe(self._publish_parser(data), self.loop)
+            future = asyncio.run_coroutine_threadsafe(self._publish_parser(data, entry.get("target")), self.loop)
             future.add_done_callback(self._log_future_exception)
 
     def _compute_rc_vector(self) -> dict:
@@ -92,4 +92,6 @@ class KeyboardController(ControllerBase):
             lookup_key = key.char if hasattr(key, "char") and key.char else getattr(key, "name", None)
             return self.config.get(lookup_key)
         except Exception as e:
-            self._publish_parser({"error": {"in": "_resolve", "exception": e}})
+            future = asyncio.run_coroutine_threadsafe(self._publish_parser({"error": {"in": "_resolve", "exception": str(e)}}), self.loop)
+            future.add_done_callback(self._log_future_exception)
+            return None

@@ -9,7 +9,7 @@ import cv2 as cv
 
 from core.video.base import VideoBase
 
-TEXT_SPACING = 10
+TEXT_SPACING = 40
 
 
 class CV2Display(VideoBase):
@@ -24,11 +24,6 @@ class CV2Display(VideoBase):
 
     async def start_stream(self):
         """Start the video stream."""
-        # drone needs to do this first for telllo:
-        # set video port .send_and_receive(f"port {self.info_port} {self.video_port}")
-        # self.drone.send_and_receive("streamon")
-        # self.cap = await cv.VideoCapture(self.udp)
-        # self.cap.release()
         self._attach()
         cv.namedWindow(self.drone_id)
         self.is_running = True
@@ -51,15 +46,15 @@ class CV2Display(VideoBase):
             for item in self.data_to_display:
                 i += 1
                 if item == "ts" or item == "timestamp":
-                    await self._display_text(frame, text=f"{self.ts}", position=(20, 60 + i * TEXT_SPACING))
+                    await self._display_text(frame, text=f"{self.ts}", position=(20, 80 + i * TEXT_SPACING))
                 elif item == "fps":
                     delta = float(ts_fps_new) - float(self.ts_fps_old)
                     fps = 1 / delta if delta > 0 else 0.0
-                    await self._display_text(frame, text=f"FPS: {fps:.1f}", position=(20, 60 + i * TEXT_SPACING))
+                    await self._display_text(frame, text=f"FPS: {fps:.1f}", position=(20, 80 + i * TEXT_SPACING))
                     self.ts_fps_old = ts_fps_new
                 else:
                     try:
-                        await self._display_text(frame, text=f"{item}: {self.state_data[item]}", position=(20, 60 + i * TEXT_SPACING))
+                        await self._display_text(frame, text=f"{item}: {self.state_data[item]}", position=(20, 80 + i * TEXT_SPACING))
                     except (KeyError, TypeError):
                         pass
 

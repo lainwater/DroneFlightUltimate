@@ -9,8 +9,8 @@ from core.logger.base import LoggerBase, LogLevel
 
 
 class JSONLLogger(LoggerBase):
-    def __init__(self, min_level: LogLevel = LogLevel.INFO, log_path: str | None = None):
-        super().__init__(min_level)
+    def __init__(self, min_level: LogLevel = LogLevel.INFO, exclude_data: tuple = (), exclude_topics: tuple = (), log_path: str | None = None):
+        super().__init__(min_level, exclude_data, exclude_topics)
         self.file_path = log_path if log_path else None
         self.fops = get_fileops()
 

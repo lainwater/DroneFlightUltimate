@@ -1,0 +1,60 @@
+{
+    "deadzone": 0.15,
+    "axes": {
+        "0": {
+            "type": "rc",
+            "axis": "x",
+            "invert": false
+        },
+        "1": {
+            "type": "rc",
+            "axis": "y",
+            "invert": false
+        },
+        "2": {
+            "type": "rc",
+            "axis": "z",
+            "invert": false
+        },
+        "3": {
+            "type": "rc",
+            "axis": "yaw",
+            "invert": false
+        },
+        "4": {
+            "type": "switch",
+            "name": "SE",
+            "positions": {
+                "negative": "takeoff",
+                "positive": "land"
+            }
+        },
+        "5": {
+            "type": "switch",
+            "name": "SA",
+            "positions": {
+                "negative": "set_arm",
+                "positive": null
+            }
+        },
+        "6": {
+            "type": "switch",
+            "name": "SC",
+            "target": "stream",
+            "positions": {
+                "up": "fpv_on",
+                "middle": null,
+                "down": "show_state_on"
+            }
+        },
+        "7": {
+            "type": "switch",
+            "name": "SB",
+            "positions": {
+                "up": "start_video",
+                "middle": null,
+                "down": "start_state_receiver"
+            }
+        }
+    }
+}

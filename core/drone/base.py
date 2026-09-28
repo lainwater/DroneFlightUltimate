@@ -45,6 +45,7 @@ class PublishType(Enum):
     DATA = "data"
     ACK = "ack"
     ERROR = "error"
+    FRAME = "frame"
 
 
 def requires(*states):
@@ -187,12 +188,12 @@ class DroneBase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def start_state_reciever(self):
+    async def start_state_receiver(self):
         "Starts continues State reciever"
         raise NotImplementedError
 
     @abstractmethod
-    async def stop_state_reciever(self):
+    async def stop_state_receiver(self):
         "Stops continues State reciever"
         raise NotImplementedError
 

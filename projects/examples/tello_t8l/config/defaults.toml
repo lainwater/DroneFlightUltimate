@@ -2,4 +2,4 @@
 level = "INFO"
 
 [controller]
-layout = "t8l"
+layout = "t8l_pos"
