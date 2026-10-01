@@ -10,15 +10,29 @@ from core.logger import LoggerType, LogLevel, get_logger
 from core.video import VideoOutputType, get_videostream
 from projects.base import ProjectBase
 
-qwertz_startup = """QWERTZ KEYBOARD CONTROLS
-C = connect; V/B = arm, disarm
-Z = get position; U = get attitude
-J/K = drone start/stop video;
-F/G = FPV on/off;
-I/O = start/stop state receiver; N/M = stream stats on/off
-T = takeoff; L = land; Space = emergency
-W/S = up/down; Up/Down = forward/back
-A/D = yaw left/right; Left/Right = move left/right"""
+qwertz_startup = """
+QWERTZ KEYBOARD CONTROLS
+# Util
+C           = connect
+V/B         = arm / disarm
+Z/U         = get position / attitude
+I/O         = start/stop state receiver
+J/K         = start/stop video stream from drone
+1/2         = Camera 1/Camera 2
+# Movement Util
+T/L         = takeoff / land
+Space       = emergency
+# Movement
+W/S         = up / down
+A/D         = left / right yaw
+Up/Down     = forward / backward
+Left/Right  = left / right move
+# Video
+Y/X         = start/stop video stream output
+J/K         = start/stop video stream
+F/G         = on/off FPV mode
+N/M         = on/off display stats on video
+"""
 
 
 class tello_keyboard_video(ProjectBase):

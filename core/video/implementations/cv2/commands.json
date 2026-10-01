@@ -1,4 +1,10 @@
 {
+    "start_video": {
+        "method": "start_video_stream"
+    },
+    "stop_video": {
+        "method": "stop_video_stream"
+    },
     "fpv_on": {
         "method": "turn_on_fpv_goggles"
     },

@@ -286,7 +286,7 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
 ---
 
 # To-Do
-> Here you find everything i want to add, issues and similar.
+> Here you find everything i want to add, issues and similar. See Notion for more.
 
 ### In this section
 - [Important](#important)
@@ -296,30 +296,36 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
 
 ## Important
 ### Features
-- [ ] add video/stream output
-  - [x] cv2
-  - [ ] webserver
+- [ ] rec video (+keyboard, and bus cmd)
+- [ ] snapshot frame (+keyboard and bus cmd)
 - [ ] implement video output for(start/stop stream)
      - [ ] simdrone
-     - [ ] tello
+     - [x] tello
 - [ ] add/edit example projects:
-    - [ ] ~~tello repl,~~
     - [x] simdrone keyboard,
-    - [ ] ~~simdrone repl,~~
     - [x] simdrone t8l,
+    - [ ] simdrone t8l video,
+    - [ ] simdrone keyboard video
+    - [x] telo t8l video,
+    - [x] telo keyboard video
     - [ ] multi tello/simdrone with keyboard,
-    - [ ] all with video support
+    - [ ] multi tello/simdrone with t8l,
+    - [ ] multi tello/simdrone with keyboard video,
+    - [ ] multi tello/simdrone with t8l video,
 - [ ] add premade flight patterns (new core module)
     - [ ] fly shapes: square, circle, triangle, hexagon
     - [ ] fly waypoints (dict of xyz + speed);
     - [ ] search grids of shapes: square, circle, triangle, hexagon (resolution, how small grid-areas are) (single, multi)
     - [ ] tests for it
     - [ ] parralel flight
-- [x] add linux fops
 
 ### Utils
 - [ ] a scafhold/template drone.py
 - [ ] implement tests for each core module
+- [ ] setup github for colabreation ()
+    - [ ] CI (lint+run tests)
+    - [ ] issue tags
+    - [ ] versions
 - [ ] look over everything
     - [x] remove deadcode, reduency, overcomplicated things
     - [x] prettyfie (linter :))
@@ -331,13 +337,13 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
 ## Less Important
 ### Features
 - [ ] add repl controller
+- [ ] add video/stream output webserver
+- [ ] add/edit example projects:
+    - [ ] tello repl
+    - [ ] simdrone repl
 
 ### Utils
 - [ ] get a proper license
-- [ ] setup github for colabreation ()
-    - [ ] CI (lint+run tests)
-    - [ ] issue tags
-    - [ ] versions
 - [ ] add pdf or powerpoint/similar presentations (for non-tech people, for techy people, for using, for collabing)
 - [ ] present to my profs
 - [ ] make github public
@@ -345,10 +351,10 @@ It must fullfill its `base.py` and work in the way other files expect it to, at 
 
 ## Future
 - [ ] rework the whole error logic/pipeline
-- [ ] get better standardized bus
+- [ ] get better more standardized bus message format
 - [ ] web ui for handling projects or an app (other repo, make a project)
 - [ ] more controllers (joystick ones mainly)
-- [ ] more drones (parrot mambo,..)
+- [ ] more drones (parrot mambo, betafpv,...)
 
 ## Known Issues
 - There is some weird async timing bug i havent been able to recreate.

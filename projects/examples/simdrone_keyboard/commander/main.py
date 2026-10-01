@@ -9,6 +9,23 @@ from core.drone import DroneType, get_drone
 from core.logger import LoggerType, LogLevel, get_logger
 from projects.base import ProjectBase
 
+qwertz_startup = """
+QWERTZ KEYBOARD CONTROLS
+# Util
+C           = connect
+V/B         = arm / disarm
+Z/U         = get position / attitude
+I/O         = start/stop state receiver
+# Movement Util
+T/L         = takeoff / land
+Space       = emergency
+# Movement
+W/S         = up / down
+A/D         = left / right yaw
+Up/Down     = forward / backward
+Left/Right  = left / right move
+"""
+
 
 class simdrone_keyboard(ProjectBase):
     async def setup(self) -> None:
@@ -19,22 +36,15 @@ class simdrone_keyboard(ProjectBase):
 
         d1_conf = self.drone_config["drone_1"]
         drone_type = DroneType[d1_conf["drone_type"].upper()]
-        self.drone1 = get_drone(drone_type, d1_conf["drone_id"], bus=self.bus, ip=d1_conf["ip"], port=d1_conf["port"])
+        self.drone1 = get_drone(drone_type, d1_conf["drone_id"], bus=self.bus, ip=d1_conf["ip"])
 
         layout = self.app_config.get("controller", {}).get("layout") or None
         self.controller = get_controller(ControllerType.KEYBOARD, drone_id=d1_conf["drone_id"], bus=self.bus, layout=layout)
 
     async def main(self) -> None:
-        await self.drone1.connect()
-        await self.drone1.set("flight_mode", flight_mode="rc")
-
         await self.controller.start_controller()
-        print(
-            f"""Keyboard controller active for '{self.drone1.drone_id}'.
-                'c': connect | 'v': arm | 't': take off
-                Press Ctrl+C to stop."""
-        )
 
+        print(qwertz_startup)
         await asyncio.Event().wait()
 
     async def end_run(self) -> None:

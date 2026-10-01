@@ -9,8 +9,14 @@ from core.drone import DroneType, get_drone
 from core.logger import LoggerType, LogLevel, get_logger
 from projects.base import ProjectBase
 
+t8l_startup = """T8L CONTROLS
+Sticks: X/Y/Z/Yaw = RC movement
+SA: negative = arm
+SE: negative = takeoff, positive = land
+SB: down = start state receiver"""
 
-class simdrone_keyboard(ProjectBase):
+
+class simdrone_t8l(ProjectBase):
     async def setup(self) -> None:
         self.live_logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=LogLevel.INFO)
 
@@ -25,16 +31,8 @@ class simdrone_keyboard(ProjectBase):
         self.controller = get_controller(ControllerType.JOYSTICK, drone_id=d1_conf["drone_id"], bus=self.bus, layout=layout)
 
     async def main(self) -> None:
-        await self.drone1.connect()
-        await self.drone1.set("flight_mode", flight_mode="rc")
-
         await self.controller.start_controller()
-        print(
-            f"""T8L controller active for '{self.drone1.drone_id}'.\n
-            SB up, down = connect, disconnect | SE = arm | SC up, down = take off, land | SA = get_position.\n
-            Press Ctrl+C to stop."""
-        )
-
+        print(t8l_startup)
         await asyncio.Event().wait()
 
     async def end_run(self) -> None:

@@ -16,6 +16,12 @@ from core.drone import DroneType, get_drone
 from core.logger import LoggerType, LogLevel, get_logger
 from projects.base import ProjectBase
 
+t8l_startup = """T8L CONTROLS
+Sticks: X/Y/Z/Yaw = RC movement
+SA: negative = arm
+SE: negative = takeoff, positive = land
+SB: down = start state receiver"""
+
 
 class tello_t8l(ProjectBase):
     async def setup(self) -> None:
@@ -33,11 +39,7 @@ class tello_t8l(ProjectBase):
 
     async def main(self) -> None:
         await self.controller.start_controller()
-        print(
-            f"""T8L controller active for '{self.drone1.drone_id}'.\n
-            SB up, down = connect, disconnect | SE = arm | SC up, down = take off, land | SA = get_position.\n
-            Press Ctrl+C to stop."""
-        )
+        print(t8l_startup)
         await asyncio.Event().wait()
 
     async def end_run(self) -> None:

@@ -26,6 +26,14 @@
   "k": {
     "on_press": "stop_video"
   },
+  "x": {
+    "on_press": "stop_video",
+    "target": "stream"
+  },
+  "y": {
+    "on_press": "start_video",
+    "target": "stream"
+  },
   "f": {
     "on_press": "fpv_on",
     "target": "stream"

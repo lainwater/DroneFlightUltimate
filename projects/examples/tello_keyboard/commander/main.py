@@ -16,6 +16,23 @@ from core.drone import DroneType, get_drone
 from core.logger import LoggerType, LogLevel, get_logger
 from projects.base import ProjectBase
 
+qwertz_startup = """
+QWERTZ KEYBOARD CONTROLS
+# Util
+C           = connect
+V/B         = arm / disarm
+Z/U         = get position / attitude
+I/O         = start/stop state receiver
+# Movement Util
+T/L         = takeoff / land
+Space       = emergency
+# Movement
+W/S         = up / down
+A/D         = left / right yaw
+Up/Down     = forward / backward
+Left/Right  = left / right move
+"""
+
 
 class tello_keyboard(ProjectBase):
     async def setup(self) -> None:
@@ -33,11 +50,8 @@ class tello_keyboard(ProjectBase):
 
     async def main(self) -> None:
         await self.controller.start_controller()
-        print(
-            f"""Keyboard controller active for '{self.drone1.drone_id}'.\n
-            'c': connect | 'v': arm | 't': take off\n
-            Press Ctrl+C to stop."""
-        )
+
+        print(qwertz_startup)
         await asyncio.Event().wait()
 
     async def end_run(self) -> None:
