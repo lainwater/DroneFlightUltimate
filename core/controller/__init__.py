@@ -18,7 +18,7 @@ from .base import ControllerBase
 
 class ControllerType(Enum):
     KEYBOARD = "keyboard_controller"
-    REPL = "repl_controller"
+    # REPL = "repl_controller"
     JOYSTICK = "joystick_controller"
 
 
@@ -29,11 +29,11 @@ def get_controller(controllertype: ControllerType, drone_id: str, bus: object, l
             from .implementations.keyboard_controller.keyboard_controller import KeyboardController
 
             return KeyboardController(drone_id=drone_id, bus=bus, layout=layout, **kwargs)
-        case ControllerType.REPL:
-            raise NotImplementedError
-            from .implementations.repl_controller.repl_controller import REPLController
+        # case ControllerType.REPL:
+        #     raise NotImplementedError
+        #     from .implementations.repl_controller.repl_controller import REPLController
 
-            return REPLController(drone_id=drone_id, bus=bus, layout=layout, **kwargs)
+        #     return REPLController(drone_id=drone_id, bus=bus, layout=layout, **kwargs)
         case ControllerType.JOYSTICK:
             from .implementations.joystick_controller.joystick_controller import JoystickController
 
