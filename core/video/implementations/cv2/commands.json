@@ -1,9 +1,9 @@
 {
     "start_video": {
-        "method": "start_video_stream"
+        "method": "start_stream"
     },
     "stop_video": {
-        "method": "stop_video_stream"
+        "method": "stop_stream"
     },
     "fpv_on": {
         "method": "turn_on_fpv_goggles"
@@ -30,5 +30,14 @@
     },
     "show_state_off": {
         "method": "turn_off_display_state_data"
+    },
+    "start_recording": {
+        "method": "start_recording"
+    },
+    "stop_recording": {
+        "method": "stop_recording"
+    },
+    "take_snapshot": {
+        "method": "take_snapshot"
     }
 }

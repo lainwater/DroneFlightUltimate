@@ -16,11 +16,13 @@ from core.drone import DroneType, get_drone
 from core.logger import LoggerType, LogLevel, get_logger
 from projects.base import ProjectBase
 
-t8l_startup = """T8L CONTROLS
+t8l_startup = """
+T8L CONTROLS
 Sticks: X/Y/Z/Yaw = RC movement
-SA: negative = arm
-SE: negative = takeoff, positive = land
-SB: down = start state receiver"""
+SA:         negative = arm
+SE:         negative = takeoff, positive = land
+SB:         down = start state receiver
+"""
 
 
 class tello_t8l(ProjectBase):

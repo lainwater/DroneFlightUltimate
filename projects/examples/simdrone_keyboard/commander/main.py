@@ -11,14 +11,17 @@ from projects.base import ProjectBase
 
 qwertz_startup = """
 QWERTZ KEYBOARD CONTROLS
+
 # Util
 C           = connect
 V/B         = arm / disarm
 Z/U         = get position / attitude
 I/O         = start/stop state receiver
+
 # Movement Util
 T/L         = takeoff / land
 Space       = emergency
+
 # Movement
 W/S         = up / down
 A/D         = left / right yaw

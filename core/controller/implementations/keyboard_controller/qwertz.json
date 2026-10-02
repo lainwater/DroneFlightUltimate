@@ -42,6 +42,18 @@
     "on_press": "fpv_off",
     "target": "stream"
   },
+  "q": {
+    "on_press": "take_snapshot",
+    "target": "stream"
+  },
+  "e": {
+    "on_press": "start_recording",
+    "target": "stream"
+  },
+  "r": {
+    "on_press": "stop_recording",
+    "target": "stream"
+  },
   "1": {
     "on_press": "set_camera_forward"
   },

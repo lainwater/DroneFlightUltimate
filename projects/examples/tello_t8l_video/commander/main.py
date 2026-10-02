@@ -17,12 +17,17 @@ from core.logger import LoggerType, LogLevel, get_logger
 from core.video import VideoOutputType, get_videostream
 from projects.base import ProjectBase
 
-t8l_video_startup = """T8L VIDEO CONTROLS
+t8l_video_startup = """
+T8L VIDEO CONTROLS
+# Util:
+SA:         negative = arm
+SE:         negative = takeoff, positive = land
+SB:         up = start drone video, down = start state receiver
+SC:         up = stream video on, down = display stream stats
+# Movement:
 Stick: X/Y/Z/Yaw = RC movement
-SA: negative = arm
-SE: negative = takeoff, positive = land
-SB: up = start drone video, down = start state receiver
-SC: up = stream video on, down = display stream stats"""
+
+"""
 
 
 class tello_t8l_video(ProjectBase):
@@ -36,7 +41,7 @@ class tello_t8l_video(ProjectBase):
         drone_type = DroneType[d1_conf["drone_type"].upper()]
         self.drone1 = get_drone(drone_type, d1_conf["drone_id"], bus=self.bus, ip=d1_conf["ip"])
 
-        self.video1 = get_videostream(VideoOutputType.CV2, drone_id=d1_conf["drone_id"], bus=self.bus)
+        self.video1 = get_videostream(VideoOutputType.CV2, drone_id=d1_conf["drone_id"], bus=self.bus, media_dir=self.log_dir / "media")
 
         layout = self.app_config.get("controller", {}).get("layout") or None
         self.controller = get_controller(ControllerType.JOYSTICK, drone_id=d1_conf["drone_id"], bus=self.bus, layout=layout)

@@ -34,7 +34,12 @@ class ProjectBase(ABC):
         self.drone_config = self.load_drone_config()
 
         session_stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.recorder = get_recorder(self.root_path / "logs" / "bus_logs" / f"flight_{session_stamp}.jsonl")
+        self.recorder = get_recorder(self.log_dir / "bus_logs" / f"flight_{session_stamp}.jsonl")
+
+    @property
+    def log_dir(self) -> Path:
+        """Where this project's logs are stored."""
+        return self.root_path / "logs"
 
     def load_app_config(self) -> dict:
         """Load this project's app-level config (logging level, keyboard/

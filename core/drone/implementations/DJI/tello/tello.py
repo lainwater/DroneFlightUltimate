@@ -129,7 +129,7 @@ class TelloDrone(DroneBase):
 
     async def disconnect(self):
         try:
-            await self.stop_state_reciever()
+            await self.stop_state_receiver()
             await self.set("disarm")
             self.flight_state = DroneFlightState.LANDED
             self.arm_state = DroneArmState.DISARMED
@@ -271,7 +271,7 @@ class TelloDrone(DroneBase):
     @requires(DroneConState.CONNECTED)
     async def start_state_receiver(self):
         """Starts a background task that publishes every item the SDK's
-        state_stream yields, until stop_state_reciever() cancels it."""
+        state_stream yields, until stop_state_receiver() cancels it."""
         await self.sdk.open_state_channel()
         self.data_gen_task = asyncio.create_task(self._consume_state_stream())
 

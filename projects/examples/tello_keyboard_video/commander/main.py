@@ -12,26 +12,31 @@ from projects.base import ProjectBase
 
 qwertz_startup = """
 QWERTZ KEYBOARD CONTROLS
+
 # Util
 C           = connect
 V/B         = arm / disarm
 Z/U         = get position / attitude
 I/O         = start/stop state receiver
 J/K         = start/stop video stream from drone
-1/2         = Camera 1/Camera 2
+1/2         = Camera 1/Camera 2 (requires Tello EDU)
+
 # Movement Util
 T/L         = takeoff / land
 Space       = emergency
+
 # Movement
 W/S         = up / down
 A/D         = left / right yaw
 Up/Down     = forward / backward
 Left/Right  = left / right move
+
 # Video
 Y/X         = start/stop video stream output
-J/K         = start/stop video stream
 F/G         = on/off FPV mode
 N/M         = on/off display stats on video
+E/R         = start/stop recording
+Q           = take snapshot
 """
 
 
@@ -46,7 +51,7 @@ class tello_keyboard_video(ProjectBase):
         drone_type = DroneType[d1_conf["drone_type"].upper()]
         self.drone1 = get_drone(drone_type, d1_conf["drone_id"], bus=self.bus, ip=d1_conf["ip"])
 
-        self.video1 = get_videostream(VideoOutputType.CV2, drone_id=d1_conf["drone_id"], bus=self.bus)
+        self.video1 = get_videostream(VideoOutputType.CV2, drone_id=d1_conf["drone_id"], bus=self.bus, media_dir=self.log_dir / "media")
 
         layout = self.app_config.get("controller", {}).get("layout") or None
         self.controller = get_controller(ControllerType.KEYBOARD, drone_id=d1_conf["drone_id"], bus=self.bus, layout=layout)

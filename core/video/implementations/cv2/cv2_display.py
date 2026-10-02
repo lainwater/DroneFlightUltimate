@@ -37,9 +37,10 @@ class CV2Display(VideoBase):
     async def _update_frame(self, data):
         """Update displayed frame"""
         ts_fps_new = datetime.timestamp(datetime.now())
-        # recieved = data.get("recieved", False)
         frame = await self._data_to_frame(data)
-
+        self._latest_frame = frame.copy()
+        if self.recorder.is_recording:
+            self.recorder.write(self._latest_frame)
         await self._display_text(frame, text=self.drone_id, position=(30, 50))
         if self.display_state_data:
             i = 0
@@ -92,7 +93,7 @@ class CV2Display(VideoBase):
             raise ValueError("frame event carried no 'frame' payload")
         encoding = data.get("encoding", "bgr24")
         if encoding == "bgr24":
-            return payload  # already numpy BGR - same process, nothing to decode
+            return payload
         if encoding == "jpeg":
             import numpy as np
 

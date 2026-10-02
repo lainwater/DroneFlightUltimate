@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import Any
 
 from core.fileops import get_fileops
+from core.video.record_vid import FrameRecorder
+from core.video.snapshot import save_snapshot
 
 
 class VideoBase(ABC):
@@ -26,6 +28,10 @@ class VideoBase(ABC):
 
         self.fops = get_fileops()
         self.command_map = self._initialize_command_map()
+
+        self.media_dir = Path(kwargs.get("media_dir", Path.cwd() / "logs" / "media"))
+        self.recorder = FrameRecorder(self.media_dir, drone_id)
+        self._latest_frame = None
 
     def _initialize_command_map(self) -> dict:
         """Initialize the command map for the stream."""
@@ -127,6 +133,24 @@ class VideoBase(ABC):
     async def turn_off_display_state_data(self):
         """Turn off the display of state data"""
         self.display_state_data = False
+
+    async def start_recording(self):
+        if self._latest_frame is None:
+            await self._publish_parser("error", {"error": "NoFrame", "message": "No frame received yet."})
+            return
+        path = self.recorder.start(self._latest_frame)
+        await self._publish_parser("ack", {"cmd": "start_recording", "ack": "True", "path": str(path)})
+
+    async def stop_recording(self):
+        path = self.recorder.stop()
+        await self._publish_parser("ack", {"cmd": "stop_recording", "ack": "True", "path": str(path) if path else None})
+
+    async def take_snapshot(self):
+        if self._latest_frame is None:
+            await self._publish_parser("error", {"error": "NoFrame", "message": "No frame received yet."})
+            return
+        path = save_snapshot(self._latest_frame, self.media_dir, self.drone_id)
+        await self._publish_parser("ack", {"cmd": "take_snapshot", "ack": "True", "path": str(path)})
 
     @property
     @abstractmethod
