@@ -8,3 +8,4 @@ droneflightultimate.egg-info/
 projects/**/*.jsonl
 projects/**/*.png
 projects/**/*.mp4
+build/

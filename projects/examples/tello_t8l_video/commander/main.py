@@ -49,12 +49,18 @@ class tello_t8l_video(ProjectBase):
     async def main(self) -> None:
         await self.controller.start_controller()
         await self.video1.start_stream()
+        await self.video1.turn_on_display_state_data()
+        await self.video1.start_recording()
         print(t8l_video_startup)
         await asyncio.Event().wait()
 
     async def end_run(self) -> None:
         if self.drone1.video_streaming:
             await self.drone1.stop_video()
+            try:
+                await self.video1.stop_recording()
+            except:
+                pass
         if self.drone1.flight_state.value == "inair":
             await self.drone1.land()
         if self.drone1.con_state.value == "connected":
