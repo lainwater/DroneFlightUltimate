@@ -1,5 +1,5 @@
 """
-# tello_keyboard_video - fly a real DJI Tello with the RadioMaster T8L with video/stream function on.
+# tello_keyboard_video - fly a real DJI Tello with the Keyboard with video/stream function on.
 """
 
 import asyncio
@@ -71,6 +71,7 @@ class tello_keyboard_video(ProjectBase):
             await self.drone1.disconnect()
         if self.video1.is_running:
             await self.video1.stop_stream()
+            await self.video1.stop_recording()
         await self.controller.stop_controller()
         self.recorder.detach(self.bus)
         self.drone1.detach()
