@@ -39,5 +39,11 @@
     },
     "take_snapshot": {
         "method": "take_snapshot"
+    },
+    "start_detection": {
+        "method": "start_detection"
+    },
+    "stop_detection": {
+        "method": "stop_detection"
     }
 }

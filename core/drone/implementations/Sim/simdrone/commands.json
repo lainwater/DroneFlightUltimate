@@ -1,42 +1,198 @@
 {
-    "connect":                { "method": "connect" },
-    "disconnect":             { "method": "disconnect" },
-    "start_state_reciever":   { "method": "start_state_reciever" },
-    "stop_state_reciever":    { "method": "stop_state_reciever" },
-    
-    "set_arm":                { "method": "set",           "args": { "what": "arm" } },
-    "set_disarm":             { "method": "set",           "args": { "what": "disarm" } },
-    "set_ip_and_port":        { "method": "set",           "args": { "what": "ip_and_port", "ip": "67.67.0.1", "port": "6767"} },
-    "set_takeoff_height":     { "method": "set",           "args": { "what": "takeoff_height", "height": 50} },
-    "set_rc_speed":           { "method": "set",           "args": { "what": "rc_speed", "speed": 10} },
-    "set_flight_mode":        { "method": "set",           "args": { "what": "flight_mode", "flight_mode": "none_set"} },
-
-    "get_state":              { "method": "get_state" },
-    "get_stats":              { "method": "get_stats" },
-    "get_command_map":        { "method": "get_command_map" },
-
-    "get_armed_status":       { "method": "get",           "args": { "what": "armed_status" } },
-    "get_state_gen_status":   { "method": "get",           "args": { "what": "state_gen_status" } },
-    "get_flight_mode":        { "method": "get",           "args": { "what": "flight_mode" } },
-    "get_ip_and_port":        { "method": "get",           "args": { "what": "ip_and_port" } },
-    "get_rc_speed":           { "method": "get",           "args": { "what": "rc_speed" } },
-    "get_takeoff_height":     { "method": "get",           "args": { "what": "takeoff_height" } },
-    "get_position":           { "method": "get",           "args": { "what": "position" } },
-    "get_attitude":           { "method": "get",           "args": { "what": "attitude" } },
-    "get_battery":            { "method": "get",           "args": { "what": "battery" } },
-    "get_temperature":        { "method": "get",           "args": { "what": "temperature" } },
-
-    "land":                   { "method": "land" },
-    "takeoff":                { "method": "takeoff" },
-    "emergency":              { "method": "emergency" },
-
-    "steps_move_up":          { "method": "steps_move",    "args": { "direction": "up", "distance": 30 } },
-    "steps_move_down":        { "method": "steps_move",    "args": { "direction": "down", "distance": 30 } },
-    "steps_move_forward":     { "method": "steps_move",    "args": { "direction": "forward", "distance": 30 } },
-    "steps_move_backward":    { "method": "steps_move",    "args": { "direction": "backward", "distance": 30 } },
-    "steps_move_left":        { "method": "steps_move",    "args": { "direction": "left", "distance": 30 } },
-    "steps_move_right":       { "method": "steps_move",    "args": { "direction": "right", "distance": 30 } },
-
-    "rc":                     { "method": "rc",            "args": { "x": 0, "y": 0, "z": 0, "yaw": 0 } },
-    "goto":                   { "method": "goto",          "args": { "x": 0, "y": 0, "z": 0 } }
+    "connect": {
+        "method": "connect"
+    },
+    "disconnect": {
+        "method": "disconnect"
+    },
+    "start_state_receiver": {
+        "method": "start_state_receiver"
+    },
+    "stop_state_receiver": {
+        "method": "stop_state_receiver"
+    },
+    "start_video": {
+        "method": "start_video"
+    },
+    "stop_video": {
+        "method": "stop_video"
+    },
+    "set_arm": {
+        "method": "set",
+        "args": {
+            "what": "arm"
+        }
+    },
+    "set_disarm": {
+        "method": "set",
+        "args": {
+            "what": "disarm"
+        }
+    },
+    "set_ip_and_port": {
+        "method": "set",
+        "args": {
+            "what": "ip_and_port",
+            "ip": "67.67.0.1",
+            "port": "6767"
+        }
+    },
+    "set_takeoff_height": {
+        "method": "set",
+        "args": {
+            "what": "takeoff_height",
+            "height": 50
+        }
+    },
+    "set_rc_speed": {
+        "method": "set",
+        "args": {
+            "what": "rc_speed",
+            "speed": 10
+        }
+    },
+    "set_flight_mode": {
+        "method": "set",
+        "args": {
+            "what": "flight_mode",
+            "flight_mode": "none_set"
+        }
+    },
+    "get_state": {
+        "method": "get_state"
+    },
+    "get_stats": {
+        "method": "get_stats"
+    },
+    "get_command_map": {
+        "method": "get_command_map"
+    },
+    "get_armed_status": {
+        "method": "get",
+        "args": {
+            "what": "armed_status"
+        }
+    },
+    "get_state_gen_status": {
+        "method": "get",
+        "args": {
+            "what": "state_gen_status"
+        }
+    },
+    "get_flight_mode": {
+        "method": "get",
+        "args": {
+            "what": "flight_mode"
+        }
+    },
+    "get_ip_and_port": {
+        "method": "get",
+        "args": {
+            "what": "ip_and_port"
+        }
+    },
+    "get_rc_speed": {
+        "method": "get",
+        "args": {
+            "what": "rc_speed"
+        }
+    },
+    "get_takeoff_height": {
+        "method": "get",
+        "args": {
+            "what": "takeoff_height"
+        }
+    },
+    "get_position": {
+        "method": "get",
+        "args": {
+            "what": "position"
+        }
+    },
+    "get_attitude": {
+        "method": "get",
+        "args": {
+            "what": "attitude"
+        }
+    },
+    "get_battery": {
+        "method": "get",
+        "args": {
+            "what": "battery"
+        }
+    },
+    "get_temperature": {
+        "method": "get",
+        "args": {
+            "what": "temperature"
+        }
+    },
+    "land": {
+        "method": "land"
+    },
+    "takeoff": {
+        "method": "takeoff"
+    },
+    "emergency": {
+        "method": "emergency"
+    },
+    "steps_move_up": {
+        "method": "steps_move",
+        "args": {
+            "direction": "up",
+            "distance": 30
+        }
+    },
+    "steps_move_down": {
+        "method": "steps_move",
+        "args": {
+            "direction": "down",
+            "distance": 30
+        }
+    },
+    "steps_move_forward": {
+        "method": "steps_move",
+        "args": {
+            "direction": "forward",
+            "distance": 30
+        }
+    },
+    "steps_move_backward": {
+        "method": "steps_move",
+        "args": {
+            "direction": "backward",
+            "distance": 30
+        }
+    },
+    "steps_move_left": {
+        "method": "steps_move",
+        "args": {
+            "direction": "left",
+            "distance": 30
+        }
+    },
+    "steps_move_right": {
+        "method": "steps_move",
+        "args": {
+            "direction": "right",
+            "distance": 30
+        }
+    },
+    "rc": {
+        "method": "rc",
+        "args": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "yaw": 0
+        }
+    },
+    "goto": {
+        "method": "goto",
+        "args": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+        }
+    }
 }

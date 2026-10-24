@@ -1,6 +1,9 @@
 import asyncio
+import sys
 from dataclasses import dataclass
 from enum import Enum
+
+import cv2 as cv
 
 from core.drone.position_and_attitude import Attitude, Position
 
@@ -77,6 +80,9 @@ class SimDroneSDK:
         self._bat: int = 85
         self._temp: int = 40
         self._state_data = _DroneStateData(bat=self._bat, temp=self._temp, pos=self._pos, att=self._att, mode=self._flight_mode)
+
+        self._video_capture = None
+        self._video_stop = False
 
     # BASIC METHODS
     async def connect(self, ip: str, port: str) -> bool:
@@ -304,3 +310,46 @@ class SimDroneSDK:
         finally:
             self._is_state_gen_running = False
             return
+
+    # ---------------------------------------------------------- video (laptop camera)
+
+    @_requires("_is_connected")
+    async def open_video_channel(self, camera_index: int = 0) -> bool:
+        """Open the laptop camera. cv.VideoCapture() blocks while it probes
+        the device, so it runs in a worker thread, not on the event loop."""
+        self._video_stop = False
+        # DirectShow opens far faster than the default (MSMF) backend on Windows.
+        backend = cv.CAP_DSHOW if sys.platform == "win32" else cv.CAP_ANY
+        cap = await asyncio.to_thread(cv.VideoCapture, camera_index, backend)
+        if not cap.isOpened():
+            await asyncio.to_thread(cap.release)
+            return False
+        self._video_capture = cap
+        return True
+
+    def stop_video_stream(self) -> None:
+        """Signals video_stream()'s loop to exit on its NEXT iteration.
+        Does NOT release the camera yet - see close_video_channel()."""
+        self._video_stop = True
+
+    async def close_video_channel(self) -> None:
+        """Only call after the consumer task has finished, otherwise a
+        cap.read() still running in a worker thread could crash OpenCV."""
+        if self._video_capture:
+            await asyncio.to_thread(self._video_capture.release)
+            self._video_capture = None
+
+    async def video_stream(self):
+        """Async generator yielding BGR numpy frames from the camera.
+        Retries on dropped frames, gives up after ~5 s of nothing."""
+        consecutive_failures = 0
+        while not self._video_stop:
+            received, frame = await asyncio.to_thread(self._video_capture.read)
+            if not received:
+                consecutive_failures += 1
+                if consecutive_failures >= 50:
+                    return
+                await asyncio.sleep(0.1)
+                continue
+            consecutive_failures = 0
+            yield frame

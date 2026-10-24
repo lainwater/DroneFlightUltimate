@@ -108,5 +108,9 @@
   "right": {
     "rc_axis": "x",
     "rc_sign": 1
+  },
+  "4": {
+    "on_press": "orbit",
+    "target": "auto"
   }
 }

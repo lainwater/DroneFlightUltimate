@@ -3,6 +3,7 @@ Simulated Drone Implementation
 """
 
 import asyncio
+import time
 from pathlib import Path
 
 from core.drone.base import DroneArmState, DroneBase, DroneConState, DroneFlightState, DroneType, PublishType, requires
@@ -17,6 +18,9 @@ class SimDrone(DroneBase):
         self.port = self.init_kwargs["port"]
         self.data_gen_task = None
         self.flightmode = _FlightMode.NONE_SET
+        self.camera_index = int(self.init_kwargs.get("camera_index", 0))
+        self.video_streaming = False
+        self.video_task = None
 
     @property
     def config_dir(self) -> Path:
@@ -34,7 +38,9 @@ class SimDrone(DroneBase):
 
     @requires(DroneConState.CONNECTED)
     async def disconnect(self):
-        await self.stop_state_reciever()
+        if self.video_streaming:
+            await self.stop_video()
+        await self.stop_state_receiver()
         await self.set("disarm")
         self.con_state = DroneConState.DISCONNECTING
         ack = await self.sdk.disconnect()
@@ -182,14 +188,53 @@ class SimDrone(DroneBase):
         else:
             await self.publish_parser(PublishType.ERROR, {"error": "NotFound", "message": f"Could not get {what}"})
 
+    # Video (laptop camera)
+
+    @requires(DroneConState.CONNECTED)
+    async def start_video(self):
+        if self.video_streaming:
+            await self.publish_parser(PublishType.ACK, {"cmd": "start_video", "ack": "already_running"})
+            return
+        ok = await self.sdk.open_video_channel(self.camera_index)
+        if not ok:
+            await self.publish_parser(
+                PublishType.ERROR,
+                {
+                    "cmd": "start_video",
+                    "error": "CameraOpenFailed",
+                    "info": f"Could not open camera {self.camera_index} (used by another app, or wrong camera_index?)",
+                },
+            )
+            return
+        self.video_task = asyncio.create_task(self._consume_video_stream())
+        self.video_streaming = True
+        await self.publish_parser(PublishType.ACK, {"cmd": "start_video", "ack": "True"})
+
+    @requires(DroneConState.CONNECTED)
+    async def stop_video(self):
+        self.sdk.stop_video_stream()
+        if self.video_task:
+            await self.video_task
+            self.video_task = None
+        await self.sdk.close_video_channel()
+        self.video_streaming = False
+        await self.publish_parser(PublishType.ACK, {"cmd": "stop_video", "ack": "True"})
+
+    async def _consume_video_stream(self):
+        """Same contract as TelloDrone: one FRAME event per camera frame."""
+        seq = 0
+        async for frame in self.sdk.video_stream():
+            seq += 1
+            await self.publish_parser(PublishType.FRAME, {"ts": time.time(), "seq": seq, "encoding": "bgr24", "frame": frame})
+
     # Other
     @requires(DroneConState.CONNECTED)
-    async def start_state_reciever(self):
+    async def start_state_receiver(self):
         """Starts a background task that publishes every item the SDK's
         data_generator yields, until stop_state_reciever() cancels it."""
         self.data_gen_task = asyncio.create_task(self._consume_state_stream())
 
-    async def stop_state_reciever(self):
+    async def stop_state_receiver(self):
         """Cancel the background task and wait for it to actually stop,
         so we don't leave an unhandled CancelledError floating around."""
         if self.data_gen_task:
