@@ -1,11 +1,19 @@
+# env
 .venv/
+*.egg-info/
+droneflightultimate.egg-info/
+build/
+
+# cache
 .pytest_cache/
 .ruff_cache/
 __pycache__/
 *.pyc
-*.egg-info/
-droneflightultimate.egg-info/
+
+# misc
+projects/*
+!/projects/examples
 projects/**/*.jsonl
 projects/**/*.png
 projects/**/*.mp4
-build/
+
