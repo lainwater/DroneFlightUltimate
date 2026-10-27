@@ -172,8 +172,8 @@ class TelloDrone(DroneBase):
 
     # goto pos movement
     @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
-    async def goto(self, x: float, y: float, z: float, speed: int = 50):
-        ack = await self.sdk.send_and_receive(f"go {int(x)} {int(y)} {int(z)} {int(speed)}", timeout=20)
+    async def goto(self, x: float, y: float, z: float, speed: int = 50, mid: str = "m1"):
+        ack = await self.sdk.send_and_receive(f"go {int(x)} {int(y)} {int(z)} {int(speed)} {str(mid)}", timeout=20)
         await self._publish_tristate_ack(f"goto {x} {y} {z}", ack, on_success=lambda: self.sdk.apply_goto_delta(x, y, z))
 
     # Step Movement

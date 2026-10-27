@@ -125,7 +125,7 @@ class VideoBase(ABC):
         """Turn off the FPV-Goggles mode"""
         self.fpv_goggles_mode = False
 
-    async def turn_on_display_state_data(self, data_to_display: tuple = ("ts", "fps", "bat", "pos")):
+    async def turn_on_display_state_data(self, data_to_display: tuple = ("ts", "fps", "bat", "pos", "x", "y", "z", "mid", "mpry")):
         """Turn on the display of state data"""
         self.data_to_display = data_to_display
         self.display_state_data = True

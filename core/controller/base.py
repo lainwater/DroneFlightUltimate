@@ -31,6 +31,8 @@ class ControllerBase(ABC):
             return f"cmd.{self.drone_id}"
         if target == "stream":
             return f"cmd.stream.{self.drone_id}"
+        if target == "project":
+            return f"project.{self.drone_id}"
         raise ValueError(f"Unknown target {target!r} in layout {self.layout!r}")
 
     @abstractmethod
