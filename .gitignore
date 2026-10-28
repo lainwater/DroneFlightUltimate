@@ -16,4 +16,5 @@ projects/*
 projects/**/*.jsonl
 projects/**/*.png
 projects/**/*.mp4
+count.ps1
 

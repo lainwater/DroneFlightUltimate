@@ -58,11 +58,6 @@ class CV2Display(VideoBase):
 
     # ------------------------------------------------------------ detection
 
-    # async def _publish_detect_parser(self, data: dict) -> None:
-    #     """Publish to the bus."""
-    #     if self.bus:
-    #         await self.bus.publish(f"project.{self.drone_id}", data)
-
     @staticmethod
     def _resolve_model_path(model_path: str | Path | None) -> str:
         if model_path:
