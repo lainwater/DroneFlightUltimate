@@ -3,6 +3,7 @@ CV2Display - Output frames to cv2 window from Bus
 """
 
 import asyncio
+import math
 import time
 from datetime import datetime
 from pathlib import Path
@@ -11,7 +12,12 @@ import cv2 as cv
 
 from core.video.base import VideoBase
 
-TEXT_SPACING = 40
+TEXT_SPACING = 40  # at UI_REF_HEIGHT, scaled with the displayed frame height
+UI_REF_HEIGHT = 720  # overlay text/boxes are designed for a frame this tall
+
+# Frames are fitted into this box (aspect ratio kept): big input is shrunk,
+# small input (e.g. the 320x240 downward camera) is enlarged.
+DISPLAY_TARGET_SIZE = (960, 720)  # (width, height)
 
 # YOLO model: looked up next to this file first (video/implementations/cv2/),
 # then one level up (video/). If neither exists the bare name is handed to
@@ -37,6 +43,10 @@ class CV2Display(VideoBase):
         self._det_publish = False
         self._det_ms = None  # last inference time, shown in the status line
         self._model_path = None
+        self._last_shape = None  # frame shape the window was sized for
+        self.auto_fit = True
+        self.target_size = DISPLAY_TARGET_SIZE
+        self._pump_task: asyncio.Task | None = None
 
     @property
     def config_dir(self) -> Path:
@@ -47,14 +57,35 @@ class CV2Display(VideoBase):
         self._attach()
         cv.namedWindow(self.drone_id)
         self.is_running = True
+        self._pump_task = asyncio.create_task(self._pump_window())
 
     async def stop_stream(self):
         """Stop the video stream."""
         if self.is_object_detecting:
             await self.stop_detection()
+        if self._pump_task is not None:
+            self._pump_task.cancel()
+            self._pump_task = None
         cv.destroyWindow(self.drone_id)
         self._detach()
         self.is_running = False
+
+    async def _pump_window(self) -> None:
+        """waitKey() is what lets the GUI process its events. It used to run only
+        when a frame arrived, so a gap in the video (camera switch) made the
+        window show '(Not Responding)'."""
+        while True:
+            cv.waitKey(1)
+            await asyncio.sleep(0.03)
+
+    def _reset_window_if_resized(self, frame) -> None:
+        """Forward and downward camera have different resolutions - recreate
+        the window so it fits the new size, and drop boxes of the old one."""
+        if self._last_shape is not None and frame.shape != self._last_shape:
+            cv.destroyWindow(self.drone_id)
+            cv.namedWindow(self.drone_id)
+            self._detections = []
+        self._last_shape = frame.shape
 
     # ------------------------------------------------------------ detection
 
@@ -185,53 +216,73 @@ class CV2Display(VideoBase):
         if self._det_task is None or self._det_task.done():
             self._det_task = asyncio.create_task(self._run_detection(frame.copy()))
 
-    def _draw_detections(self, frame) -> None:
+    def _draw_detections(self, frame, box_scale: float = 1.0, ui: float = 1.0) -> None:
+        """box_scale: raw frame -> displayed frame (boxes come in raw coordinates).
+        ui: overlay size factor (line width, font size)."""
+        font = 0.6 * ui
+        thick = max(1, round(2 * ui))
         if self.is_object_detecting:
             # status line: proves detection is running even when nothing is found
             if self._det_ms is None:
                 status = "YOLO: waiting for first result..."
             else:
                 status = f"YOLO: {len(self._detections)} obj, {self._det_ms:.0f} ms"
-            cv.putText(frame, status, (20, frame.shape[0] - 20), cv.FONT_HERSHEY_SIMPLEX, 0.6, BOX_COLOR, 2)
+            cv.putText(frame, status, (round(20 * ui), frame.shape[0] - round(20 * ui)), cv.FONT_HERSHEY_SIMPLEX, font, BOX_COLOR, thick)
         for det in self._detections:
-            x1, y1, x2, y2 = det["box"]
-            cv.rectangle(frame, (x1, y1), (x2, y2), BOX_COLOR, 2)
+            x1, y1, x2, y2 = (round(v * box_scale) for v in det["box"])
+            cv.rectangle(frame, (x1, y1), (x2, y2), BOX_COLOR, thick)
             label = f"{det['label']} {det['conf']:.2f}"
-            cv.putText(frame, label, (x1, max(15, y1 - 8)), cv.FONT_HERSHEY_SIMPLEX, 0.6, BOX_COLOR, 2)
+            cv.putText(frame, label, (x1, max(round(15 * ui), y1 - round(8 * ui))), cv.FONT_HERSHEY_SIMPLEX, font, BOX_COLOR, thick)
 
     # ------------------------------------------------------------ frames
     async def _update_frame(self, data):
         """Update displayed frame"""
         ts_fps_new = datetime.timestamp(datetime.now())
         frame = await self._data_to_frame(data)
+        self._reset_window_if_resized(frame)
         self._latest_frame = frame.copy()
         if self.recorder.is_recording:
             self.recorder.write(self._latest_frame)
 
         # detection runs on the raw frame; boxes are drawn on the display copy
         self._maybe_submit_detection(self._latest_frame)
-        self._draw_detections(frame)
 
-        await self._display_text(frame, text=self.drone_id, position=(30, 50))
+        # 1) bring the frame to display size (auto-fit * manual rescale_factor) BEFORE
+        #    drawing, so text and boxes are rendered crisp at the final size
+        raw_w = frame.shape[1]
+        scale = self._fit_scale(frame) * self.rescale_factor
+        if scale != 1:
+            frame = await self._rescale_frame(frame, scale)
+        box_scale = frame.shape[1] / raw_w
+
+        # 2) overlay sized relative to the displayed frame height
+        ui = frame.shape[0] / UI_REF_HEIGHT
+        spacing = round(TEXT_SPACING * ui)
+        font_scale = 1.0 * ui
+        thickness = max(1, round(2 * ui))
+
+        self._draw_detections(frame, box_scale, ui)
+
+        await self._display_text(frame, text=self.drone_id, position=(round(30 * ui), round(50 * ui)), font_scale=font_scale, thickness=thickness)
         if self.display_state_data:
             i = 0
             for item in self.data_to_display:
                 i += 1
+                pos = (round(20 * ui), round(80 * ui) + i * spacing)
                 if item == "ts" or item == "timestamp":
-                    await self._display_text(frame, text=f"{self.ts}", position=(20, 80 + i * TEXT_SPACING))
+                    await self._display_text(frame, text=f"{self.ts}", position=pos, font_scale=font_scale, thickness=thickness)
                 elif item == "fps":
                     delta = float(ts_fps_new) - float(self.ts_fps_old)
                     fps = 1 / delta if delta > 0 else 0.0
-                    await self._display_text(frame, text=f"FPS: {fps:.1f}", position=(20, 80 + i * TEXT_SPACING))
+                    await self._display_text(frame, text=f"FPS: {fps:.1f}", position=pos, font_scale=font_scale, thickness=thickness)
                     self.ts_fps_old = ts_fps_new
                 else:
                     try:
-                        await self._display_text(frame, text=f"{item}: {self.state_data[item]}", position=(20, 80 + i * TEXT_SPACING))
+                        await self._display_text(
+                            frame, text=f"{item}: {self.state_data[item]}", position=pos, font_scale=font_scale, thickness=thickness
+                        )
                     except (KeyError, TypeError):
                         pass
-
-        if self.rescale_factor != 1:
-            frame = await self._rescale_frame(frame, self.rescale_factor)
 
         if self.fpv_goggles_mode:
             frame = await self._to_fpv_goggles_frame(frame)
@@ -239,11 +290,29 @@ class CV2Display(VideoBase):
         cv.imshow(self.drone_id, frame)
         cv.waitKey(1)
 
+    def _fit_scale(self, frame) -> float:
+        """Scale that fits the frame into target_size with the aspect ratio kept
+        (shrinks big frames, enlarges small ones). 1.0 when auto_fit is off."""
+        if not self.auto_fit:
+            return 1.0
+        h, w = frame.shape[:2]
+        tw, th = self.target_size
+        return min(tw / w, th / h)
+
+    async def set_display_size(self, width: int = 960, height: int = 720):
+        """Box (px) the video is fitted into, aspect ratio is kept."""
+        self.target_size = (int(width), int(height))
+        self.auto_fit = True
+
+    async def set_auto_fit(self, enabled: bool = True):
+        """Turn fitting to target_size on/off (off = show the native resolution)."""
+        self.auto_fit = bool(enabled)
+
     async def _rescale_frame(self, frame, scale):
-        width = int(frame.shape[1] * scale)
-        height = int(frame.shape[0] * scale)
-        dimensions = (width, height)
-        return cv.resize(frame, dimensions, interpolation=cv.INTER_AREA)
+        width = max(1, round(frame.shape[1] * scale))
+        height = max(1, round(frame.shape[0] * scale))
+        interp = cv.INTER_AREA if scale < 1 else cv.INTER_LINEAR
+        return cv.resize(frame, (width, height), interpolation=interp)
 
     async def _to_fpv_goggles_frame(self, frame):
         h, w = frame.shape[:2]
@@ -255,7 +324,7 @@ class CV2Display(VideoBase):
 
     async def _display_text(self, frame, text=None, position=(30, 50), font=cv.FONT_HERSHEY_SIMPLEX, font_scale=1, color=(255, 0, 115), thickness=2):
         """Render text on frame"""
-        cv.putText(frame, text, position, font, font_scale, color, thickness)
+        cv.putText(frame, str(text), position, font, font_scale, color, thickness)
 
     async def _data_to_frame(self, data):
         """Turn a frame.{drone_id} bus message into a BGR numpy frame."""

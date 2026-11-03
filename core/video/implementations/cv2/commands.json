@@ -17,6 +17,25 @@
             "scale": 1.0
         }
     },
+    "display_size": {
+        "method": "set_display_size",
+        "args": {
+            "width": 960,
+            "height": 720
+        }
+    },
+    "auto_fit_on": {
+        "method": "set_auto_fit",
+        "args": {
+            "enabled": true
+        }
+    },
+    "auto_fit_off": {
+        "method": "set_auto_fit",
+        "args": {
+            "enabled": false
+        }
+    },
     "show_state_on": {
         "method": "turn_on_display_state_data",
         "args": {

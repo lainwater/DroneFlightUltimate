@@ -62,6 +62,7 @@ class TelloDrone(DroneBase):
         self.data_gen_task = None
         self.video_streaming = False
         self.video_task = None
+        self._camera_lock = asyncio.Lock()  # key 1/2 mashed quickly must not run two switches at once
 
     @property
     def config_dir(self) -> Path:
@@ -210,6 +211,16 @@ class TelloDrone(DroneBase):
             "video_fps": lambda: f"setfps {kwargs['fps']}",
             "video_bitrate": lambda: f"setbitrate {int(kwargs['bitrate'])}",
         }
+        if what == "camera_source":
+            # downvision while the stream runs leaves ffmpeg decoding the new
+            # resolution with the old buffers (green / 3x tall frame, then a
+            # dead stream) - needs a full streamoff -> downvision -> streamon
+            # with a freshly opened capture.
+            async with self._camera_lock:
+                ack = await self._switch_camera(bool(kwargs.get("downward")))
+            await self._publish_tristate_ack(f"set {what} {kwargs}", ack)
+            return
+
         builder = command_builders.get(what)
         if builder is None:
             await self.publish_parser(PublishType.ERROR, {"error": "UnknownSet", "message": f"'{what}' is not settable on Tello."})
@@ -245,25 +256,50 @@ class TelloDrone(DroneBase):
     async def start_video(self):
         ack = await self.sdk.send_and_receive("streamon", timeout=10)
         if ack is not False:
-            await asyncio.sleep(1.0)  # gib der Tello kurz Zeit, bevor der Capture-Probe reinschaut - siehe dein altes sleep(1)
-            await self.sdk.open_video_channel()
-            self.video_task = asyncio.create_task(self._consume_video_stream())
+            await self._open_video()
         await self._publish_tristate_ack("start_video", ack, on_success=lambda: setattr(self, "video_streaming", True))
 
     @requires(DroneConState.CONNECTED)
     async def stop_video(self):
+        # Reader first, WHILE frames still flow: its in-flight cap.read() then
+        # returns quickly and the loop sees the stop flag. Sending streamoff
+        # first starves that read() and awaiting the task hangs (= freeze).
+        await self._close_video()
         ack = await self.sdk.send_and_receive("streamoff", timeout=10)
+        await self._publish_tristate_ack("stop_video", ack, on_success=lambda: setattr(self, "video_streaming", False))
+
+    async def _open_video(self) -> None:
+        await asyncio.sleep(1.0)  # give the Tello a moment before the capture probes the stream
+        await self.sdk.open_video_channel()
+        self.video_task = asyncio.create_task(self._consume_video_stream())
+
+    async def _close_video(self) -> None:
         self.sdk.stop_video_stream()
         if self.video_task:
             await self.video_task
             self.video_task = None
         await self.sdk.close_video_channel()
-        await self._publish_tristate_ack("stop_video", ack, on_success=lambda: setattr(self, "video_streaming", False))
+
+    async def _switch_camera(self, downward: bool) -> bool | None:
+        resume = self.video_streaming
+        if resume:
+            await self._close_video()
+            await self.sdk.send_and_receive("streamoff", timeout=5)
+        ack = await self.sdk.send_and_receive(f"downvision {1 if downward else 0}", timeout=10)
+        if resume:
+            await asyncio.sleep(0.5)
+            await self.sdk.send_and_receive("streamon", timeout=10)
+            await self._open_video()
+        return ack
 
     async def _consume_video_stream(self):
         """Analog to _consume_state_stream"""
         seq = 0
+        warmup = 15  # drop the first frames after (re)opening: decoder output is green until the first full keyframe
         async for frame in self.sdk.video_stream():
+            if warmup > 0:
+                warmup -= 1
+                continue
             seq += 1
             await self.publish_parser(PublishType.FRAME, {"ts": time.time(), "seq": seq, "encoding": "bgr24", "frame": frame})
 
