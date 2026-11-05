@@ -23,8 +23,13 @@ class VideoBase(ABC):
         self.display_state_data = False
         self.rescale_factor = 1
         self.ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.data_to_display: tuple = ("ts", "fpsbat", "pos")
+        self.data_to_display: tuple = ("ts", "fps", "bat", "pos")
         self.state_data = {}
+
+        # Second overlay block: free data sent by a project (e.g. results of your
+        # own calculations), drawn top-right. See _on_display_event().
+        self.display_custom_data = True
+        self.custom_data: dict = {}
 
         self.fops = get_fileops()
         self.command_map = self._initialize_command_map()
@@ -43,6 +48,7 @@ class VideoBase(ABC):
         self.bus.subscribe(f"frame.{self.drone_id}", self._on_frame_event)
         self.bus.subscribe(f"cmd.stream.{self.drone_id}", self._on_cmd_event)
         self.bus.subscribe(f"state.{self.drone_id}", self._on_state_event)
+        self.bus.subscribe(f"display.{self.drone_id}", self._on_display_event)
 
     def _detach(self) -> None:
         """Stop recording events from `bus`. Safe to call even if never attached.
@@ -50,6 +56,7 @@ class VideoBase(ABC):
         self.bus.unsubscribe(f"frame.{self.drone_id}", self._on_frame_event)
         self.bus.unsubscribe(f"cmd.stream.{self.drone_id}", self._on_cmd_event)
         self.bus.unsubscribe(f"state.{self.drone_id}", self._on_state_event)
+        self.bus.unsubscribe(f"display.{self.drone_id}", self._on_display_event)
 
     async def _on_frame_event(self, topic: str, data: Any):
         """
@@ -89,6 +96,53 @@ class VideoBase(ABC):
             return
         self.state_data = data
 
+    async def _on_display_event(self, topic: str, data: Any):
+        """
+        Custom overlay data from a project - the video module only DRAWS it,
+        all calculations stay in your project.
+        Contract of topic, data
+            display.drone_id  - {"label": value, ...}
+                value may be anything: number, string, list, numpy array/matrix
+                (multi-line values are drawn over several lines)
+            Every message REPLACES the previous block; publish {} to clear it.
+        Example (in your project's main):
+            await self.bus.publish("display.drone1", {"R": rot_matrix, "dist": 1.23})
+        """
+        if data is None:
+            data = {}
+        if not isinstance(data, dict):
+            data = {"data": data}
+        self.custom_data = dict(data)
+
+    def _custom_data_lines(self) -> list[str]:
+        """custom_data -> text lines ("label: value"; matrices get one line per row)."""
+        lines: list[str] = []
+        for label, value in self.custom_data.items():
+            text = self._format_value(value).splitlines() or [""]
+            lines.append(f"{label}: {text[0]}")
+            indent = " " * (len(str(label)) + 2)
+            lines.extend(indent + row for row in text[1:])
+        return lines
+
+    @staticmethod
+    def _format_value(value: Any) -> str:
+        if hasattr(value, "shape") and hasattr(value, "tolist"):  # numpy array / matrix -> same as a list
+            value = value.tolist()
+            if not isinstance(value, list):  # 0-d array = single number
+                return VideoBase._format_value(value)
+            if value and not isinstance(value[0], list):  # 1-d vector -> one row
+                value = [value]
+        if isinstance(value, float) and value.is_integer():
+            return str(int(value))
+        if isinstance(value, (list, tuple)) and value and all(isinstance(row, (list, tuple)) for row in value):
+            # plain list of lists = matrix: one row per line, columns aligned
+            cells = [[VideoBase._format_value(v) for v in row] for row in value]
+            width = max(len(c) for row in cells for c in row)
+            return "\n".join("[ " + "  ".join(c.rjust(width) for c in row) + " ]" for row in cells)
+        if isinstance(value, float):
+            return f"{value:.2f}"
+        return str(value)
+
     async def _execute(self, action: str, **kwargs) -> None:
         if action not in self.command_map:
             await self._publish_parser("error", {"error": "NotCapable", "message": f"'{action}' not in stream.{self.drone_id}'s capabilities"})
@@ -125,7 +179,7 @@ class VideoBase(ABC):
         """Turn off the FPV-Goggles mode"""
         self.fpv_goggles_mode = False
 
-    async def turn_on_display_state_data(self, data_to_display: tuple = ("ts", "fps", "bat", "pos", "mid", "mpry", "x", "y", "z")):
+    async def turn_on_display_state_data(self, data_to_display: tuple = ("ts", "fps", "bat", "pos")):
         """Turn on the display of state data"""
         self.data_to_display = data_to_display
         self.display_state_data = True
@@ -133,6 +187,21 @@ class VideoBase(ABC):
     async def turn_off_display_state_data(self):
         """Turn off the display of state data"""
         self.display_state_data = False
+
+    async def set_custom_data(self, data: dict | None = None):
+        """Same as publishing on display.{drone_id} - for use via cmd.stream."""
+        await self._on_display_event(f"display.{self.drone_id}", data or {})
+
+    async def clear_custom_data(self):
+        self.custom_data = {}
+
+    async def turn_on_display_custom_data(self):
+        """Show the custom (project) data block"""
+        self.display_custom_data = True
+
+    async def turn_off_display_custom_data(self):
+        """Hide the custom (project) data block (data is kept)"""
+        self.display_custom_data = False
 
     async def start_recording(self):
         if self._latest_frame is None:

@@ -96,6 +96,21 @@
             "bitrate": 0
         }
     },
+    "set_wifi_channel": {
+        "method": "set",
+        "args": {
+            "what": "wifi_channel",
+            "channel": 6
+        }
+    },
+    "set_multi_wifi": {
+        "method": "set",
+        "args": {
+            "what": "multi_wifi",
+            "ssid": "RMTT-MyNet",
+            "password": "12345678"
+        }
+    },
     "get_battery": {
         "method": "get",
         "args": {
@@ -174,6 +189,42 @@
             "what": "tof"
         }
     },
+    "get_hardware": {
+        "method": "get",
+        "args": {
+            "what": "hardware"
+        }
+    },
+    "get_wifi_version": {
+        "method": "get",
+        "args": {
+            "what": "wifi_version"
+        }
+    },
+    "get_ap": {
+        "method": "get",
+        "args": {
+            "what": "ap"
+        }
+    },
+    "get_ssid": {
+        "method": "get",
+        "args": {
+            "what": "ssid"
+        }
+    },
+    "get_ext_tof": {
+        "method": "get",
+        "args": {
+            "what": "ext_tof"
+        }
+    },
+    "get_ext_version": {
+        "method": "get",
+        "args": {
+            "what": "ext_version"
+        }
+    },
     "get_state": {
         "method": "get_state"
     },
@@ -191,6 +242,21 @@
     },
     "emergency": {
         "method": "emergency"
+    },
+    "stop": {
+        "method": "stop"
+    },
+    "motor_on": {
+        "method": "motor_on"
+    },
+    "motor_off": {
+        "method": "motor_off"
+    },
+    "throw_fly": {
+        "method": "throw_fly"
+    },
+    "reboot": {
+        "method": "reboot"
     },
     "steps_move_up": {
         "method": "steps_move",
@@ -234,6 +300,44 @@
             "distance": 30
         }
     },
+    "rotate_cw": {
+        "method": "rotate",
+        "args": {
+            "direction": "cw",
+            "degrees": 90
+        }
+    },
+    "rotate_ccw": {
+        "method": "rotate",
+        "args": {
+            "direction": "ccw",
+            "degrees": 90
+        }
+    },
+    "flip_left": {
+        "method": "flip",
+        "args": {
+            "direction": "left"
+        }
+    },
+    "flip_right": {
+        "method": "flip",
+        "args": {
+            "direction": "right"
+        }
+    },
+    "flip_forward": {
+        "method": "flip",
+        "args": {
+            "direction": "forward"
+        }
+    },
+    "flip_back": {
+        "method": "flip",
+        "args": {
+            "direction": "back"
+        }
+    },
     "rc": {
         "method": "rc",
         "args": {
@@ -252,10 +356,145 @@
             "speed": 50
         }
     },
+    "goto_mission_pad": {
+        "method": "goto",
+        "args": {
+            "x": 0,
+            "y": 0,
+            "z": 80,
+            "speed": 30,
+            "mid": "m-2"
+        }
+    },
+    "curve": {
+        "method": "curve",
+        "args": {
+            "x1": 50,
+            "y1": 50,
+            "z1": 0,
+            "x2": 100,
+            "y2": 0,
+            "z2": 0,
+            "speed": 30
+        }
+    },
+    "jump": {
+        "method": "jump",
+        "args": {
+            "x": 0,
+            "y": 0,
+            "z": 80,
+            "speed": 30,
+            "yaw": 0,
+            "mid1": "m1",
+            "mid2": "m2"
+        }
+    },
     "start_video": {
         "method": "start_video"
     },
     "stop_video": {
         "method": "stop_video"
+    },
+    "ext_led": {
+        "method": "ext",
+        "args": {
+            "what": "led",
+            "r": 0,
+            "g": 255,
+            "b": 0
+        }
+    },
+    "ext_led_off": {
+        "method": "ext",
+        "args": {
+            "what": "led",
+            "r": 0,
+            "g": 0,
+            "b": 0
+        }
+    },
+    "ext_led_pulse": {
+        "method": "ext",
+        "args": {
+            "what": "led_pulse",
+            "rate": 1.0,
+            "r": 0,
+            "g": 0,
+            "b": 255
+        }
+    },
+    "ext_led_blink": {
+        "method": "ext",
+        "args": {
+            "what": "led_blink",
+            "rate": 2.0,
+            "r1": 255,
+            "g1": 0,
+            "b1": 0,
+            "r2": 0,
+            "g2": 0,
+            "b2": 255
+        }
+    },
+    "ext_matrix_pattern": {
+        "method": "ext",
+        "args": {
+            "what": "matrix_pattern",
+            "pattern": "00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00"
+        }
+    },
+    "ext_matrix_clear": {
+        "method": "ext",
+        "args": {
+            "what": "matrix_clear"
+        }
+    },
+    "ext_matrix_scroll_text": {
+        "method": "ext",
+        "args": {
+            "what": "matrix_scroll_text",
+            "direction": "l",
+            "color": "b",
+            "rate": 1.0,
+            "text": "HELLO"
+        }
+    },
+    "ext_matrix_scroll_pattern": {
+        "method": "ext",
+        "args": {
+            "what": "matrix_scroll_pattern",
+            "direction": "l",
+            "rate": 1.0,
+            "pattern": "00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00"
+        }
+    },
+    "ext_matrix_show": {
+        "method": "ext",
+        "args": {
+            "what": "matrix_show",
+            "color": "r",
+            "text": "heart"
+        }
+    },
+    "ext_matrix_boot_pattern": {
+        "method": "ext",
+        "args": {
+            "what": "matrix_boot_pattern",
+            "pattern": "00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00"
+        }
+    },
+    "ext_matrix_clear_boot": {
+        "method": "ext",
+        "args": {
+            "what": "matrix_clear_boot"
+        }
+    },
+    "ext_matrix_brightness": {
+        "method": "ext",
+        "args": {
+            "what": "matrix_brightness",
+            "level": 255
+        }
     }
 }

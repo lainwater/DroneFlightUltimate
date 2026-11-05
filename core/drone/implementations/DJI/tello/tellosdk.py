@@ -20,9 +20,10 @@ Two things this does differently from a naive blocking-socket wrapper:
 """
 
 import asyncio
-from typing import Any
-
-import cv2 as cv
+import socket
+import threading
+import time
+from typing import Any, Callable
 
 
 def _coerce_number(value: str):
@@ -93,7 +94,8 @@ class TelloSDK:
         self._response_queue: "asyncio.Queue[str]" = asyncio.Queue()
         self._state_queue: "asyncio.Queue[dict]" = asyncio.Queue()
         self._send_lock = asyncio.Lock()
-        self._video_capture: "cv.VideoCapture | None" = None
+        self._video_receiver: "_TelloVideoReceiver | None" = None
+        self._video_frames: "asyncio.Queue" = asyncio.Queue(maxsize=1)
         self._video_stop = False
 
         # position estimate - x/y have NO real sensor on
@@ -174,7 +176,9 @@ class TelloSDK:
     async def send_and_receive(self, msg: str, timeout: float = 7.0) -> bool | None:
         """Returns True ('ok'), False ('error' or any other explicit
         rejection), or None (no response within timeout - the command
-        may have still succeeded, we just don't know)."""
+        may have still succeeded, we just don't know).
+        Expansion kit (EXT) commands answer e.g. 'led ok' / 'matrix ok',
+        so anything ending in 'ok' counts as success."""
         async with self._send_lock:
             while not self._response_queue.empty():
                 self._response_queue.get_nowait()
@@ -183,7 +187,8 @@ class TelloSDK:
                 raw = await asyncio.wait_for(self._response_queue.get(), timeout=timeout)
             except asyncio.TimeoutError:
                 return None
-            return raw.strip().lower() == "ok"
+            reply = raw.strip().lower()
+            return reply == "ok" or reply.endswith(" ok")
 
     async def query(self, msg: str, timeout: float = 7.0) -> str | None:
         """Like send_and_receive, but for '?' read-commands where the
@@ -210,40 +215,134 @@ class TelloSDK:
             yield state
 
     # ---------------------------------------------------------- video stream
+    # Why not cv.VideoCapture("udp://...")?
+    #   - its open() and read() block for up to 30 s when no packets arrive
+    #     (e.g. the short gap while the Tello switches camera) -> frozen frame,
+    #     and a failed open() makes read() fail instantly, which used to end the
+    #     stream for good.
+    #   - it probes the resolution ONCE at open; the downward camera (320x240)
+    #     has a different resolution than the forward one (960x720).
+    # Instead: our own UDP socket (short timeout, never hangs) + a PyAV H.264
+    # decoder (PyAV comes with djitellopy). The decoder handles resolution
+    # changes and can be reset on demand when the camera is switched.
+
     async def open_video_channel(self) -> None:
-        """VideoCapture's constructor itself blocks while it probes the
-        stream - runs off the event loop, same reasoning as everywhere else here."""
+        if self._video_receiver is not None:
+            return
         self._video_stop = False
-        self._video_capture = await asyncio.to_thread(cv.VideoCapture, f"udp://0.0.0.0:{self.video_port}")
+        self._video_frames = asyncio.Queue(maxsize=1)
+        self._video_receiver = _TelloVideoReceiver(self.video_port, asyncio.get_running_loop(), self._push_video_frame)
+        await asyncio.to_thread(self._video_receiver.start)
+
+    def _push_video_frame(self, frame) -> None:
+        """Runs on the event loop (called via call_soon_threadsafe). Only the
+        newest frame is kept - if the display is slow we drop old frames
+        instead of building up lag."""
+        if self._video_frames.full():
+            self._video_frames.get_nowait()
+        self._video_frames.put_nowait(frame)
+
+    def reset_video_decoder(self) -> None:
+        """Call right after a camera switch: throws away decoder state from the
+        old camera and waits for a clean keyframe of the new one (no green /
+        smeared frames)."""
+        if self._video_receiver is not None:
+            self._video_receiver.request_reset()
 
     def stop_video_stream(self) -> None:
-        """Signals video_stream()'s loop to exit on its NEXT iteration.
-        Deliberately does NOT release the capture yet - see close_video_channel()."""
+        """Signals video_stream()'s loop to exit (within ~0.5 s)."""
         self._video_stop = True
 
     async def close_video_channel(self) -> None:
-        """Only call this after the consumer task has actually finished
-        (see TelloDrone.stop_video). asyncio.Task.cancel() can't interrupt
-        a blocking call already running in a worker thread - if we release()
-        while a cap.read() from the previous iteration is still in flight
-        on another thread, that's a real OpenCV crash risk, not just a
-        theoretical one."""
-        if self._video_capture:
-            await asyncio.to_thread(self._video_capture.release)
-            self._video_capture = None
+        receiver, self._video_receiver = self._video_receiver, None
+        if receiver is not None:
+            await asyncio.to_thread(receiver.stop)
 
     async def video_stream(self):
         """Async generator yielding BGR numpy frames as they arrive.
-        Mirrors state_stream()'s interface. Retries on dropped frames
-        (normal over WiFi/UDP) but gives up after ~5s of nothing."""
-        consecutive_failures = 0
+        A gap in the video (camera switch, WiFi hiccup) is NOT the end of
+        the stream - it just waits for the next frame until stopped."""
         while not self._video_stop:
-            received, frame = await asyncio.to_thread(self._video_capture.read)
-            if not received:
-                consecutive_failures += 1
-                if consecutive_failures >= 50:
-                    return
-                await asyncio.sleep(0.1)
+            try:
+                frame = await asyncio.wait_for(self._video_frames.get(), timeout=0.5)
+            except asyncio.TimeoutError:
                 continue
-            consecutive_failures = 0
             yield frame
+
+
+class _TelloVideoReceiver:
+    """Receives the Tello's raw H.264 over UDP and decodes it, in its own
+    thread. Every socket wait has a short timeout, so stop() always returns
+    quickly - no call in here can hang for long."""
+
+    _KEYFRAME_WAIT_MAX = 3.0  # s - after a reset, show frames anyway if no keyframe is flagged by then
+
+    def __init__(self, port: int, loop: asyncio.AbstractEventLoop, on_frame: Callable[[Any], None]):
+        self._port = port
+        self._loop = loop
+        self._on_frame = on_frame
+        self._stop = threading.Event()
+        self._reset = threading.Event()
+        self._thread: threading.Thread | None = None
+        self._sock: socket.socket | None = None
+
+    def start(self) -> None:
+        import av  # noqa: F401  - fail here (clear error) rather than inside the thread
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 1024 * 1024)
+        sock.bind(("0.0.0.0", self._port))
+        sock.settimeout(0.5)
+        self._sock = sock
+        self._thread = threading.Thread(target=self._run, name=f"tello-video-{self._port}", daemon=True)
+        self._thread.start()
+
+    def request_reset(self) -> None:
+        self._reset.set()
+
+    def stop(self) -> None:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=2.0)
+            self._thread = None
+        if self._sock is not None:
+            self._sock.close()
+            self._sock = None
+
+    def _run(self) -> None:
+        import av
+
+        codec = av.CodecContext.create("h264", "r")
+        waiting_since = time.monotonic()  # wait for a keyframe before showing anything
+        while not self._stop.is_set():
+            if self._reset.is_set():
+                self._reset.clear()
+                codec = av.CodecContext.create("h264", "r")
+                waiting_since = time.monotonic()
+            try:
+                data = self._sock.recv(65535)
+            except socket.timeout:
+                continue
+            except OSError:
+                break  # socket closed
+            try:
+                packets = codec.parse(data)
+            except Exception:
+                continue
+            for packet in packets:
+                try:
+                    frames = codec.decode(packet)
+                except Exception:
+                    continue  # normal right after a (re)start: no SPS/keyframe yet, or a lost UDP packet
+                for frame in frames:
+                    if waiting_since is not None:
+                        if getattr(frame, "key_frame", True) or time.monotonic() - waiting_since > self._KEYFRAME_WAIT_MAX:
+                            waiting_since = None
+                        else:
+                            continue
+                    image = frame.to_ndarray(format="bgr24")
+                    try:
+                        self._loop.call_soon_threadsafe(self._on_frame, image)
+                    except RuntimeError:
+                        return  # event loop already closed

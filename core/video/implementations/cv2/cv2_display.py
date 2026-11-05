@@ -24,6 +24,7 @@ DISPLAY_TARGET_SIZE = (960, 720)  # (width, height)
 # ultralytics, which downloads it automatically.
 DEFAULT_MODEL_NAME = "yolo26n.pt"
 BOX_COLOR = (0, 255, 0)  # BGR
+CUSTOM_TEXT_COLOR = (0, 255, 255)  # BGR yellow - custom data block (top-right)
 
 
 class CV2Display(VideoBase):
@@ -284,11 +285,36 @@ class CV2Display(VideoBase):
                     except (KeyError, TypeError):
                         pass
 
+        if self.display_custom_data and self.custom_data:
+            self._draw_custom_data(frame, ui)
+
         if self.fpv_goggles_mode:
             frame = await self._to_fpv_goggles_frame(frame)
 
         cv.imshow(self.drone_id, frame)
         cv.waitKey(1)
+
+    def _draw_custom_data(self, frame, ui: float = 1.0) -> None:
+        """Second data block (sent by the project via display.{drone_id}),
+        top-right on a dark background so it stays readable on any image."""
+        lines = self._custom_data_lines()
+        if not lines:
+            return
+        font = cv.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.6 * ui
+        thickness = max(1, round(1.5 * ui))
+        (_, text_h), _ = cv.getTextSize("Ag", font, font_scale, thickness)
+        line_h = round(text_h * 1.8)
+        width = max(cv.getTextSize(line, font, font_scale, thickness)[0][0] for line in lines)
+        margin = round(10 * ui)
+        x = max(0, frame.shape[1] - width - 2 * margin - round(10 * ui))
+        y = round(20 * ui)
+        x2 = min(frame.shape[1], x + width + 2 * margin)
+        y2 = min(frame.shape[0], y + line_h * len(lines) + margin)
+        roi = frame[y:y2, x:x2]
+        roi[:] = (roi * 0.4).astype(roi.dtype)  # darken behind the text
+        for i, line in enumerate(lines):
+            cv.putText(frame, line, (x + margin, y + margin + text_h + i * line_h), font, font_scale, CUSTOM_TEXT_COLOR, thickness, cv.LINE_AA)
 
     def _fit_scale(self, frame) -> float:
         """Scale that fits the frame into target_size with the aspect ratio kept

@@ -1,6 +1,7 @@
 """
 TelloDrone - Real DJI/Ryze Tello, controlled via UDP per the Tello
-SDK 2.0.
+SDK 2.0 / 3.0 (3.0 = RoboMaster TT: adds expansion kit LED, dot matrix
+and distance sensor - those commands answer 'error' on a plain Tello).
 
 - arm()/disarm() send NO command to the drone - the real Tello has no
   arming concept at all, it goes straight from "connected" to
@@ -46,6 +47,31 @@ _QUERY_COMMANDS = {
     "barometer": "baro?",
     "acceleration": "acceleration?",
     "tof": "tof?",
+    # SDK 3.0 (RoboMaster TT)
+    "hardware": "hardware?",  # 'TELLO' or 'RMTT' (= expansion kit attached)
+    "wifi_version": "wifiversion?",  # expansion kit only
+    "ap": "ap?",  # router the drone joins in station mode - expansion kit only
+    "ssid": "ssid?",  # current Wi-Fi name - expansion kit only
+    "ext_tof": "EXT tof?",  # distance sensor on the expansion kit, in mm (8192 = out of range)
+    "ext_version": "EXT version?",  # expansion kit (ESP32) firmware
+}
+
+_FLIP_DIRECTIONS = {"left": "l", "right": "r", "forward": "f", "back": "b", "l": "l", "r": "r", "f": "f", "b": "b"}
+
+# Expansion kit (RoboMaster TT open-source controller) - LED and 8x8 dot matrix.
+# Matrix patterns are 64 characters, row by row: r = red, b = blue, p = purple, 0 = off.
+_EXT_COMMANDS: dict[str, Callable[..., str]] = {
+    "led": lambda r, g, b: f"EXT led {int(r)} {int(g)} {int(b)}",
+    "led_pulse": lambda rate, r, g, b: f"EXT led br {rate} {int(r)} {int(g)} {int(b)}",
+    "led_blink": lambda rate, r1, g1, b1, r2, g2, b2: f"EXT led bl {rate} {int(r1)} {int(g1)} {int(b1)} {int(r2)} {int(g2)} {int(b2)}",
+    "matrix_pattern": lambda pattern: f"EXT mled g {pattern}",
+    "matrix_clear": lambda: "EXT mled g " + "0" * 64,
+    "matrix_scroll_text": lambda direction, color, rate, text: f"EXT mled {direction} {color} {rate} {text}",
+    "matrix_scroll_pattern": lambda direction, rate, pattern: f"EXT mled {direction} g {rate} {pattern}",
+    "matrix_show": lambda color, text: f"EXT mled s {color} {text}",  # one character, or 'heart'
+    "matrix_boot_pattern": lambda pattern: f"EXT mled sg {pattern}",
+    "matrix_clear_boot": lambda: "EXT mled sc",
+    "matrix_brightness": lambda level: f"EXT mled sl {int(level)}",
 }
 
 
@@ -173,9 +199,103 @@ class TelloDrone(DroneBase):
 
     # goto pos movement
     @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
-    async def goto(self, x: float, y: float, z: float, speed: int = 50, mid: str = "m1"):
-        ack = await self.sdk.send_and_receive(f"go {int(x)} {int(y)} {int(z)} {int(speed)} {str(mid)}", timeout=20)
-        await self._publish_tristate_ack(f"goto {x} {y} {z}", ack, on_success=lambda: self.sdk.apply_goto_delta(x, y, z))
+    async def goto(self, x: float, y: float, z: float, speed: int = 50, mid: str | None = None):
+        """Fly x/y/z cm (-500..500) at speed cm/s (10..100), relative to the
+        drone - or, with mid ('m1'..'m8', 'm-1' = first pad seen, 'm-2' =
+        nearest pad), to that point in the mission pad's coordinates."""
+        cmd = f"go {int(x)} {int(y)} {int(z)} {int(speed)}" + (f" {mid}" if mid else "")
+        ack = await self.sdk.send_and_receive(cmd, timeout=20)
+        await self._publish_tristate_ack(f"goto {x} {y} {z}" + (f" {mid}" if mid else ""), ack, on_success=lambda: self.sdk.apply_goto_delta(x, y, z))
+
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
+    async def curve(self, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float, speed: int = 30, mid: str | None = None):
+        """Fly a curve through (x1 y1 z1) to (x2 y2 z2), cm, speed 10..60 cm/s.
+        The arc radius must be 0.5..10 m, otherwise the drone answers 'error'."""
+        cmd = f"curve {int(x1)} {int(y1)} {int(z1)} {int(x2)} {int(y2)} {int(z2)} {int(speed)}" + (f" {mid}" if mid else "")
+        ack = await self.sdk.send_and_receive(cmd, timeout=30)
+        await self._publish_tristate_ack(cmd, ack, on_success=lambda: self.sdk.apply_goto_delta(x2, y2, z2))
+
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
+    async def jump(self, x: float, y: float, z: float, speed: int, yaw: int, mid1: str, mid2: str):
+        """Fly to (x y z) in mission pad mid1's coordinates, then find pad mid2
+        and turn to `yaw` degrees relative to it."""
+        cmd = f"jump {int(x)} {int(y)} {int(z)} {int(speed)} {int(yaw)} {mid1} {mid2}"
+        ack = await self.sdk.send_and_receive(cmd, timeout=30)
+        await self._publish_tristate_ack(cmd, ack)
+
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
+    async def rotate(self, direction: str, degrees: int):
+        """Turn 'cw' (clockwise) or 'ccw' by 1..360 degrees."""
+        if direction not in ("cw", "ccw"):
+            msg = f"rotate direction must be 'cw' or 'ccw', not '{direction}'."
+            await self.publish_parser(PublishType.ERROR, {"error": "UnknownDirection", "message": msg})
+            return
+        ack = await self.sdk.send_and_receive(f"{direction} {int(degrees)}", timeout=15)
+        await self._publish_tristate_ack(f"rotate {direction} {degrees}", ack)
+
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
+    async def flip(self, direction: str):
+        """Flip 'left', 'right', 'forward' or 'back' (needs enough battery)."""
+        code = _FLIP_DIRECTIONS.get(direction)
+        if code is None:
+            msg = f"'{direction}' is not a flip direction (left/right/forward/back)."
+            await self.publish_parser(PublishType.ERROR, {"error": "UnknownDirection", "message": msg})
+            return
+        ack = await self.sdk.send_and_receive(f"flip {code}", timeout=15)
+        await self._publish_tristate_ack(f"flip {direction}", ack)
+
+    @requires(DroneConState.CONNECTED)
+    async def stop(self):
+        """Stop and hover in place right now (interrupts go/curve/moves)."""
+        self.sdk.track_rc_velocity(0, 0, 0, 0)
+        ack = await self.sdk.send_and_receive("stop", timeout=5)
+        await self._publish_tristate_ack("stop", ack)
+
+    # Motors / launch / reboot
+    @requires(DroneConState.CONNECTED, DroneFlightState.LANDED, DroneArmState.ARMED)
+    async def motor_on(self):
+        """Spin the propellers slowly on the ground (cooling). Ends by itself on takeoff."""
+        ack = await self.sdk.send_and_receive("motoron", timeout=10)
+        await self._publish_tristate_ack("motor_on", ack)
+
+    @requires(DroneConState.CONNECTED, DroneFlightState.LANDED)
+    async def motor_off(self):
+        ack = await self.sdk.send_and_receive("motoroff", timeout=10)
+        await self._publish_tristate_ack("motor_off", ack)
+
+    @requires(DroneConState.CONNECTED, DroneFlightState.LANDED, DroneArmState.ARMED)
+    async def throw_fly(self):
+        """Throw-to-launch: throw the drone horizontally within 5 s after this."""
+        ack = await self.sdk.send_and_receive("throwfly", timeout=15)
+        await self._publish_tristate_ack("throw_fly", ack, on_success=lambda: setattr(self, "flight_state", DroneFlightState.INAIR))
+
+    @requires(DroneConState.CONNECTED)
+    async def reboot(self):
+        """Reboot the drone. It sends no answer on success - and the connection
+        is gone afterwards, so we disconnect locally (connect again when it's back)."""
+        ack = await self.sdk.send_and_receive("reboot", timeout=5)
+        if ack is False:
+            await self._publish_tristate_ack("reboot", ack)
+            return
+        await self.publish_parser(PublishType.ACK, {"cmd": "reboot", "ack": "sent", "info": "Drone reboots - connect again in ~10 s."})
+        if self.video_streaming:
+            await self._close_video()
+            self.video_streaming = False
+        await self.disconnect()
+
+    # Expansion kit (RoboMaster TT): top LED + 8x8 dot matrix
+    @requires(DroneConState.CONNECTED)
+    async def ext(self, what: str, **kwargs):
+        """Expansion kit LED / dot matrix - see _EXT_COMMANDS for 'what' and its args.
+        A drone without the expansion kit answers 'error'."""
+        builder = _EXT_COMMANDS.get(what)
+        if builder is None:
+            msg = f"'{what}' is not an expansion kit command. Known: {', '.join(_EXT_COMMANDS)}"
+            await self.publish_parser(PublishType.ERROR, {"error": "UnknownExt", "message": msg})
+            return
+        cmd = builder(**kwargs)
+        ack = await self.sdk.send_and_receive(cmd, timeout=5)
+        await self._publish_tristate_ack(f"ext {what}", ack)
 
     # Step Movement
     @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
@@ -210,12 +330,13 @@ class TelloDrone(DroneBase):
             "camera_source": lambda: f"downvision {1 if kwargs.get('downward') else 0}",
             "video_fps": lambda: f"setfps {kwargs['fps']}",
             "video_bitrate": lambda: f"setbitrate {int(kwargs['bitrate'])}",
+            # SDK 3.0 - expansion kit only
+            "wifi_channel": lambda: f"wifisetchannel {int(kwargs['channel'])}",
+            "multi_wifi": lambda: f"multi wifi {kwargs['ssid']} {kwargs['password']}",
         }
         if what == "camera_source":
-            # downvision while the stream runs leaves ffmpeg decoding the new
-            # resolution with the old buffers (green / 3x tall frame, then a
-            # dead stream) - needs a full streamoff -> downvision -> streamon
-            # with a freshly opened capture.
+            # Handled separately: see _switch_camera() - the video decoder
+            # must be reset when the camera (and so the resolution) changes.
             async with self._camera_lock:
                 ack = await self._switch_camera(bool(kwargs.get("downward")))
             await self._publish_tristate_ack(f"set {what} {kwargs}", ack)
@@ -249,29 +370,34 @@ class TelloDrone(DroneBase):
             await self.publish_parser(PublishType.ERROR, {"error": "QueryTimeout", "message": f"No response querying '{what}'."})
             return
 
-        value = _parse_state_string(raw) if what == "attitude" else _coerce_number(raw)
+        if what == "attitude":
+            value = _parse_state_string(raw)
+        elif what == "ext_tof":
+            value = _coerce_number(raw.split()[-1])  # reply is 'tof 1234' (mm)
+        else:
+            value = _coerce_number(raw)
         await self.publish_parser(PublishType.DATA, {what: value})
 
     @requires(DroneConState.CONNECTED)
     async def start_video(self):
+        # Socket first, so no packet (and no keyframe) is missed after streamon.
+        await self._open_video()
         ack = await self.sdk.send_and_receive("streamon", timeout=10)
-        if ack is not False:
-            await self._open_video()
+        if ack is False:
+            await self._close_video()
         await self._publish_tristate_ack("start_video", ack, on_success=lambda: setattr(self, "video_streaming", True))
 
     @requires(DroneConState.CONNECTED)
     async def stop_video(self):
-        # Reader first, WHILE frames still flow: its in-flight cap.read() then
-        # returns quickly and the loop sees the stop flag. Sending streamoff
-        # first starves that read() and awaiting the task hangs (= freeze).
+        # Order no longer matters: the receiver never blocks longer than 0.5 s.
         await self._close_video()
         ack = await self.sdk.send_and_receive("streamoff", timeout=10)
         await self._publish_tristate_ack("stop_video", ack, on_success=lambda: setattr(self, "video_streaming", False))
 
     async def _open_video(self) -> None:
-        await asyncio.sleep(1.0)  # give the Tello a moment before the capture probes the stream
         await self.sdk.open_video_channel()
-        self.video_task = asyncio.create_task(self._consume_video_stream())
+        if self.video_task is None or self.video_task.done():
+            self.video_task = asyncio.create_task(self._consume_video_stream())
 
     async def _close_video(self) -> None:
         self.sdk.stop_video_stream()
@@ -281,25 +407,20 @@ class TelloDrone(DroneBase):
         await self.sdk.close_video_channel()
 
     async def _switch_camera(self, downward: bool) -> bool | None:
-        resume = self.video_streaming
-        if resume:
-            await self._close_video()
-            await self.sdk.send_and_receive("streamoff", timeout=5)
+        """'downvision' switches the camera on the fly - the stream keeps
+        running, only its resolution changes (960x720 <-> 320x240). So: NO
+        streamoff/streamon and no reopening (that gap is what used to freeze
+        the video). We only reset the decoder so it starts clean on the new
+        camera's next keyframe."""
         ack = await self.sdk.send_and_receive(f"downvision {1 if downward else 0}", timeout=10)
-        if resume:
-            await asyncio.sleep(0.5)
-            await self.sdk.send_and_receive("streamon", timeout=10)
-            await self._open_video()
+        if ack is not False:
+            self.sdk.reset_video_decoder()
         return ack
 
     async def _consume_video_stream(self):
         """Analog to _consume_state_stream"""
         seq = 0
-        warmup = 15  # drop the first frames after (re)opening: decoder output is green until the first full keyframe
         async for frame in self.sdk.video_stream():
-            if warmup > 0:
-                warmup -= 1
-                continue
             seq += 1
             await self.publish_parser(PublishType.FRAME, {"ts": time.time(), "seq": seq, "encoding": "bgr24", "frame": frame})
 

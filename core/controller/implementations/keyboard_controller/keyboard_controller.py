@@ -80,6 +80,8 @@ class KeyboardController(ControllerBase):
         """run_coroutine_threadsafe() futures swallow exceptions unless
         someone checks .result()/.exception() on them - without this,
         a bug anywhere downstream just looks like 'nothing happened'."""
+        if future.cancelled():  # e.g. a key press still running when the program shuts down
+            return
         exc = future.exception()
         if exc is not None:
             import traceback

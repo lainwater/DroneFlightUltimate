@@ -50,6 +50,21 @@
     "show_state_off": {
         "method": "turn_off_display_state_data"
     },
+    "show_custom_on": {
+        "method": "turn_on_display_custom_data"
+    },
+    "show_custom_off": {
+        "method": "turn_off_display_custom_data"
+    },
+    "set_custom_data": {
+        "method": "set_custom_data",
+        "args": {
+            "data": {}
+        }
+    },
+    "clear_custom_data": {
+        "method": "clear_custom_data"
+    },
     "start_recording": {
         "method": "start_recording"
     },
