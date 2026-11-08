@@ -12,6 +12,7 @@ dependencies = [
     "toml",
     "numpy",
     "ultralytics",
+    "vicon_dssdk",
 ]
 
 [project.optional-dependencies]

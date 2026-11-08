@@ -138,6 +138,15 @@ class TelloDrone(DroneBase):
             # True or None (dropped ack) both count as "probably connected" -
             # the SDK-mode command is nearly always accepted in practice.
             self.con_state = DroneConState.CONNECTED
+        if ack is None:
+            # Not one UDP packet came back from the drone - almost always a network/firewall problem, not the drone.
+            info = (
+                f"No answer from {self.ip}:{self.cmd_port}. Check: same subnet as the drone (ping {self.ip}), "
+                f"PC firewall allows inbound UDP {self.cmd_pc_port}/{self.state_port}/{self.video_port} for python, "
+                "no other program/drone using these ports."
+            )
+            await self.publish_parser(PublishType.ACK, {"cmd": "connect", "ack": "None", "info": info})
+            return
         await self.publish_parser(PublishType.ACK, {"cmd": "connect", "ack": f"{ack}"})
 
     @requires(DroneConState.CONNECTED)
