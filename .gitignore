@@ -11,8 +11,11 @@ __pycache__/
 *.pyc
 
 # misc
+tools/calibration/images/
 projects/*
 !/projects/examples
+!/projects/__init__.py
+!/projects/base.py
 projects/**/*.jsonl
 projects/**/*.png
 projects/**/*.mp4

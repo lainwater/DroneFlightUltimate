@@ -1,58 +1,21 @@
 """
-# run.py - single entry point for DroneFlightUltimate. Provides entry by command line interface (CLI) or by function call.
+# run.py - single entry point for DroneFlightUltimate: create and run projects.
 
-## Programmatic Usage:
-    ### Create a project:
-        create_project(project_name: str, path: Path | None = None) -> None
-            Creates a new project with the given name at the given path.
-            If no path is provided, the project will be created in the default projects directory.
+## CLI
+    python run.py create -n <name>              new project in projects/<name> (template)
+    python run.py run -n <name>                 run projects/<name>
+    python run.py run -e                        list projects/examples
+    python run.py run -e -n <example>           run projects/examples/<example>
+    python run.py run -m                        list more_examples
+    python run.py run -m -n <example>           run more_examples/<example>
+    python run.py run -n <name> -p <folder>     run <folder>/<name>
 
-    ### Run a project:
-        run_project(project_name: str, path: Path | None = None, _type: str | None = None) -> None
-            Runs the project with the given name at the given path.
-            If no path is provided, the project will be run from the default projects directory.
-            The `_type` parameter can be used to specify the type of project to run ("example" or None)
+    Short forms: c = create, r = run.  -e, -m and -p can't be combined.
 
-    ### Get a list of examples:
-        get_examples() -> list[str]
-
-## CLI Usage:
-    ### Create a project:
-        python run.py create
-        python run.py create -n <project_name>
-
-    ### Run a project:
-        python run.py run -n <project_name>
-        python run.py run -n <example_name> -e
-        python run.py run -n <project_name> -p <path>
-
-    ### Short aliases:
-        create -> c
-        run    -> r
-        example -> e
-        path    -> p
-
-    Examples:
-        python run.py create
-            Creates "projects/new_project".
-
-        python run.py create -n myproject
-            Creates "projects/myproject".
-
-        python run.py run -n myproject
-            Runs "projects/myproject".
-
-        python run.py run -n tello_t8l -e
-            Runs "projects/examples/tello_t8l".
-
-        python run.py run -e
-            Gives you list of examples in "project/examples/"
-
-        python run.py run -n myproject -p /some/path
-            Runs "/some/path/myproject".
-
-    Note:
-        --example (-e) and --path (-p) cannot be used together.
+## From Python
+    create_project(name, path=None)
+    run_project(name, path=None, _type=None)    _type: None, "example" or "more"
+    get_examples() / get_more_examples()        names
 """
 
 import argparse
@@ -64,95 +27,85 @@ from projects import get_project
 ROOT = Path(__file__).resolve().parent
 PROJECTS = ROOT / "projects"
 EXAMPLES = PROJECTS / "examples"
+MORE_EXAMPLES = ROOT / "more_examples"
+
+_SOURCES = {"example": EXAMPLES, "more": MORE_EXAMPLES}
 
 
-######################################################
-##### Functions for programmatic usage of run.py #####
-######################################################
+def _list(folder: Path) -> list[str]:
+    if not folder.exists():
+        return []
+    return sorted(p.name for p in folder.iterdir() if (p / "commander" / "main.py").exists())
+
+
+def get_examples() -> list[str]:
+    return _list(EXAMPLES)
+
+
+def get_more_examples() -> list[str]:
+    return _list(MORE_EXAMPLES)
 
 
 def create_project(project_name: str, path: Path | None = None) -> None:
-    if path is None:
-        path = PROJECTS
-    get_project(project_name, path)
+    get_project(project_name, path or PROJECTS)
 
 
 def run_project(project_name: str, path: Path | None = None, _type: str | None = None) -> None:
-    if path is None:
-        path = PROJECTS
-    if _type is not None and type(_type) is str:
-        if _type.lower() == "example":
-            path = EXAMPLES
-    project = get_project(project_name, path)
+    if isinstance(_type, str) and _type.lower() in _SOURCES:
+        path = _SOURCES[_type.lower()]
+    project = get_project(project_name, path or PROJECTS)
     try:
         asyncio.run(project.run())
     except KeyboardInterrupt:
         pass
 
 
-######################################################
-#####  Functions for both programmatic and CLI   #####
-######################################################
-
-
-def get_examples() -> list[str]:
-    if not EXAMPLES.exists():
-        return []
-
-    return sorted(project.name for project in EXAMPLES.iterdir() if project.is_dir())
-
-
-######################################################
-#####   Entry point and Functions for CLI usage  #####
-######################################################
+def _print_list(title: str, names: list[str]) -> None:
+    print(title)
+    for name in names:
+        print(f"  - {name}")
 
 
 def cli_usage() -> None:
-    # get args
-    parser = argparse.ArgumentParser(description="DroneFlightUltimate project manager")
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    parser = argparse.ArgumentParser(
+        description="DroneFlightUltimate project manager", epilog=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
 
-    # create arg parse
-    create_parser = subparsers.add_parser("create", aliases=["c"], help="Create a new project")
-    create_parser.add_argument("-n", "--name", default="new_project", help="Name of the project")
+    create = sub.add_parser("create", aliases=["c"], help="create a new project in projects/")
+    create.add_argument("-n", "--name", default="new_project", help="name of the project")
 
-    # run arg parse
-    run_parser = subparsers.add_parser("run", aliases=["r"], help="Run a project")
-    run_parser.add_argument("-n", "--name", default=None, help="Name of the project")
-    location = run_parser.add_mutually_exclusive_group()
-    location.add_argument("-e", "--example", action="store_true", help="Use a project from projects/examples")
-    location.add_argument("-p", "--path", type=Path, help="Path to the project without project name")
+    run = sub.add_parser("run", aliases=["r"], help="run a project")
+    run.add_argument("-n", "--name", default=None, help="name of the project")
+    where = run.add_mutually_exclusive_group()
+    where.add_argument("-e", "--example", action="store_true", help="from projects/examples")
+    where.add_argument("-m", "--more", action="store_true", help="from more_examples")
+    where.add_argument("-p", "--path", type=Path, help="folder that contains the project")
 
-    # get args
     args = parser.parse_args()
 
-    # check args for create
     if args.command in ("create", "c"):
-        path = PROJECTS
-        print(f"Creating project '{args.name}' at {path}...")
-        get_project(args.name, path)
+        print(f"Creating project '{args.name}' in {PROJECTS} ...")
+        create_project(args.name)
         return
 
-    # check args for run
-    if args.command in ("run", "r"):
-        if args.example:
-            examples = get_examples()
-            if args.name is None:  # print list of examples if no name is provided
-                print("Available examples:")
-                for example in examples:
-                    print(f"  - {example}")
-                return
-            path = EXAMPLES
-        elif args.path is not None:
-            path = args.path.resolve()
-        else:
-            path = PROJECTS
-        print(f"Running project '{args.name}' at {path}...")
-        project = get_project(args.name, path)
-        try:
-            asyncio.run(project.run())
-        except KeyboardInterrupt:
-            pass
+    if args.example or args.more:
+        folder, names, title = (EXAMPLES, get_examples(), "examples") if args.example else (MORE_EXAMPLES, get_more_examples(), "more_examples")
+        if args.name is None or args.name not in names:  # never scaffold an empty project inside an examples folder
+            if args.name is not None:
+                print(f"No example '{args.name}'.")
+            _print_list(f"Available {title}:", names)
+            return
+        path = folder
+    elif args.path is not None:
+        path = args.path.resolve()
+    else:
+        path = PROJECTS
+        if args.name is None:
+            parser.error("run needs -n <name> (or -e / -m to list examples)")
+
+    print(f"Running project '{args.name}' from {path} ...")
+    run_project(args.name, path)
 
 
 if __name__ == "__main__":

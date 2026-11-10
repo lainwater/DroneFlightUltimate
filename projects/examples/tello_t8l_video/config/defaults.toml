@@ -3,3 +3,6 @@ level = "INFO"
 
 [controller]
 layout = "t8l_video"
+
+[video]
+calibration = "tello"

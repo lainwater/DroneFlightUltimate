@@ -1,26 +1,58 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "droneflightultimate"
-version = "0.1.0"
-description = "Modular, async Framework to control various drones."
+version = "0.2.0"
+description = "Modular, async Python framework to fly drones (DJI Tello family, simulator) with keyboard or joystick - video, YOLO, ArUco, Vicon, flight patterns."
+readme = "README.md"
+license = { file = "LICENSE" }
 authors = [{ name = "Valerie Lain" }]
 requires-python = ">=3.11"
+keywords = ["drone", "tello", "tello-edu", "robomaster-tt", "asyncio", "opencv", "aruco", "vicon", "education"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Robotics",
+]
 dependencies = [
-    "djitellopy",
-    "opencv-python",
-    "pynput",
-    "pygame",
-    "toml",
     "numpy",
-    "ultralytics",
-    "vicon_dssdk",
+    "opencv-python",  # video window, ArUco (cv2.aruco), calibration
+    "av",             # PyAV: decodes the Tello's H.264 video
+    "pynput",         # keyboard controller
+    "pygame",         # joystick controller (RadioMaster T8L, gamepads)
+    "toml",           # config/defaults.toml
 ]
 
 [project.optional-dependencies]
+yolo = ["ultralytics"]   # YOLO object detection in the video window (pulls in PyTorch - large)
 dev = ["pytest", "ruff"]
+all = ["droneflightultimate[yolo,dev]"]
+# Vicon (core/vicon) needs vicon_dssdk - NOT on PyPI. Install it from the Vicon DataStream
+# SDK folder: install_vicon_dssdk.bat, or pip install "<SDK>/Python/vicon_dssdk".
+
+[project.urls]
+Repository = "https://github.com/lainwater/DroneFlightUltimate"
+Documentation = "https://github.com/lainwater/DroneFlightUltimate/tree/master/docs"
+
+[tool.setuptools.packages.find]
+include = ["core*"]
+
+[tool.setuptools.package-data]
+core = ["**/*.json", "**/*.npz", "**/*.pt"]   # commands, layouts, calibrations, YOLO model
 
 [tool.ruff]
 line-length = 150
 target-version = "py311"
+extend-exclude = ["*.md"]   # docs code blocks are hand-aligned for reading
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
@@ -28,10 +60,5 @@ select = ["E", "F", "I"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
-
-[tool.setuptools.packages.find]
-include = ["core*", "app*"]
-
-[build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+python_files = ["*_test.py", "test_*.py"]
+addopts = "-p no:cacheprovider"

@@ -71,6 +71,7 @@ class DroneBase(ABC):
         self.con_state = DroneConState.DISCONNECTED
         self.arm_state = DroneArmState.DISARMED
         self.init_kwargs = kwargs
+        self.model: str | None = None  # drone model (e.g. Tello EDU) - None = no capability checks
         self.bus = bus
         self.fops = get_fileops()
         self.command_map = self._initialize_command_map()
@@ -128,6 +129,13 @@ class DroneBase(ABC):
             await self.publish_parser(PublishType.ERROR, {"error": "NotCapable", "message": f"'{action}' not in {self.drone_id}'s capabilities"})
             return
         entry = self.command_map[action]
+        models = entry.get("models")
+        if models and getattr(self, "model", None) and self.model not in models:
+            await self.publish_parser(
+                PublishType.ERROR,
+                {"error": "NotSupported", "message": f"'{action}' needs {' / '.join(models)}, {self.drone_id} is a {self.model}", "action": action},
+            )
+            return
         method_name = entry["method"]
         method = getattr(self, method_name, None)
         if method is None:

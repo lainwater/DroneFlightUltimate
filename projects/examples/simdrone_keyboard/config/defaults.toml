@@ -2,4 +2,4 @@
 level = "INFO"
 
 [controller]
-layout = "qwertz"
+layout = "keyboard"

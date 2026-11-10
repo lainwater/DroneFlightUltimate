@@ -3,7 +3,6 @@ CV2Display - Output frames to cv2 window from Bus
 """
 
 import asyncio
-import math
 import time
 from datetime import datetime
 from pathlib import Path
@@ -11,6 +10,8 @@ from pathlib import Path
 import cv2 as cv
 
 from core.video.base import VideoBase
+from core.video.calibration import CameraCalibration, load_calibration
+from core.video.implementations.cv2.vision import ArucoMarkerDetector, Undistorter
 
 TEXT_SPACING = 40  # at UI_REF_HEIGHT, scaled with the displayed frame height
 UI_REF_HEIGHT = 720  # overlay text/boxes are designed for a frame this tall
@@ -25,6 +26,9 @@ DISPLAY_TARGET_SIZE = (960, 720)  # (width, height)
 DEFAULT_MODEL_NAME = "yolo26n.pt"
 BOX_COLOR = (0, 255, 0)  # BGR
 CUSTOM_TEXT_COLOR = (0, 255, 255)  # BGR yellow - custom data block (top-right)
+ARUCO_COLOR = (255, 0, 255)  # BGR magenta - marker outlines + ArUco status line
+UNDISTORT_COLOR = (255, 255, 0)  # BGR cyan - undistort status line
+AXIS_COLORS = ((0, 0, 255), (0, 255, 0), (255, 0, 0))  # x red, y green, z blue (like cv.drawFrameAxes)
 
 
 class CV2Display(VideoBase):
@@ -49,6 +53,25 @@ class CV2Display(VideoBase):
         self.target_size = DISPLAY_TARGET_SIZE
         self._pump_task: asyncio.Task | None = None
 
+        # --- camera calibration (undistort + ArUco pose) ---
+        # get_videostream(..., calibration="tello") - name of core/video/calibration/<name>.npz
+        self.calibration_name: str | None = kwargs.get("calibration")
+        self._calibration: CameraCalibration | None = None
+        self.is_undistorting = False
+        self._undistorter: Undistorter | None = None
+        self._undistort_note: str | None = None  # why undistort is not applied right now (size mismatch)
+
+        # --- ArUco state (defaults overridable via get_videostream kwargs) ---
+        self.aruco_dictionary: str = kwargs.get("aruco_dictionary", "DICT_5X5_50")
+        self.aruco_marker_size: float = float(kwargs.get("aruco_marker_size", 0.15))  # metres, black square edge
+        self.aruco_publish: bool = bool(kwargs.get("aruco_publish", False))
+        self.is_aruco_detecting = False
+        self._aruco: ArucoMarkerDetector | None = None
+        self._aruco_task: asyncio.Task | None = None
+        self._markers: list[dict] = []
+        self._aruco_ms = None
+        self._aruco_note: str | None = None  # e.g. "no calibration - no pose"
+
     @property
     def config_dir(self) -> Path:
         return Path(__file__).parent
@@ -64,6 +87,8 @@ class CV2Display(VideoBase):
         """Stop the video stream."""
         if self.is_object_detecting:
             await self.stop_detection()
+        if self.is_aruco_detecting:
+            await self.stop_aruco()
         if self._pump_task is not None:
             self._pump_task.cancel()
             self._pump_task = None
@@ -86,6 +111,7 @@ class CV2Display(VideoBase):
             cv.destroyWindow(self.drone_id)
             cv.namedWindow(self.drone_id)
             self._detections = []
+            self._markers = []
         self._last_shape = frame.shape
 
     # ------------------------------------------------------------ detection
@@ -222,18 +248,184 @@ class CV2Display(VideoBase):
         ui: overlay size factor (line width, font size)."""
         font = 0.6 * ui
         thick = max(1, round(2 * ui))
-        if self.is_object_detecting:
-            # status line: proves detection is running even when nothing is found
-            if self._det_ms is None:
-                status = "YOLO: waiting for first result..."
-            else:
-                status = f"YOLO: {len(self._detections)} obj, {self._det_ms:.0f} ms"
-            cv.putText(frame, status, (round(20 * ui), frame.shape[0] - round(20 * ui)), cv.FONT_HERSHEY_SIMPLEX, font, BOX_COLOR, thick)
         for det in self._detections:
             x1, y1, x2, y2 = (round(v * box_scale) for v in det["box"])
             cv.rectangle(frame, (x1, y1), (x2, y2), BOX_COLOR, thick)
             label = f"{det['label']} {det['conf']:.2f}"
             cv.putText(frame, label, (x1, max(round(15 * ui), y1 - round(8 * ui))), cv.FONT_HERSHEY_SIMPLEX, font, BOX_COLOR, thick)
+
+    # ------------------------------------------------------------ calibration / undistort
+
+    def _get_calibration(self, name: str | None = None) -> CameraCalibration:
+        """Load (and cache) the calibration. `name` overrides the one given at creation."""
+        name = name or self.calibration_name
+        if name is None:
+            raise ValueError("No camera calibration set - pass calibration='tello' (or 'webcam', ...) to get_videostream()")
+        if self._calibration is None or self._calibration.name != name:
+            self._calibration = load_calibration(name)
+            self.calibration_name = self._calibration.name
+            self._undistorter = None
+        return self._calibration
+
+    async def undistort_on(self, calibration: str | None = None, alpha: float = 1.0) -> None:
+        """Show the undistorted image (remove lens distortion).
+        calibration - name in core/video/calibration (default: the one given at creation)
+        alpha       - 1.0 keep all pixels (black curved borders), 0.0 crop to valid area"""
+        try:
+            calib = self._get_calibration(calibration)
+        except (ValueError, FileNotFoundError) as e:
+            await self._publish_parser("error", {"error": type(e).__name__, "message": str(e)})
+            return
+        self._undistorter = Undistorter(calib, alpha)
+        self.is_undistorting = True
+        self._detections, self._markers = [], []  # old results are in the other geometry
+        await self._publish_parser("ack", {"cmd": "undistort_on", "ack": "True", "calibration": calib.name})
+
+    async def undistort_off(self) -> None:
+        self.is_undistorting = False
+        self._undistort_note = None
+        self._detections, self._markers = [], []
+        await self._publish_parser("ack", {"cmd": "undistort_off", "ack": "True"})
+
+    def _undistort(self, frame):
+        """-> (frame to process + display, camera matrix, distortion) for that frame.
+        Camera parameters are None when there is no fitting calibration."""
+        calib = self._calibration
+        if calib is None and self.calibration_name and (self.is_aruco_detecting or self.is_undistorting):
+            try:
+                calib = self._get_calibration()
+            except (ValueError, FileNotFoundError):
+                self.calibration_name = None  # error was already reported - don't retry on every frame
+                calib = None
+        if calib is None:
+            return frame, None, None
+        if not calib.matches(frame.shape):
+            self._undistort_note = calib.mismatch_text(frame.shape)
+            return frame, None, None
+        self._undistort_note = None
+        if self.is_undistorting and self._undistorter is not None:
+            frame = self._undistorter.apply(frame)
+            return frame, self._undistorter.new_camera_matrix, None  # undistorted image: no distortion left
+        return frame, calib.camera_matrix, calib.dist_coeffs
+
+    # ------------------------------------------------------------ ArUco
+
+    async def start_aruco(
+        self, dictionary: str | None = None, marker_size: float | None = None, publish: bool | None = None, calibration: str | None = None
+    ) -> None:
+        """Detect ArUco markers and draw them; with a calibration also localize
+        them (x, y, z, distance, roll/pitch/yaw relative to the camera).
+
+        dictionary  - e.g. "DICT_5X5_50" (default from creation, see __init__)
+        marker_size - black square edge in METRES - wrong size = wrong distance!
+        publish     - publish every result on data.stream.{drone_id} as {"aruco": [...]}
+        calibration - calibration name, default: the one given at creation
+
+        Same worker pattern as YOLO: one frame at a time in a thread, frames
+        arriving meanwhile are shown with the last known markers."""
+        if self.is_aruco_detecting:
+            await self._publish_parser("ack", {"cmd": "start_aruco", "ack": "already_running"})
+            return
+        try:
+            self._aruco = ArucoMarkerDetector(dictionary or self.aruco_dictionary, marker_size or self.aruco_marker_size)
+        except Exception as e:
+            await self._publish_parser("error", {"error": type(e).__name__, "message": str(e)})
+            return
+        if publish is not None:
+            self.aruco_publish = bool(publish)
+        self._aruco_note = None
+        try:
+            self._get_calibration(calibration)
+        except (ValueError, FileNotFoundError) as e:
+            self._aruco_note = "no calibration - detect only, no pose"
+            await self._publish_parser("error", {"error": type(e).__name__, "message": f"{e} - ArUco runs without pose."})
+        self._markers = []
+        self._aruco_ms = None
+        self.is_aruco_detecting = True
+        await self._publish_parser(
+            "ack",
+            {
+                "cmd": "start_aruco",
+                "ack": "True",
+                "dictionary": self._aruco.dictionary_name,
+                "marker_size": self._aruco.marker_size,
+                "calibration": self._calibration.name if self._calibration else None,
+            },
+        )
+
+    async def stop_aruco(self) -> None:
+        self.is_aruco_detecting = False
+        task, self._aruco_task = self._aruco_task, None
+        if task is not None:
+            try:
+                await task
+            except Exception:
+                pass
+        self._markers = []
+        await self._publish_parser("ack", {"cmd": "stop_aruco", "ack": "True"})
+
+    def _maybe_submit_aruco(self, frame, camera_matrix, dist_coeffs) -> None:
+        if not self.is_aruco_detecting or self._aruco is None:
+            return
+        if self._aruco_task is None or self._aruco_task.done():
+            self._aruco_task = asyncio.create_task(self._run_aruco(frame.copy(), camera_matrix, dist_coeffs))
+
+    async def _run_aruco(self, frame, camera_matrix, dist_coeffs) -> None:
+        try:
+            t0 = time.perf_counter()
+            markers = await asyncio.to_thread(self._aruco.detect, frame, camera_matrix, dist_coeffs)
+            self._aruco_ms = (time.perf_counter() - t0) * 1000
+        except Exception as e:
+            self.is_aruco_detecting = False
+            self._markers = []
+            await self._publish_parser("error", {"error": type(e).__name__, "message": f"ArUco failed, stopped: {e}"})
+            return
+        if not self.is_aruco_detecting:
+            return
+        self._markers = markers
+        if self.aruco_publish:
+            await self._publish_parser("data", {"aruco": [{k: v for k, v in m.items() if k != "axes"} for m in markers]})
+
+    def _draw_markers(self, frame, box_scale: float = 1.0, ui: float = 1.0) -> None:
+        thick = max(1, round(2 * ui))
+        font = 0.6 * ui
+        for m in self._markers:
+            pts = [(round(x * box_scale), round(y * box_scale)) for x, y in m["corners"]]
+            for i in range(4):
+                cv.line(frame, pts[i], pts[(i + 1) % 4], ARUCO_COLOR, thick)
+            if "axes" in m:
+                origin, *ends = [(round(x * box_scale), round(y * box_scale)) for x, y in m["axes"]]
+                for end, color in zip(ends, AXIS_COLORS):
+                    cv.line(frame, origin, end, color, thick)
+                label = f"ID {m['id']}  {m['distance']:.2f} m"
+            else:
+                label = f"ID {m['id']}"
+            x, y = pts[0]
+            cv.putText(frame, label, (x, max(round(15 * ui), y - round(8 * ui))), cv.FONT_HERSHEY_SIMPLEX, font, ARUCO_COLOR, thick)
+
+    def _draw_status_lines(self, frame, ui: float = 1.0) -> None:
+        """Bottom-left: one line per running feature - proves it runs even when nothing is found."""
+        lines = []
+        if self.is_object_detecting:
+            text = "YOLO: waiting for first result..." if self._det_ms is None else f"YOLO: {len(self._detections)} obj, {self._det_ms:.0f} ms"
+            lines.append((text, BOX_COLOR))
+        if self.is_aruco_detecting:
+            if self._aruco_ms is None:
+                text = "ArUco: waiting for first result..."
+            else:
+                text = f"ArUco {self._aruco.dictionary_name}: {len(self._markers)} marker, {self._aruco_ms:.0f} ms"
+            note = self._aruco_note or (self._undistort_note and "no pose: " + self._undistort_note)
+            if note:
+                text += f"  ({note})"
+            lines.append((text, ARUCO_COLOR))
+        if self.is_undistorting:
+            text = f"UNDISTORTED ({self.calibration_name})" if not self._undistort_note else f"undistort paused: {self._undistort_note}"
+            lines.append((text, UNDISTORT_COLOR))
+        font = 0.6 * ui
+        thick = max(1, round(2 * ui))
+        for i, (text, color) in enumerate(reversed(lines)):
+            y = frame.shape[0] - round(20 * ui) - i * round(28 * ui)
+            cv.putText(frame, text, (round(20 * ui), y), cv.FONT_HERSHEY_SIMPLEX, font, color, thick)
 
     # ------------------------------------------------------------ frames
     async def _update_frame(self, data):
@@ -241,12 +433,16 @@ class CV2Display(VideoBase):
         ts_fps_new = datetime.timestamp(datetime.now())
         frame = await self._data_to_frame(data)
         self._reset_window_if_resized(frame)
+        # recordings + snapshots keep the RAW camera image (a calibration can be redone later)
         self._latest_frame = frame.copy()
         if self.recorder.is_recording:
             self.recorder.write(self._latest_frame)
 
-        # detection runs on the raw frame; boxes are drawn on the display copy
-        self._maybe_submit_detection(self._latest_frame)
+        # undistort (if on and the calibration fits this camera/resolution); YOLO and
+        # ArUco run on the same image that is displayed, so boxes/markers line up
+        frame, camera_matrix, dist_coeffs = self._undistort(frame)
+        self._maybe_submit_detection(frame)
+        self._maybe_submit_aruco(frame, camera_matrix, dist_coeffs)
 
         # 1) bring the frame to display size (auto-fit * manual rescale_factor) BEFORE
         #    drawing, so text and boxes are rendered crisp at the final size
@@ -263,6 +459,8 @@ class CV2Display(VideoBase):
         thickness = max(1, round(2 * ui))
 
         self._draw_detections(frame, box_scale, ui)
+        self._draw_markers(frame, box_scale, ui)
+        self._draw_status_lines(frame, ui)
 
         await self._display_text(frame, text=self.drone_id, position=(round(30 * ui), round(50 * ui)), font_scale=font_scale, thickness=thickness)
         if self.display_state_data:
@@ -280,7 +478,11 @@ class CV2Display(VideoBase):
                 else:
                     try:
                         await self._display_text(
-                            frame, text=f"{item}: {self.state_data[item]}", position=pos, font_scale=font_scale, thickness=thickness
+                            frame,
+                            text=f"{item}: {self._format_value(self.state_data[item])}",
+                            position=pos,
+                            font_scale=font_scale,
+                            thickness=thickness,
                         )
                     except (KeyError, TypeError):
                         pass

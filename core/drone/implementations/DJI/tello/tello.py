@@ -23,7 +23,8 @@ from pathlib import Path
 from typing import Callable
 
 from core.drone.base import DroneArmState, DroneBase, DroneConState, DroneFlightState, DroneType, PublishType, requires
-from core.drone.implementations.DJI.tello.tellosdk import TelloSDK, _coerce_number, _parse_state_string
+from core.drone.implementations.DJI.tello.tellosdk import TelloSDK
+from core.drone.telemetry import tello_query, tello_state
 
 _STEP_MOVE_WORDS = {
     "forward": "forward",
@@ -75,14 +76,44 @@ _EXT_COMMANDS: dict[str, Callable[..., str]] = {
 }
 
 
+# Tello models - config/mydrone.json "model". Commands a model can't do are listed with
+# "models" in commands.json and answered with error NotSupported instead of being sent.
+#   tello         basic Tello, SDK 1.3: hotspot only, no mission pads, no 'stop'
+#   tello_edu     Tello EDU, SDK 2.0 (3.0 with firmware >= 02.05.01.17): mission pads, station mode, ...
+#   tello_talent  Tello Talent = RoboMaster TT, SDK 3.0 + expansion kit (LED, dot matrix, ToF)
+TELLO_MODELS = ("tello", "tello_edu", "tello_talent")
+_MODEL_ALIASES = {
+    "basic": "tello",
+    "edu": "tello_edu",
+    "talent": "tello_talent",
+    "rmtt": "tello_talent",
+    "tt": "tello_talent",
+    "robomaster_tt": "tello_talent",
+}
+DEFAULT_STATE_PORT = 8890
+DEFAULT_VIDEO_PORT = 11111
+
+
+def normalize_model(model: str | None) -> str | None:
+    """'EDU' -> 'tello_edu'. None = unknown model: nothing is blocked."""
+    if model in (None, "", "auto"):
+        return None
+    name = str(model).strip().lower().replace("-", "_").replace(" ", "_")
+    name = _MODEL_ALIASES.get(name, name)
+    if name not in TELLO_MODELS:
+        raise ValueError(f"Unknown Tello model {model!r} - use one of {', '.join(TELLO_MODELS)}")
+    return name
+
+
 class TelloDrone(DroneBase):
     def __init__(self, drone_type: DroneType, drone_id: str, bus: object, **kwargs):
         super().__init__(drone_type, drone_id, bus, **kwargs)
+        self.model = normalize_model(self.init_kwargs.get("model"))
         self.ip = self.init_kwargs.get("ip", "192.168.10.1")
         self.cmd_port = self.init_kwargs.get("cmd_port", 8889)
         self.cmd_pc_port = self.init_kwargs.get("cmd_pc_port", 9000)
-        self.state_port = self.init_kwargs.get("state_port", 8890)
-        self.video_port = self.init_kwargs.get("video_port", 11111)
+        self.state_port = int(self.init_kwargs.get("state_port", DEFAULT_STATE_PORT))
+        self.video_port = int(self.init_kwargs.get("video_port", DEFAULT_VIDEO_PORT))
 
         self.sdk: TelloSDK | None = None
         self.data_gen_task = None
@@ -148,6 +179,10 @@ class TelloDrone(DroneBase):
             await self.publish_parser(PublishType.ACK, {"cmd": "connect", "ack": "None", "info": info})
             return
         await self.publish_parser(PublishType.ACK, {"cmd": "connect", "ack": f"{ack}"})
+        if ack and (self.state_port, self.video_port) != (DEFAULT_STATE_PORT, DEFAULT_VIDEO_PORT):
+            # several Tellos on one PC: each sends state/video to its own ports (EDU/Talent)
+            ports_ack = await self.sdk.send_and_receive(f"port {self.state_port} {self.video_port}", timeout=10)
+            await self._publish_tristate_ack(f"set ports {self.state_port} {self.video_port}", ports_ack)
 
     @requires(DroneConState.CONNECTED)
     async def connect_via_wifi(self, ssid: str, password: str):
@@ -240,7 +275,8 @@ class TelloDrone(DroneBase):
             await self.publish_parser(PublishType.ERROR, {"error": "UnknownDirection", "message": msg})
             return
         ack = await self.sdk.send_and_receive(f"{direction} {int(degrees)}", timeout=15)
-        await self._publish_tristate_ack(f"rotate {direction} {degrees}", ack)
+        turn = degrees if direction == "cw" else -degrees
+        await self._publish_tristate_ack(f"rotate {direction} {degrees}", ack, on_success=lambda: self.sdk.apply_rotation(turn))
 
     @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
     async def flip(self, direction: str):
@@ -255,10 +291,12 @@ class TelloDrone(DroneBase):
 
     @requires(DroneConState.CONNECTED)
     async def stop(self):
-        """Stop and hover in place right now (interrupts go/curve/moves)."""
+        """Stop and hover in place RIGHT NOW - interrupts a running go/curve/move.
+        Sent at once, without waiting for the running command (which holds the
+        command channel until the drone answers it)."""
         self.sdk.track_rc_velocity(0, 0, 0, 0)
-        ack = await self.sdk.send_and_receive("stop", timeout=5)
-        await self._publish_tristate_ack("stop", ack)
+        self.sdk.send("stop")
+        await self.publish_parser(PublishType.ACK, {"cmd": "stop", "ack": "sent"})
 
     # Motors / launch / reboot
     @requires(DroneConState.CONNECTED, DroneFlightState.LANDED, DroneArmState.ARMED)
@@ -366,7 +404,7 @@ class TelloDrone(DroneBase):
             # Dead-reckoned estimate, not a real sensor reading - see
             # TelloSDK's position tracking. Labeled clearly so it's
             # never mistaken for ground truth.
-            await self.publish_parser(PublishType.DATA, {"position": self.sdk.get_position(), "estimated": True})
+            await self.publish_parser(PublishType.DATA, {"position": self.sdk.get_position(), "estimated": True})  # cm, x right, y forward
             return
 
         query = _QUERY_COMMANDS.get(what)
@@ -379,13 +417,7 @@ class TelloDrone(DroneBase):
             await self.publish_parser(PublishType.ERROR, {"error": "QueryTimeout", "message": f"No response querying '{what}'."})
             return
 
-        if what == "attitude":
-            value = _parse_state_string(raw)
-        elif what == "ext_tof":
-            value = _coerce_number(raw.split()[-1])  # reply is 'tof 1234' (mm)
-        else:
-            value = _coerce_number(raw)
-        await self.publish_parser(PublishType.DATA, {what: value})
+        await self.publish_parser(PublishType.DATA, {what: tello_query(what, raw)})  # unified units, see core/drone/telemetry.py
 
     @requires(DroneConState.CONNECTED)
     async def start_video(self):
@@ -458,7 +490,9 @@ class TelloDrone(DroneBase):
         """The actual loop: as soon as the SDK yields a data point,
         sync z with the real 'h' field (Tello has a real height sensor,
         unlike x/y which stay pure dead-reckoning) and publish it."""
-        async for i in self.sdk.state_stream():
-            if "h" in i:
-                self.sdk.position["z"] = i["h"]
-            await self.publish_parser(PublishType.STATE, i)
+        async for raw in self.sdk.state_stream():
+            if "h" in raw:
+                self.sdk.position["z"] = raw["h"]
+            if isinstance(raw.get("yaw"), (int, float)):
+                self.sdk.heading = raw["yaw"]  # Tello yaw: relative to takeoff, clockwise positive
+            await self.publish_parser(PublishType.STATE, tello_state(raw, self.sdk.get_position()))

@@ -1,4 +1,5 @@
 import asyncio
+import math
 import sys
 from dataclasses import dataclass
 from enum import Enum
@@ -239,13 +240,15 @@ class SimDroneSDK:
     async def move_step(self, direction: str, distance: float) -> bool:
         if self._is_landed:
             return False
-        if self._flight_mode != _FlightMode.STEPS:
-            return False
+        self._flight_mode = _FlightMode.STEPS
         axis = _MOVEMENT_MAP[direction][0]
         att_axis = _ATTITUDE_MAP[direction][0]
         sign = _MOVEMENT_MAP[direction][1]
         att_sign = _ATTITUDE_MAP[direction][1]
-        setattr(self._pos, axis, getattr(self._pos, axis) + sign * distance)
+        if axis == "z":
+            self._pos.z += sign * distance
+        else:  # moves are relative to the nose, like on a real drone
+            self._move_body(sign * distance if axis == "x" else 0.0, sign * distance if axis == "y" else 0.0)
         setattr(self._att, att_axis, att_sign * _TILT_DEGREES)
         await asyncio.sleep(self._wait_time)
 
@@ -254,32 +257,43 @@ class SimDroneSDK:
 
     @_requires("_is_connected", "_is_ready_to_recv", "_is_armed", "_is_in_air")
     async def goto_pos(self, x: float, y: float, z: float) -> bool:
+        """RELATIVE move in the Tello 'go' frame: x forward, y LEFT, z up (cm).
+        The simulated position uses x right, y forward."""
         if self._is_landed:
             return False
-        if self._flight_mode != _FlightMode.GOTO:
-            return False
+        self._flight_mode = _FlightMode.GOTO
         await asyncio.sleep(self._wait_time)
-        self._pos.x = x
-        self._pos.y = y
-        self._pos.z = z
+        self._move_body(right=-y, forward=x)
+        self._pos.z += z
+        return True
+
+    def _move_body(self, right: float, forward: float) -> None:
+        """Body-frame move (right, forward) -> world position. yaw 0 = facing +y, positive = clockwise."""
+        yaw = math.radians(self._att.yaw)
+        self._pos.x += right * math.cos(yaw) + forward * math.sin(yaw)
+        self._pos.y += forward * math.cos(yaw) - right * math.sin(yaw)
+
+    @_requires("_is_connected", "_is_ready_to_recv", "_is_armed", "_is_in_air")
+    async def rotate(self, degrees: float) -> bool:
+        """Turn by `degrees` (positive = clockwise), yaw kept in -180..180."""
+        await asyncio.sleep(self._wait_time)
+        self._att.yaw = (self._att.yaw + degrees + 180) % 360 - 180
         return True
 
     @_requires("_is_connected", "_is_ready_to_recv", "_is_armed", "_is_in_air")
     async def rc(self, x: int, y: int, z: int, yaw: int) -> bool:
         if self._is_landed:
             return False
-        if self._flight_mode != _FlightMode.RC:
-            return False
+        self._flight_mode = _FlightMode.RC  # switches automatically (like a real drone)
         # x = self._normalize_rc(x)
         # y = self._normalize_rc(y)
         # z = self._normalize_rc(z)
         # yaw = self._normalize_rc(yaw)
         # x / l-r dir
         self._att.roll = x * _TILT_DEGREES
-        self._pos.x += x * self._rc_speed
-        # y / fw-bw dir
         self._att.pitch = y * _TILT_DEGREES
-        self._pos.y += y * self._rc_speed
+        # x = right, y = forward - relative to the nose
+        self._move_body(right=x * self._rc_speed, forward=y * self._rc_speed)
         # z / h dir
         self._pos.z += z * self._rc_speed
         # yaw

@@ -3,7 +3,11 @@
         "method": "connect"
     },
     "connect_via_wifi": {
-        "method": "connect_via_wifi"
+        "method": "connect_via_wifi",
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "disconnect": {
         "method": "disconnect"
@@ -45,63 +49,98 @@
             "what": "ports",
             "state_port": 8890,
             "video_port": 11111
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "set_mission_pad_on": {
         "method": "set",
         "args": {
             "what": "mission_pad_detection",
             "enabled": true
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "set_mission_pad_off": {
         "method": "set",
         "args": {
             "what": "mission_pad_detection",
             "enabled": false
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "set_mission_pad_direction": {
         "method": "set",
         "args": {
             "what": "mission_pad_direction",
             "direction": 0
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "set_camera_forward": {
         "method": "set",
         "args": {
             "what": "camera_source",
             "downward": false
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "set_camera_downward": {
         "method": "set",
         "args": {
             "what": "camera_source",
             "downward": true
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "set_video_fps": {
         "method": "set",
         "args": {
             "what": "video_fps",
             "fps": "middle"
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "set_video_bitrate": {
         "method": "set",
         "args": {
             "what": "video_bitrate",
             "bitrate": 0
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "set_wifi_channel": {
         "method": "set",
         "args": {
             "what": "wifi_channel",
             "channel": 6
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "set_multi_wifi": {
         "method": "set",
@@ -109,7 +148,10 @@
             "what": "multi_wifi",
             "ssid": "RMTT-MyNet",
             "password": "12345678"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "get_battery": {
         "method": "get",
@@ -145,13 +187,21 @@
         "method": "get",
         "args": {
             "what": "sdk_version"
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "get_serial_number": {
         "method": "get",
         "args": {
             "what": "serial_number"
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "get_height": {
         "method": "get",
@@ -193,37 +243,56 @@
         "method": "get",
         "args": {
             "what": "hardware"
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "get_wifi_version": {
         "method": "get",
         "args": {
             "what": "wifi_version"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "get_ap": {
         "method": "get",
         "args": {
             "what": "ap"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "get_ssid": {
         "method": "get",
         "args": {
             "what": "ssid"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "get_ext_tof": {
         "method": "get",
         "args": {
             "what": "ext_tof"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "get_ext_version": {
         "method": "get",
         "args": {
             "what": "ext_version"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "get_state": {
         "method": "get_state"
@@ -244,19 +313,39 @@
         "method": "emergency"
     },
     "stop": {
-        "method": "stop"
+        "method": "stop",
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "motor_on": {
-        "method": "motor_on"
+        "method": "motor_on",
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "motor_off": {
-        "method": "motor_off"
+        "method": "motor_off",
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "throw_fly": {
-        "method": "throw_fly"
+        "method": "throw_fly",
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "reboot": {
-        "method": "reboot"
+        "method": "reboot",
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "steps_move_up": {
         "method": "steps_move",
@@ -364,7 +453,11 @@
             "z": 80,
             "speed": 30,
             "mid": "m-2"
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "curve": {
         "method": "curve",
@@ -388,7 +481,11 @@
             "yaw": 0,
             "mid1": "m1",
             "mid2": "m2"
-        }
+        },
+        "models": [
+            "tello_edu",
+            "tello_talent"
+        ]
     },
     "start_video": {
         "method": "start_video"
@@ -403,7 +500,10 @@
             "r": 0,
             "g": 255,
             "b": 0
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_led_off": {
         "method": "ext",
@@ -412,7 +512,10 @@
             "r": 0,
             "g": 0,
             "b": 0
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_led_pulse": {
         "method": "ext",
@@ -422,7 +525,10 @@
             "r": 0,
             "g": 0,
             "b": 255
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_led_blink": {
         "method": "ext",
@@ -435,20 +541,29 @@
             "r2": 0,
             "g2": 0,
             "b2": 255
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_matrix_pattern": {
         "method": "ext",
         "args": {
             "what": "matrix_pattern",
             "pattern": "00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_matrix_clear": {
         "method": "ext",
         "args": {
             "what": "matrix_clear"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_matrix_scroll_text": {
         "method": "ext",
@@ -458,7 +573,10 @@
             "color": "b",
             "rate": 1.0,
             "text": "HELLO"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_matrix_scroll_pattern": {
         "method": "ext",
@@ -467,7 +585,10 @@
             "direction": "l",
             "rate": 1.0,
             "pattern": "00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_matrix_show": {
         "method": "ext",
@@ -475,26 +596,38 @@
             "what": "matrix_show",
             "color": "r",
             "text": "heart"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_matrix_boot_pattern": {
         "method": "ext",
         "args": {
             "what": "matrix_boot_pattern",
             "pattern": "00rrrr000r0000r0r0r00r0rr000000rr0r00r0rr00rr00r0r0000r000rrrr00"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_matrix_clear_boot": {
         "method": "ext",
         "args": {
             "what": "matrix_clear_boot"
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     },
     "ext_matrix_brightness": {
         "method": "ext",
         "args": {
             "what": "matrix_brightness",
             "level": 255
-        }
+        },
+        "models": [
+            "tello_talent"
+        ]
     }
 }

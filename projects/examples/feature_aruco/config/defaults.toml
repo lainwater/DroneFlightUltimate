@@ -1,0 +1,11 @@
+[logging]
+level = "INFO"
+
+[controller]
+layout = "keyboard_video"
+
+[video]
+calibration = "tello"
+aruco_dictionary = "DICT_5X5_50"
+aruco_marker_size = 0.15
+aruco_publish = true

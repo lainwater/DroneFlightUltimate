@@ -42,8 +42,8 @@
             "data_to_display": [
                 "ts",
                 "fps",
-                "bat",
-                "pos"
+                "battery",
+                "height"
             ]
         }
     },
@@ -79,5 +79,17 @@
     },
     "stop_detection": {
         "method": "stop_detection"
+    },
+    "undistort_on": {
+        "method": "undistort_on"
+    },
+    "undistort_off": {
+        "method": "undistort_off"
+    },
+    "start_aruco": {
+        "method": "start_aruco"
+    },
+    "stop_aruco": {
+        "method": "stop_aruco"
     }
 }

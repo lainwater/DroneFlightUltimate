@@ -19,7 +19,9 @@ from pathlib import Path
 
 from core.bus import get_bus
 from core.bus_player_recorder import get_recorder
+from core.drone import DroneConState, DroneFlightState, DroneType, get_drone
 from core.fileops import get_fileops
+from core.logger import LogLevel
 
 
 class ProjectBase(ABC):
@@ -41,6 +43,15 @@ class ProjectBase(ABC):
         """Where this project's logs are stored."""
         return self.root_path / "logs"
 
+    @property
+    def log_level(self) -> LogLevel:
+        """[logging] level in defaults.toml (DEBUG, INFO, WARNING, ERROR, CRITICAL), default INFO."""
+        name = str(self.app_config.get("logging", {}).get("level", "INFO")).upper()
+        try:
+            return LogLevel[name]
+        except KeyError:
+            raise ValueError(f"[logging] level = {name!r} in defaults.toml - use one of {', '.join(LogLevel.__members__)}") from None
+
     def load_app_config(self) -> dict:
         """Load this project's app-level config (logging level, keyboard/
         joystick layout override, ...)."""
@@ -49,6 +60,32 @@ class ProjectBase(ABC):
     def load_drone_config(self) -> dict:
         """Load this project's drone config (drone_type, drone_id, ip, ...)."""
         return self.fops.read_json(self.root_path / "config" / "mydrone.json")
+
+    def create_drone(self, key: str = "drone_1"):
+        """Drone from config/mydrone.json[key]. drone_type + drone_id pick the drone,
+        every other field (ip, port, camera_index, ...) is passed on to it."""
+        conf = dict(self.drone_config[key])
+        drone_type = DroneType[conf.pop("drone_type").upper()]
+        drone_id = conf.pop("drone_id")
+        return get_drone(drone_type, drone_id, bus=self.bus, **conf)
+
+    @staticmethod
+    async def shutdown_drone(drone) -> None:
+        """Stop video, land, disconnect, detach - in that order, safe in any state.
+        One failing step (e.g. drone already gone) does not skip the others."""
+        steps = []
+        if getattr(drone, "video_streaming", False):
+            steps.append(drone.stop_video)
+        if drone.flight_state == DroneFlightState.INAIR:
+            steps.append(drone.land)
+        if drone.con_state == DroneConState.CONNECTED:
+            steps.append(drone.disconnect)
+        for step in steps:
+            try:
+                await step()
+            except Exception as e:
+                print(f"[shutdown {drone.drone_id}] {step.__name__} failed: {e}")
+        drone.detach()
 
     async def run(self) -> None:
         """Run this project's full lifecycle. Call this once from an

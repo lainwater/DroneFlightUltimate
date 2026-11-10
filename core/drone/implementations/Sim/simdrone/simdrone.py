@@ -8,14 +8,15 @@ from pathlib import Path
 
 from core.drone.base import DroneArmState, DroneBase, DroneConState, DroneFlightState, DroneType, PublishType, requires
 from core.drone.implementations.Sim.simdrone.simdronesdk import SimDroneSDK, _FlightMode
+from core.drone.position_and_attitude import Attitude, Position
 
 
 class SimDrone(DroneBase):
     def __init__(self, drone_type: DroneType, drone_id: str, bus: object, **kwargs):
         super().__init__(drone_type, drone_id, bus, **kwargs)
         self.sdk = SimDroneSDK()
-        self.ip = self.init_kwargs["ip"]
-        self.port = self.init_kwargs["port"]
+        self.ip = self.init_kwargs.get("ip", "67.67.0.1")
+        self.port = self.init_kwargs.get("port", "6767")
         self.data_gen_task = None
         self.flightmode = _FlightMode.NONE_SET
         self.camera_index = int(self.init_kwargs.get("camera_index", 0))
@@ -41,6 +42,8 @@ class SimDrone(DroneBase):
         if self.video_streaming:
             await self.stop_video()
         await self.stop_state_receiver()
+        if self.flight_state == DroneFlightState.INAIR:
+            await self.land()  # disarming in the air fails - land first, like the Tello does
         await self.set("disarm")
         self.con_state = DroneConState.DISCONNECTING
         ack = await self.sdk.disconnect()
@@ -96,7 +99,11 @@ class SimDrone(DroneBase):
 
     # goto pos movement
     @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
-    async def goto(self, x: float, y: float, z: float):
+    async def goto(self, x: float, y: float, z: float, speed: int = 50, mid: str | None = None):
+        """Relative move like the Tello's 'go': x forward, y LEFT, z up (cm). speed is accepted, not simulated."""
+        if mid:
+            await self.publish_parser(PublishType.ERROR, {"error": "NotSupported", "message": "simdrone has no mission pads", "action": "goto"})
+            return
         ack = await self.sdk.goto_pos(x, y, z)
         if not ack:
             await self.publish_parser(
@@ -105,6 +112,21 @@ class SimDrone(DroneBase):
             )
         else:
             await self.publish_parser(PublishType.ACK, {"cmd": f"goto {x} {y} {z}", "ack": f"{ack}"})
+
+    @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
+    async def rotate(self, direction: str, degrees: int):
+        """Turn 'cw' or 'ccw' by degrees (like the Tello)."""
+        if direction not in ("cw", "ccw"):
+            msg = f"rotate direction must be 'cw' or 'ccw', not '{direction}'."
+            await self.publish_parser(PublishType.ERROR, {"error": "UnknownDirection", "message": msg})
+            return
+        ack = await self.sdk.rotate(degrees if direction == "cw" else -degrees)
+        await self.publish_parser(PublishType.ACK, {"cmd": f"rotate {direction} {degrees}", "ack": f"{bool(ack)}"})
+
+    @requires(DroneConState.CONNECTED)
+    async def stop(self):
+        """Hover in place (the simulated moves are instant, so this only acknowledges)."""
+        await self.publish_parser(PublishType.ACK, {"cmd": "stop", "ack": "sent"})
 
     # Step Movement
     @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
@@ -184,7 +206,7 @@ class SimDrone(DroneBase):
             await self.publish_parser(PublishType.ERROR, {"error": "NotExist", "message": f"{what} does not exist in simdrone."})
 
         if return_val is not None:
-            await self.publish_parser(PublishType.DATA, {f"{what}": return_val})
+            await self.publish_parser(PublishType.DATA, {f"{what}": _json_safe(return_val)})
         else:
             await self.publish_parser(PublishType.ERROR, {"error": "NotFound", "message": f"Could not get {what}"})
 
@@ -247,5 +269,32 @@ class SimDrone(DroneBase):
 
     async def _consume_state_stream(self):
         """The actual loop: as soon as the SDK yields a data point, publish it."""
-        async for i in self.sdk.state_stream():
-            await self.publish_parser(PublishType.STATE, i)
+        async for raw in self.sdk.state_stream():
+            await self.publish_parser(PublishType.STATE, _unified_state(raw))
+
+
+def _json_safe(value):
+    """Position/Attitude dataclasses and enums -> plain dicts/strings (bus + recorder friendly)."""
+    if isinstance(value, Position):
+        return value.get_position_as_dict()
+    if isinstance(value, Attitude):
+        return value.get_attitude_as_dict()
+    if hasattr(value, "value") and not isinstance(value, (int, float, str)):
+        return value.value
+    if isinstance(value, tuple):
+        return list(value)
+    return value
+
+
+def _unified_state(raw: dict) -> dict:
+    """Simulated state -> unified telemetry keys (see core/drone/telemetry.py)."""
+    position = _json_safe(raw["position"])
+    return {
+        "battery": raw["battery"],
+        "temperature": raw["temperature"],
+        "height": position["z"],
+        "attitude": _json_safe(raw["attitude"]),
+        "position": position,
+        "speed": {"x": raw["position"].vx, "y": raw["position"].vy, "z": raw["position"].vz},
+        "flight_mode": _json_safe(raw["flight_mode"]),
+    }

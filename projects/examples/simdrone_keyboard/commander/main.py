@@ -1,60 +1,44 @@
 """
-simdrone_keyboard - controll simdrone with a keyboard
+# simdrone_keyboard - fly the simdrone with the keyboard
+
+## You need
+    Nothing - the simdrone runs on your PC
+
+## Run
+    python run.py run -e -n simdrone_keyboard
+
+## Config
+    config/mydrone.json     which drone: drone_type, drone_id, ip, ...
+    config/defaults.toml    controller layout
 """
 
 import asyncio
 
 from core.controller import ControllerType, get_controller
-from core.drone import DroneType, get_drone
-from core.logger import LoggerType, LogLevel, get_logger
+from core.logger import LoggerType, get_logger
 from projects.base import ProjectBase
-
-qwertz_startup = """
-QWERTZ KEYBOARD CONTROLS
-
-# Util
-C           = connect
-V/B         = arm / disarm
-Z/U         = get position / attitude
-I/O         = start/stop state receiver
-
-# Movement Util
-T/L         = takeoff / land
-Space       = emergency
-
-# Movement
-W/S         = up / down
-A/D         = left / right yaw
-Up/Down     = forward / backward
-Left/Right  = left / right move
-"""
 
 
 class simdrone_keyboard(ProjectBase):
     async def setup(self) -> None:
-        self.live_logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=LogLevel.INFO)
-
+        # every bus message -> console, and recorded to logs/bus_logs/
+        self.live_logger = get_logger(LoggerType.LIVE_CONSOLE, min_level=self.log_level)
         self.recorder.attach(self.bus)
         self.bus.subscribe("*", self.live_logger.log_bus_event)
 
-        d1_conf = self.drone_config["drone_1"]
-        drone_type = DroneType[d1_conf["drone_type"].upper()]
-        self.drone1 = get_drone(drone_type, d1_conf["drone_id"], bus=self.bus, ip=d1_conf["ip"])
+        # drone from config/mydrone.json
+        self.drone1 = self.create_drone("drone_1")
 
-        layout = self.app_config.get("controller", {}).get("layout") or None
-        self.controller = get_controller(ControllerType.KEYBOARD, drone_id=d1_conf["drone_id"], bus=self.bus, layout=layout)
+        # controller, layout from config/defaults.toml
+        layout = self.app_config.get("controller", {}).get("layout")
+        self.controller = get_controller(ControllerType.KEYBOARD, drone_id=self.drone1.drone_id, bus=self.bus, layout=layout)
 
     async def main(self) -> None:
         await self.controller.start_controller()
-
-        print(qwertz_startup)
-        await asyncio.Event().wait()
+        print(self.controller.controls_text())
+        await asyncio.Event().wait()  # runs until CTRL+C, then end_run()
 
     async def end_run(self) -> None:
-        if self.drone1.flight_state.value == "inair":
-            await self.drone1.land()
-        if self.drone1.con_state.value == "connected":
-            await self.drone1.disconnect()
+        await self.shutdown_drone(self.drone1)
         await self.controller.stop_controller()
         self.recorder.detach(self.bus)
-        self.drone1.detach()

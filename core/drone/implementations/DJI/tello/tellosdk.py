@@ -20,6 +20,7 @@ Two things this does differently from a naive blocking-socket wrapper:
 """
 
 import asyncio
+import math
 import socket
 import threading
 import time
@@ -103,23 +104,36 @@ class TelloSDK:
         # z gets overwritten with the real 'h' field whenever the
         # state stream is running (see TelloDrone._consume_state_stream) -
         # only falls back to dead-reckoning for z when it isn't.
+        # x/y are in the frame of the takeoff spot (x right, y forward); moves are turned by
+        # `heading` (deg, clockwise) - from the state stream's yaw, else from the rotations sent.
         self.position = {"x": 0.0, "y": 0.0, "z": 0.0}
+        self.heading = 0.0
         self._rc_velocity = {"x": 0.0, "y": 0.0, "z": 0.0}
         self._position_task: asyncio.Task | None = None
 
     def get_position(self) -> dict:
         return dict(self.position)
 
+    def _add_body(self, right: float, forward: float, up: float = 0.0) -> None:
+        """Move relative to the nose -> position in the takeoff frame."""
+        h = math.radians(self.heading)
+        self.position["x"] += right * math.cos(h) + forward * math.sin(h)
+        self.position["y"] += forward * math.cos(h) - right * math.sin(h)
+        self.position["z"] += up
+
     def apply_step_delta(self, direction: str, distance: float) -> None:
         axis_info = _POSITION_DELTA.get(direction)
         if axis_info:
             axis, sign = axis_info
-            self.position[axis] += sign * distance
+            d = sign * distance
+            self._add_body(d if axis == "x" else 0.0, d if axis == "y" else 0.0, d if axis == "z" else 0.0)
 
     def apply_goto_delta(self, x: float, y: float, z: float) -> None:
-        self.position["x"] += x
-        self.position["y"] += y
-        self.position["z"] += z
+        """go/curve use the Tello frame (x forward, y LEFT, z up)."""
+        self._add_body(right=-y, forward=x, up=z)
+
+    def apply_rotation(self, degrees_cw: float) -> None:
+        self.heading = (self.heading + degrees_cw + 180) % 360 - 180
 
     def track_rc_velocity(self, x: float, y: float, z: float, yaw: float) -> None:
         """Best-effort dead-reckoning while rc is held - starts a
@@ -131,8 +145,8 @@ class TelloSDK:
 
     async def _integrate_position(self) -> None:
         while any(abs(v) > 0 for v in self._rc_velocity.values()):
-            for axis in ("x", "y", "z"):
-                self.position[axis] += self._rc_velocity[axis] * _RC_CM_PER_SECOND_PER_UNIT * _RC_TICK_SECONDS
+            k = _RC_CM_PER_SECOND_PER_UNIT * _RC_TICK_SECONDS
+            self._add_body(self._rc_velocity["x"] * k, self._rc_velocity["y"] * k, self._rc_velocity["z"] * k)
             await asyncio.sleep(_RC_TICK_SECONDS)
 
     # ---------------------------------------------------------- connection
@@ -144,9 +158,13 @@ class TelloSDK:
         )
 
     async def close_command_channel(self) -> None:
-        if self._cmd_transport and self._position_task:
+        # Close the socket even if the drone never moved (no _position_task) -
+        # otherwise port cmd_pc_port stays bound and the next connect fails.
+        if self._cmd_transport:
             self._cmd_transport.close()
             self._cmd_transport = None
+            await asyncio.sleep(0)  # the socket is really closed one loop step later - then the port is free again
+        if self._position_task:
             self._position_task.cancel()
             try:
                 await self._position_task
@@ -165,6 +183,7 @@ class TelloSDK:
         if self._state_transport:
             self._state_transport.close()
             self._state_transport = None
+            await asyncio.sleep(0)
 
     # ---------------------------------------------------------- commands
     def send(self, msg: str) -> None:
@@ -223,7 +242,7 @@ class TelloSDK:
     #   - it probes the resolution ONCE at open; the downward camera (320x240)
     #     has a different resolution than the forward one (960x720).
     # Instead: our own UDP socket (short timeout, never hangs) + a PyAV H.264
-    # decoder (PyAV comes with djitellopy). The decoder handles resolution
+    # decoder (PyAV, a DFU dependency). The decoder handles resolution
     # changes and can be reset on demand when the camera is switched.
 
     async def open_video_channel(self) -> None:

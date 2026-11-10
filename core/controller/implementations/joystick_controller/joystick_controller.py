@@ -21,6 +21,7 @@ import pygame
 from core.controller.base import ControllerBase
 
 POLLING_RATE = 200
+DEFAULT_LAYOUT = "t8l_pos"
 
 
 class JoystickController(ControllerBase):
@@ -56,11 +57,24 @@ class JoystickController(ControllerBase):
         pygame.joystick.quit()
         pygame.quit()
 
-    def _load_layout(self, layout: str = "t8l") -> None:
-        if layout is None:
-            layout = "t8l"
-        layout_path = Path(__file__).parent / f"{layout}.json"
+    def _load_layout(self, layout: str = DEFAULT_LAYOUT) -> None:
+        self.layout = layout or DEFAULT_LAYOUT
+        layout_path = Path(__file__).parent / f"{self.layout}.json"
+        if not layout_path.exists():
+            available = ", ".join(sorted(p.stem for p in Path(__file__).parent.glob("*.json")))
+            raise ValueError(f"Joystick layout '{self.layout}' not found. Available: {available}")
         self.config = self.fops.read_json(layout_path)
+
+    def controls_text(self) -> str:
+        """Sticks and switches as configured in the layout file."""
+        sticks = [f"{a['axis']}{' (inverted)' if a.get('invert') else ''}" for a in self.config.get("axes", {}).values() if a.get("type") == "rc"]
+        lines = [f"JOYSTICK CONTROLS ({self.layout})", "", f"  Sticks: rc {', '.join(sticks)}", ""]
+        for axis in self.config.get("axes", {}).values():
+            if axis.get("type") == "switch":
+                actions = ", ".join(f"{pos} = {act}" for pos, act in axis.get("positions", {}).items() if act)
+                target = f"  [{axis['target']}]" if axis.get("target") else ""
+                lines.append(f"  {axis['name']:<4} {actions}{target}")
+        return "\n".join(lines) + "\n"
 
     async def _publish_parser(self, _type: str, data: dict, target: str | None = None) -> None:
         if self.bus:

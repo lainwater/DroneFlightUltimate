@@ -7,7 +7,9 @@ import asyncio
 from pynput import keyboard
 
 from core.controller.base import ControllerBase
-from core.controller.implementations.keyboard_controller.get_layout import current_keyboard_layout_as_json_path
+from core.controller.implementations.keyboard_controller.get_layout import DEFAULT_LAYOUT, layout_path
+
+_KEY_NAMES = {"space": "Space", "up": "Up", "down": "Down", "left": "Left", "right": "Right", "esc": "Esc", "enter": "Enter", "tab": "Tab"}
 
 
 class KeyboardController(ControllerBase):
@@ -24,8 +26,23 @@ class KeyboardController(ControllerBase):
         self.kb_listener.stop()
 
     def _load_layout(self, layout: str) -> None:
-        layoutpath = current_keyboard_layout_as_json_path(layout)
-        self.config = self.fops.read_json(layoutpath)
+        self.layout = layout or DEFAULT_LAYOUT
+        self.config = self.fops.read_json(layout_path(self.layout))
+
+    def controls_text(self) -> str:
+        """Controls grouped as in the layout file ("group"/"desc" fields)."""
+        groups: dict[str, list[str]] = {}
+        for key, entry in self.config.items():
+            name = _KEY_NAMES.get(key, key.upper())
+            desc = entry.get("desc") or entry.get("on_press") or f"rc {entry.get('rc_axis')} {entry.get('rc_sign', 0):+}"
+            groups.setdefault(entry.get("group", "Other"), []).append(f"{name:<6} {desc}")
+        lines = [f"KEYBOARD CONTROLS ({self.layout})"]
+        for group, rows in groups.items():
+            lines += ["", f"# {group}"]
+            # two columns: pairs like up/down, on/off end up on one line
+            width = max(len(r) for r in rows[::2]) + 3
+            lines += [f"  {rows[i]:<{width}}{rows[i + 1] if i + 1 < len(rows) else ''}".rstrip() for i in range(0, len(rows), 2)]
+        return "\n".join(lines) + "\n"
 
     async def _publish_parser(self, data: dict, target: str | None = None) -> None:
         if self.bus:
@@ -91,7 +108,7 @@ class KeyboardController(ControllerBase):
     def _resolve(self, key) -> dict | None:
         """Gets layout sub-dictionary from pressed char/key-name."""
         try:
-            lookup_key = key.char if hasattr(key, "char") and key.char else getattr(key, "name", None)
+            lookup_key = key.char.lower() if hasattr(key, "char") and key.char else getattr(key, "name", None)  # lower: caps lock/shift
             return self.config.get(lookup_key)
         except Exception as e:
             future = asyncio.run_coroutine_threadsafe(self._publish_parser({"error": {"in": "_resolve", "exception": str(e)}}), self.loop)

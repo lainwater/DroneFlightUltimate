@@ -1,0 +1,8 @@
+[logging]
+level = "INFO"
+
+[controller]
+layout = "keyboard"
+
+[multi]
+video = false   # true = one video window per drone (each drone needs its own video_port)

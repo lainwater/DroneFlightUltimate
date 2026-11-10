@@ -1,0 +1,8 @@
+[logging]
+level = "INFO"
+
+[controller]
+layout = "keyboard_video"
+
+[video]
+calibration = "webcam"

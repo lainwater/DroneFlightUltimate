@@ -1,0 +1,210 @@
+{
+  "w": {
+    "rc_axis": "z",
+    "rc_sign": 1,
+    "group": "Flight",
+    "desc": "up"
+  },
+  "s": {
+    "rc_axis": "z",
+    "rc_sign": -1,
+    "group": "Flight",
+    "desc": "down"
+  },
+  "a": {
+    "rc_axis": "yaw",
+    "rc_sign": -1,
+    "group": "Flight",
+    "desc": "yaw left"
+  },
+  "d": {
+    "rc_axis": "yaw",
+    "rc_sign": 1,
+    "group": "Flight",
+    "desc": "yaw right"
+  },
+  "up": {
+    "rc_axis": "y",
+    "rc_sign": 1,
+    "group": "Flight",
+    "desc": "forward"
+  },
+  "down": {
+    "rc_axis": "y",
+    "rc_sign": -1,
+    "group": "Flight",
+    "desc": "backward"
+  },
+  "left": {
+    "rc_axis": "x",
+    "rc_sign": -1,
+    "group": "Flight",
+    "desc": "move left"
+  },
+  "right": {
+    "rc_axis": "x",
+    "rc_sign": 1,
+    "group": "Flight",
+    "desc": "move right"
+  },
+  "t": {
+    "on_press": "takeoff",
+    "group": "Flight",
+    "desc": "takeoff"
+  },
+  "l": {
+    "on_press": "land",
+    "group": "Flight",
+    "desc": "land"
+  },
+  "space": {
+    "on_press": "emergency",
+    "group": "Flight",
+    "desc": "EMERGENCY (motors off)"
+  },
+  "v": {
+    "on_press": "set_arm",
+    "group": "Drone",
+    "desc": "arm"
+  },
+  "b": {
+    "on_press": "set_disarm",
+    "group": "Drone",
+    "desc": "disarm"
+  },
+  "i": {
+    "on_press": "start_state_receiver",
+    "group": "Drone",
+    "desc": "state receiver on"
+  },
+  "o": {
+    "on_press": "stop_state_receiver",
+    "group": "Drone",
+    "desc": "state receiver off"
+  },
+  "u": {
+    "on_press": "get_attitude",
+    "group": "Drone",
+    "desc": "get attitude"
+  },
+  "p": {
+    "on_press": "get_position",
+    "group": "Drone",
+    "desc": "get position"
+  },
+  "c": {
+    "on_press": "connect",
+    "group": "Drone",
+    "desc": "connect"
+  },
+  "9": {
+    "on_press": "misc_1",
+    "target": "project",
+    "group": "Project",
+    "desc": "misc_1 (project)"
+  },
+  "0": {
+    "on_press": "misc_2",
+    "target": "project",
+    "group": "Project",
+    "desc": "misc_2 (project)"
+  },
+  "j": {
+    "on_press": "start_video",
+    "group": "Video",
+    "desc": "drone video on"
+  },
+  "k": {
+    "on_press": "stop_video",
+    "group": "Video",
+    "desc": "drone video off"
+  },
+  "1": {
+    "on_press": "set_camera_forward",
+    "group": "Video",
+    "desc": "forward camera"
+  },
+  "2": {
+    "on_press": "set_camera_downward",
+    "group": "Video",
+    "desc": "downward camera (Tello EDU)"
+  },
+  "3": {
+    "on_press": "start_detection",
+    "target": "stream",
+    "group": "Video",
+    "desc": "YOLO detection on"
+  },
+  "4": {
+    "on_press": "stop_detection",
+    "target": "stream",
+    "group": "Video",
+    "desc": "YOLO detection off"
+  },
+  "5": {
+    "on_press": "start_aruco",
+    "target": "stream",
+    "group": "Video",
+    "desc": "ArUco markers on"
+  },
+  "6": {
+    "on_press": "stop_aruco",
+    "target": "stream",
+    "group": "Video",
+    "desc": "ArUco markers off"
+  },
+  "7": {
+    "on_press": "undistort_on",
+    "target": "stream",
+    "group": "Video",
+    "desc": "undistort on"
+  },
+  "8": {
+    "on_press": "undistort_off",
+    "target": "stream",
+    "group": "Video",
+    "desc": "undistort off"
+  },
+  "n": {
+    "on_press": "show_state_on",
+    "target": "stream",
+    "group": "Video",
+    "desc": "stats overlay on"
+  },
+  "m": {
+    "on_press": "show_state_off",
+    "target": "stream",
+    "group": "Video",
+    "desc": "stats overlay off"
+  },
+  "f": {
+    "on_press": "fpv_on",
+    "target": "stream",
+    "group": "Video",
+    "desc": "FPV goggles on"
+  },
+  "g": {
+    "on_press": "fpv_off",
+    "target": "stream",
+    "group": "Video",
+    "desc": "FPV goggles off"
+  },
+  "e": {
+    "on_press": "start_recording",
+    "target": "stream",
+    "group": "Video",
+    "desc": "start recording"
+  },
+  "r": {
+    "on_press": "stop_recording",
+    "target": "stream",
+    "group": "Video",
+    "desc": "stop recording"
+  },
+  "q": {
+    "on_press": "take_snapshot",
+    "target": "stream",
+    "group": "Video",
+    "desc": "snapshot"
+  }
+}

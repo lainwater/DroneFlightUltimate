@@ -3,6 +3,7 @@
     "drone_type": "sim_simdrone",
     "drone_id": "drone1",
     "ip": "67.67.0.1",
-    "port": "6767"
+    "port": "6767",
+    "camera_index": 0
   }
 }

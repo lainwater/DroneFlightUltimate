@@ -23,7 +23,7 @@ class VideoBase(ABC):
         self.display_state_data = False
         self.rescale_factor = 1
         self.ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.data_to_display: tuple = ("ts", "fps", "bat", "pos")
+        self.data_to_display: tuple = ("ts", "fps", "battery", "height")  # keys of the unified telemetry
         self.state_data = {}
 
         # Second overlay block: free data sent by a project (e.g. results of your
@@ -132,6 +132,8 @@ class VideoBase(ABC):
                 return VideoBase._format_value(value)
             if value and not isinstance(value[0], list):  # 1-d vector -> one row
                 value = [value]
+        if isinstance(value, dict):  # e.g. attitude {"pitch": 0, "roll": 1, "yaw": 90} -> "pitch 0, roll 1, yaw 90"
+            return ", ".join(f"{k} {VideoBase._format_value(v)}" for k, v in value.items())
         if isinstance(value, float) and value.is_integer():
             return str(int(value))
         if isinstance(value, (list, tuple)) and value and all(isinstance(row, (list, tuple)) for row in value):
@@ -179,7 +181,7 @@ class VideoBase(ABC):
         """Turn off the FPV-Goggles mode"""
         self.fpv_goggles_mode = False
 
-    async def turn_on_display_state_data(self, data_to_display: tuple = ("ts", "fps", "bat", "pos")):
+    async def turn_on_display_state_data(self, data_to_display: tuple = ("ts", "fps", "battery", "height")):
         """Turn on the display of state data"""
         self.data_to_display = data_to_display
         self.display_state_data = True

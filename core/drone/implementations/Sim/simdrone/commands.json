@@ -192,7 +192,25 @@
         "args": {
             "x": 0,
             "y": 0,
-            "z": 0
+            "z": 0,
+            "speed": 50
+        }
+    },
+    "stop": {
+        "method": "stop"
+    },
+    "rotate_cw": {
+        "method": "rotate",
+        "args": {
+            "direction": "cw",
+            "degrees": 90
+        }
+    },
+    "rotate_ccw": {
+        "method": "rotate",
+        "args": {
+            "direction": "ccw",
+            "degrees": 90
         }
     }
 }

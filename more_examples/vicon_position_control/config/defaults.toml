@@ -1,0 +1,20 @@
+[logging]
+level = "INFO"
+
+[controller]
+layout = "keyboard_video"
+
+[video]
+calibration = "tello"
+
+[vicon]
+host = "192.168.10.1:801"   # Vicon DataStream server (ip:port)
+subject = "tello-1"         # subject name in Vicon Tracker
+rate_hz = 20
+
+[control]
+# points in the Vicon world frame: [x mm, y mm, z mm, yaw deg (counter-clockwise, 0 = +x)]
+waypoints = [[0, 0, 1000, 0], [1000, 0, 1000, 0], [1000, 1000, 1200, 90], [0, 1000, 1000, 180]]
+
+[control.gains]   # see commander/control.py Gains - start slow!
+max_rc = 0.3

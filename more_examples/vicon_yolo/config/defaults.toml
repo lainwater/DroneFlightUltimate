@@ -1,0 +1,13 @@
+[logging]
+level = "INFO"
+
+[controller]
+layout = "keyboard_video"
+
+[video]
+calibration = "tello"
+
+[vicon]
+host = "192.168.10.1:801"   # Vicon DataStream server (ip:port)
+subject = "tello-1"         # subject name in Vicon Tracker
+rate_hz = 20

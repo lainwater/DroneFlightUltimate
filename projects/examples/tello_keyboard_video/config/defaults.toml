@@ -2,4 +2,7 @@
 level = "INFO"
 
 [controller]
-layout = "qwertz"
+layout = "keyboard_video"
+
+[video]
+calibration = "tello"

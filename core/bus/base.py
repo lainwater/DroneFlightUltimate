@@ -8,8 +8,10 @@ Everything communicates exclusively through topic strings on the bus.
 Topic naming convention used throughout the app:
     cmd.{drone_id}      controller -> drone   (abstract commands)
     state.{drone_id}    drone -> everyone     (telemetry)
-    video.{drone_id}    drone -> everyone     (raw frames)
+    frame.{drone_id}    drone -> everyone     (video frames)
     "*"                 wildcard, receives EVERY published event
+                        (the only wildcard: "error.*" is NOT a pattern)
+Full list: docs/concepts.md
 
 Subscribers are always called with (topic, data), regardless of whether
 they subscribed to an exact topic or the wildcard "*".

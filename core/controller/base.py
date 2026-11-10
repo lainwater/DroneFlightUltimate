@@ -35,6 +35,11 @@ class ControllerBase(ABC):
             return f"project.{self.drone_id}"
         raise ValueError(f"Unknown target {target!r} in layout {self.layout!r}")
 
+    def controls_text(self) -> str:
+        """Human readable list of this controller's controls, generated from the
+        loaded layout (print it at startup instead of a hand-written copy)."""
+        return f"{type(self).__name__} - layout '{self.layout}'"
+
     @abstractmethod
     def _load_layout(self, layout: str = None):
         """Load the layout."""
