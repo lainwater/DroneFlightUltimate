@@ -29,17 +29,20 @@ from core.logger import LoggerType, get_logger
 from core.video import VideoOutputType, get_videostream
 from projects.base import ProjectBase
 
-TARGET_ID = 7  # marker to fly to (other markers are ignored)
+TARGET_ID = 1  # marker to fly to (other markers are ignored)
 GAINS = Gains(distance_m=1.0, max_rc=0.3)
 RATE_HZ = 10
 LOST_S = 0.5  # marker not seen this long -> hover
-SEARCH_YAW = 0.0  # >0: turn this fast (rc) while the marker is lost, e.g. 0.15
+SEARCH_YAW = 0.15  # >0: turn this fast (rc) while the marker is lost, e.g. 0.15
 
 
 class fly_to_marker(ProjectBase):
     async def setup(self) -> None:
         self.live_logger = get_logger(
-            LoggerType.LIVE_CONSOLE, min_level=self.log_level, exclude_topics=("frame.*", "data.stream.*", "display.*"), exclude_data=("rc", "rc *")
+            LoggerType.LIVE_CONSOLE,
+            min_level=self.log_level,
+            exclude_topics=("frame.*", "data.stream.*", "display.*", "state.*"),
+            exclude_data=("rc", "rc *"),
         )
         self.recorder.attach(self.bus)
         self.bus.subscribe("*", self.live_logger.log_bus_event)
@@ -88,7 +91,7 @@ class fly_to_marker(ProjectBase):
                 if fresh:
                     rc = rc_to_marker(self.marker, GAINS)
                     state = "ARRIVED" if arrived(self.marker, GAINS) else "approaching"
-                    await self.show(f"{state}  z={self.marker['z']:.2f} m  x={self.marker['x']:+.2f}  y={self.marker['y']:+.2f}")
+                    await self.show(f"{state} z={self.marker['z']:.2f} m x={self.marker['x']:+.2f}")
                 else:
                     rc = {"x": 0, "y": 0, "z": 0, "yaw": SEARCH_YAW}
                     await self.show("marker lost - " + ("searching" if SEARCH_YAW else "hovering"))

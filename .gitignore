@@ -10,15 +10,19 @@ build/
 __pycache__/
 *.pyc
 
-# misc
+# tools
 tools/calibration/images/
-projects/*
+
+# projects & examples
+## include
 !/projects/examples
 !/projects/__init__.py
 !/projects/base.py
+## exclude
+projects/*
 projects/**/*.jsonl
 projects/**/*.png
 projects/**/*.mp4
-count.ps1
-testy/*
-
+more_examples/**/*.jsonl
+more_examples/**/*.mp4
+more_examples/**/*.png

@@ -92,6 +92,8 @@ _MODEL_ALIASES = {
 }
 DEFAULT_STATE_PORT = 8890
 DEFAULT_VIDEO_PORT = 11111
+TAKEOFF_HOT_C = 80  # board temperature from which a refused takeoff is blamed on heat (experience, not a DJI number)
+TAKEOFF_LOW_BATTERY = 10  # % below which a refused takeoff is blamed on the battery
 
 
 def normalize_model(model: str | None) -> str | None:
@@ -109,6 +111,7 @@ class TelloDrone(DroneBase):
     def __init__(self, drone_type: DroneType, drone_id: str, bus: object, **kwargs):
         super().__init__(drone_type, drone_id, bus, **kwargs)
         self.model = normalize_model(self.init_kwargs.get("model"))
+        self._last_state: dict = {}  # newest telemetry (unified keys), if the state receiver runs
         self.ip = self.init_kwargs.get("ip", "192.168.10.1")
         self.cmd_port = self.init_kwargs.get("cmd_port", 8889)
         self.cmd_pc_port = self.init_kwargs.get("cmd_pc_port", 9000)
@@ -215,7 +218,32 @@ class TelloDrone(DroneBase):
     @requires(DroneConState.CONNECTED, DroneFlightState.LANDED, DroneArmState.ARMED)
     async def takeoff(self):
         ack = await self.sdk.send_and_receive("takeoff", timeout=20)
+        if ack is False:  # the Tello refused - say why, if we can tell
+            info = "'takeoff' returned 'error'."
+            await self.publish_parser(
+                PublishType.ERROR, {"cmd": "takeoff", "error": "takeoffFailed", "info": info, "hint": await self._takeoff_refused_hint()}
+            )
+            return
         await self._publish_tristate_ack("takeoff", ack, on_success=lambda: setattr(self, "flight_state", DroneFlightState.INAIR))
+
+    async def _takeoff_refused_hint(self) -> str:
+        """Most common reasons the Tello refuses a takeoff: too hot, battery too low.
+        Uses the last telemetry if the state receiver runs, else asks the drone."""
+        temp, battery = self._last_state.get("temperature"), self._last_state.get("battery")
+        if temp is None:
+            raw = await self.sdk.query("temp?", timeout=3)
+            temp = tello_query("temperature", raw) if isinstance(raw, str) else None
+        if battery is None:
+            raw = await self.sdk.query("battery?", timeout=3)
+            battery = tello_query("battery", raw) if isinstance(raw, str) else None
+        temp, battery = (v if isinstance(v, (int, float)) else None for v in (temp, battery))  # unreadable -> unknown
+        if temp is not None and temp >= TAKEOFF_HOT_C:
+            cooling = " or motor_on to cool it (EDU/Talent)" if self.model != "tello" else ""
+            return f"Board is {temp:g} C - too hot to take off. Let it cool down (power off / fan){cooling}; start the video right before takeoff."
+        if battery is not None and battery < TAKEOFF_LOW_BATTERY:
+            return f"Battery is {battery:g} % - too low to take off. Charge it."
+        status = ", ".join(f"{k} {v:g}" for k, v in (("temperature C", temp), ("battery %", battery)) if v is not None)
+        return f"Check: standing level on the ground, propellers free, IMU calibration (Tello app){f' ({status})' if status else ''}."
 
     @requires(DroneConState.CONNECTED, DroneFlightState.INAIR)
     async def land(self):
@@ -495,4 +523,5 @@ class TelloDrone(DroneBase):
                 self.sdk.position["z"] = raw["h"]
             if isinstance(raw.get("yaw"), (int, float)):
                 self.sdk.heading = raw["yaw"]  # Tello yaw: relative to takeoff, clockwise positive
-            await self.publish_parser(PublishType.STATE, tello_state(raw, self.sdk.get_position()))
+            self._last_state = tello_state(raw, self.sdk.get_position())
+            await self.publish_parser(PublishType.STATE, self._last_state)
